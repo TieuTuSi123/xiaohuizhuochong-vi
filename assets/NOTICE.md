@@ -6,6 +6,7 @@
 原素材：https://github.com/1798547983tt/Cardwright/tree/359019715afc60813384964b023a09c6dd6ed326/assets/pets/erii
 原素材许可：CC BY-NC 4.0，https://creativecommons.org/licenses/by-nc/4.0/
 
-本包 12 张动作图由 ImageGen 根据上述参考生成，再切分和压缩。
+本包 16 张动作图由 ImageGen 根据上述参考生成，再切分为 384×384 透明无损 WebP。
+v0.3.0 的被拎起、坐稳、招呼、探头 4 张图为新增互动姿势。抱鸭动作只保留手中的一只鸭子。
 保留原作者署名；本包美术素材按 CC BY-NC 4.0 仅供非商业使用。
 角色及相关商标归原权利人所有。本项目不代表原作或官方授权。

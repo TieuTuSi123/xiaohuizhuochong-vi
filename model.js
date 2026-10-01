@@ -28,35 +28,42 @@ export class CompanionModel {
     if (!next) return false;
     const previous = this.snapshot;
     this.snapshot = next;
-    if (!next.connected) { this.reaction = null; this.idle = null; return true; }
+    if (!next.connected) {
+      if (this.reaction?.source === 'database') this.reaction = null;
+      return true;
+    }
     const added = next.tasks.filter(task => task.busy && !previous.tasks.some(old => old.id === task.id));
-    if (added.length || (next.busy && !previous.busy)) { this.reaction = { pose: 'received', until: this.now() + 1200 }; this.idle = null; }
+    if (added.length || (next.busy && !previous.busy)) { this.reaction = { pose: 'received', until: this.now() + 1400, source: 'database' }; this.idle = null; }
     if (next.busy) this.idle = null;
     for (const notice of next.notices) {
       if (!notice.id || this.seen.has(notice.id)) continue;
       this.seen.add(notice.id);
       this.history.unshift(notice);
       this.history = this.history.slice(0, 20);
-      if (notice.kind === 'error' || notice.kind === 'warning') this.reaction = { pose: 'error', until: this.now() + 5000 };
-      else if (notice.kind === 'success') this.reaction = { pose: 'complete', until: this.now() + 3500 };
+      if (notice.kind === 'error' || notice.kind === 'warning') this.reaction = { pose: 'error', until: this.now() + 5000, source: 'database' };
+      else if (notice.kind === 'success') this.reaction = { pose: 'complete', until: this.now() + 3500, source: 'database' };
     }
     while (this.seen.size > 200) this.seen.delete(this.seen.values().next().value);
     return true;
   }
   pose() {
-    if (!this.snapshot.connected) return 'idle';
     if (this.reaction && this.reaction.until > this.now()) return this.reaction.pose;
     if (this.snapshot.busy) return 'writing';
     return this.idle && this.idle.until > this.now() ? this.idle.pose : 'idle';
   }
   leisure(pose) {
-    if (!this.snapshot.connected || this.snapshot.busy || (this.reaction?.until > this.now())) return false;
-    this.idle = { pose, until: this.now() + 6500 };
+    if (!['tea', 'reading', 'origami', 'duck', 'stretch', 'rest', 'wave', 'peek'].includes(pose) || this.snapshot.busy || (this.reaction?.until > this.now() && this.reaction.source === 'database')) return false;
+    this.reaction = null;
+    this.idle = { pose, until: this.now() + (pose === 'wave' || pose === 'peek' ? 2000 : 10000) };
     return true;
   }
+  interruptLocal() {
+    this.idle = null;
+    if (this.reaction?.source === 'local') this.reaction = null;
+  }
   gift() {
-    if (!this.snapshot.connected || this.snapshot.busy) return false;
-    this.reaction = { pose: 'gift', until: this.now() + 3500 };
+    if (this.snapshot.busy || (this.reaction?.until > this.now() && this.reaction.source === 'database')) return false;
+    this.reaction = { pose: 'gift', until: this.now() + 3500, source: 'local' };
     return true;
   }
 }

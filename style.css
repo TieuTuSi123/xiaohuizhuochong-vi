@@ -8,7 +8,9 @@
   font: 13px/1.55 "Microsoft YaHei", "PingFang SC", sans-serif;
   pointer-events: none;
   text-shadow: none;
+  transition: left .26s cubic-bezier(.2,.8,.2,1), top .26s cubic-bezier(.2,.8,.2,1);
 }
+.erii-companion[data-dragging="true"] { transition: none; }
 .erii-companion *, .erii-companion *::before, .erii-companion *::after { box-sizing: border-box; }
 .erii-companion[hidden], .erii-companion [hidden] { display: none !important; }
 .erii-companion button { font: inherit; cursor: pointer; text-shadow: none; box-shadow: none; }
@@ -16,23 +18,19 @@
   display: block; width: 100%; height: 100%; margin: 0; padding: 0;
   border: 0; outline-offset: 3px; background: transparent !important;
   pointer-events: auto; -webkit-tap-highlight-color: transparent;
+  cursor: grab !important; touch-action: none; user-select: none;
 }
+.erii-companion[data-dragging="true"] .erii-companion__portrait { cursor: grabbing !important; }
 .erii-companion__portrait:hover { background: transparent !important; opacity: 1; }
+.erii-companion__sway, .erii-companion__stage { position: relative; display: block; width: 100%; height: 100%; pointer-events: none; }
+.erii-companion__sway { transform: rotate(var(--erii-tilt, 0deg)); transform-origin: 50% 25%; transition: transform .15s ease-out; }
+.erii-companion__stage { transform-origin: 50% 88%; }
 .erii-companion__sprite {
-  display: block; width: 100%; height: 100%; object-fit: contain;
-  transform-origin: 50% 86%; user-select: none; pointer-events: none; filter: none;
+  position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain;
+  user-select: none; pointer-events: none; filter: none !important; image-rendering: auto;
+  opacity: 0; transition: opacity .14s ease-in-out;
 }
-.erii-companion[data-pose="idle"] .erii-companion__sprite { animation: erii-quiet 4s ease-in-out infinite; }
-.erii-companion[data-pose="received"] .erii-companion__sprite { animation: erii-note 1.2s ease-out; }
-.erii-companion[data-pose="writing"] .erii-companion__sprite { animation: erii-write 1s ease-in-out infinite; }
-.erii-companion[data-pose="complete"] .erii-companion__sprite,
-.erii-companion[data-pose="gift"] .erii-companion__sprite { animation: erii-proud 1.1s ease-in-out 3; }
-.erii-companion[data-pose="error"] .erii-companion__sprite { animation: erii-inspect 2.2s ease-in-out 2; }
-.erii-companion[data-pose="tea"] .erii-companion__sprite,
-.erii-companion[data-pose="reading"] .erii-companion__sprite,
-.erii-companion[data-pose="origami"] .erii-companion__sprite,
-.erii-companion[data-pose="duck"] .erii-companion__sprite { animation: erii-leisure 3.2s ease-in-out infinite; }
-.erii-companion[data-pose="rest"] .erii-companion__sprite { animation: erii-rest 4s ease-in-out infinite; }
+.erii-companion__sprite[data-visible="true"] { opacity: 1; }
 .erii-companion__notebook {
   position: fixed; width: var(--erii-page-width, 310px); max-height: var(--erii-page-height, 420px);
   overflow: auto; overscroll-behavior: contain; pointer-events: auto; padding: 14px;
@@ -45,6 +43,7 @@
 .erii-companion p { margin: 5px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .erii-companion h4 { margin: 14px 0 6px; font-size: 12px; color: #9c7770; }
 .erii-companion__connection { color: #9c7770; font-size: 11px; padding-bottom: 8px; border-bottom: 1px dashed #e8cfc3; }
+.erii-companion__help { color: #9c7770; font-size: 11px; margin-top: 12px !important; }
 .erii-companion__task, .erii-companion__record { padding: 7px 0; border-bottom: 1px solid #ecdcd0; }
 .erii-companion__record { font-size: 12px; }
 .erii-companion [data-kind="error"], .erii-companion [data-kind="warning"] { color: #a4483b; }
@@ -65,11 +64,6 @@
 .erii-companion-settings input[type="range"] { max-width: 150px; }
 body[data-erii-replace-database-pet] .acu-desk-pet,
 body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !important; pointer-events: none !important; }
-@keyframes erii-quiet { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1px); } }
-@keyframes erii-note { 0% { transform: translateY(3px) scale(.97); } 60% { transform: translateY(-2px) scale(1.02); } 100% { transform: none; } }
-@keyframes erii-write { 0%, 100% { transform: rotate(-.8deg); } 55% { transform: rotate(.8deg) translateY(1px); } }
-@keyframes erii-proud { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-4px) rotate(-2deg); } 70% { transform: translateY(-2px) rotate(2deg); } }
-@keyframes erii-inspect { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-4deg); } }
-@keyframes erii-leisure { 0%, 100% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } }
-@keyframes erii-rest { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.99); } }
-@media (prefers-reduced-motion: reduce) { .erii-companion__sprite { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  .erii-companion, .erii-companion__sprite, .erii-companion__sway { transition: none !important; }
+}
