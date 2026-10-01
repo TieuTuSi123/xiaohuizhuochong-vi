@@ -1,0 +1,17 @@
+{
+  "display_name": "绘梨衣 · 数据库桌宠",
+  "loading_order": 220,
+  "js": "index.js",
+  "css": "style.css",
+  "author": "User project / Codex assisted",
+  "version": "0.2.0",
+  "minimum_client_version": "1.19.0",
+  "auto_update": true,
+  "homePage": "https://github.com/dzsks/xiaohuizhuochong",
+  "hooks": {
+    "activate": "onActivate",
+    "enable": "onEnable",
+    "disable": "onDisable",
+    "clean": "onClean"
+  }
+}

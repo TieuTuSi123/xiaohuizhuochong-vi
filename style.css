@@ -1,0 +1,75 @@
+.erii-companion {
+  --erii-size: 88px;
+  position: fixed;
+  z-index: 9420;
+  width: var(--erii-size);
+  height: var(--erii-size);
+  color: #613531;
+  font: 13px/1.55 "Microsoft YaHei", "PingFang SC", sans-serif;
+  pointer-events: none;
+  text-shadow: none;
+}
+.erii-companion *, .erii-companion *::before, .erii-companion *::after { box-sizing: border-box; }
+.erii-companion[hidden], .erii-companion [hidden] { display: none !important; }
+.erii-companion button { font: inherit; cursor: pointer; text-shadow: none; box-shadow: none; }
+.erii-companion__portrait {
+  display: block; width: 100%; height: 100%; margin: 0; padding: 0;
+  border: 0; outline-offset: 3px; background: transparent !important;
+  pointer-events: auto; -webkit-tap-highlight-color: transparent;
+}
+.erii-companion__portrait:hover { background: transparent !important; opacity: 1; }
+.erii-companion__sprite {
+  display: block; width: 100%; height: 100%; object-fit: contain;
+  transform-origin: 50% 86%; user-select: none; pointer-events: none; filter: none;
+}
+.erii-companion[data-pose="idle"] .erii-companion__sprite { animation: erii-quiet 4s ease-in-out infinite; }
+.erii-companion[data-pose="received"] .erii-companion__sprite { animation: erii-note 1.2s ease-out; }
+.erii-companion[data-pose="writing"] .erii-companion__sprite { animation: erii-write 1s ease-in-out infinite; }
+.erii-companion[data-pose="complete"] .erii-companion__sprite,
+.erii-companion[data-pose="gift"] .erii-companion__sprite { animation: erii-proud 1.1s ease-in-out 3; }
+.erii-companion[data-pose="error"] .erii-companion__sprite { animation: erii-inspect 2.2s ease-in-out 2; }
+.erii-companion[data-pose="tea"] .erii-companion__sprite,
+.erii-companion[data-pose="reading"] .erii-companion__sprite,
+.erii-companion[data-pose="origami"] .erii-companion__sprite,
+.erii-companion[data-pose="duck"] .erii-companion__sprite { animation: erii-leisure 3.2s ease-in-out infinite; }
+.erii-companion[data-pose="rest"] .erii-companion__sprite { animation: erii-rest 4s ease-in-out infinite; }
+.erii-companion__notebook {
+  position: fixed; width: var(--erii-page-width, 310px); max-height: var(--erii-page-height, 420px);
+  overflow: auto; overscroll-behavior: contain; pointer-events: auto; padding: 14px;
+  background: #fff9f0; border: 1px solid #dab6aa; border-left: 5px solid #a94446;
+  border-radius: 5px 12px 12px 5px; box-shadow: none; backdrop-filter: none;
+}
+.erii-companion__header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.erii-companion__header strong { color: #923d3f; font-size: 15px; }
+.erii-companion__close { border: 0; background: transparent; color: #923d3f; width: 28px; height: 28px; font-size: 22px !important; }
+.erii-companion p { margin: 5px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.erii-companion h4 { margin: 14px 0 6px; font-size: 12px; color: #9c7770; }
+.erii-companion__connection { color: #9c7770; font-size: 11px; padding-bottom: 8px; border-bottom: 1px dashed #e8cfc3; }
+.erii-companion__task, .erii-companion__record { padding: 7px 0; border-bottom: 1px solid #ecdcd0; }
+.erii-companion__record { font-size: 12px; }
+.erii-companion [data-kind="error"], .erii-companion [data-kind="warning"] { color: #a4483b; }
+.erii-companion [data-kind="success"] { color: #4c7856; }
+.erii-companion__controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.erii-companion__controls button { border: 1px solid #dec2b8; border-radius: 6px; background: #fffdf8; color: #8f4144; padding: 6px 10px; }
+.erii-companion__controls button:hover:not(:disabled) { background: #f9e6dc; }
+.erii-companion__controls button:disabled { opacity: .45; cursor: default; }
+.erii-companion__message {
+  position: fixed; width: max-content; max-width: var(--erii-page-width, 310px); max-height: 130px;
+  overflow: auto; padding: 8px 12px; border: 1px solid #d7b9af; border-radius: 8px;
+  background: #fff9f0; white-space: pre-wrap; overflow-wrap: anywhere;
+  pointer-events: auto; box-shadow: none; backdrop-filter: none;
+}
+.erii-companion-settings { padding: 8px 0; }
+.erii-companion-settings summary { cursor: pointer; padding: 6px 0; }
+.erii-companion-settings label { display: flex; gap: 8px; align-items: center; margin: 10px 0; }
+.erii-companion-settings input[type="range"] { max-width: 150px; }
+body[data-erii-replace-database-pet] .acu-desk-pet,
+body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !important; pointer-events: none !important; }
+@keyframes erii-quiet { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1px); } }
+@keyframes erii-note { 0% { transform: translateY(3px) scale(.97); } 60% { transform: translateY(-2px) scale(1.02); } 100% { transform: none; } }
+@keyframes erii-write { 0%, 100% { transform: rotate(-.8deg); } 55% { transform: rotate(.8deg) translateY(1px); } }
+@keyframes erii-proud { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-4px) rotate(-2deg); } 70% { transform: translateY(-2px) rotate(2deg); } }
+@keyframes erii-inspect { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-4deg); } }
+@keyframes erii-leisure { 0%, 100% { transform: rotate(-1deg); } 50% { transform: rotate(1deg); } }
+@keyframes erii-rest { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.99); } }
+@media (prefers-reduced-motion: reduce) { .erii-companion__sprite { animation: none !important; } }
