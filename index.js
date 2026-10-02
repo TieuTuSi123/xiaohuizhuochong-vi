@@ -65,11 +65,12 @@ export function createCompanion(host, context) {
   let taskStopBusy = false;
   let autonomousPose = null;
   let autonomousRunToken = 0;
+  let autonomousStepTimer = null;
   const loaded = new Map();
   const localActions = [];
   const root = el(doc, 'div', undefined, 'erii-companion');
   root.id = `${ID}-root`;
-  root.dataset.version = '0.5.4';
+  root.dataset.version = '0.5.6';
   root.dataset.pose = 'idle';
   root.style.transition = 'none';
   // Panels are siblings: a transformed ancestor would change their fixed coordinates.
@@ -373,35 +374,42 @@ export function createCompanion(host, context) {
   function resetPosition() { cancelDrag(); settings.position = null; landingUntil = Date.now() + 1000; save(); }
   function autonomousWander() {
     if (destroyed || !bounds || !point || dragging || !notebook.hidden || model.snapshot.busy) return false;
-    const distance = 46 + Math.random() * 96;
+    const stepPx = 8;
+    const stepMs = 260;
+    const steps = 12;
     const direction = Math.random() < 0.5 ? -1 : 1;
-    const vertical = (Math.random() - 0.5) * 34;
-    const next = constrain({ x: point.x + direction * distance, y: point.y + vertical }, bounds);
-    if (Math.abs(next.x - point.x) < 12 && Math.abs(next.y - point.y) < 8) return false;
+    const origin = { ...point };
+    const room = direction < 0 ? origin.x - bounds.left : bounds.left + bounds.width - bounds.size - origin.x;
+    if (room < stepPx * 3) return false;
     model.leisure(direction < 0 ? 'peek' : 'wave');
     const token = ++autonomousRunToken;
     const frames = direction < 0 ? runPoses.left : runPoses.right;
-    let frame = 0;
-    autonomousPose = frames[0];
-    const runTimer = host.setInterval(() => {
-      if (destroyed || token !== autonomousRunToken) { host.clearInterval(runTimer); timers.delete(runTimer); return; }
-      autonomousPose = frames[frame++ % frames.length];
-      update();
-    }, 120);
-    timers.add(runTimer);
+    let step = 0;
     root.dataset.autonomous = 'true';
-    applyPoint(next);
-    point = next;
-    landingUntil = Date.now() + 900;
-    const settleTimer = host.setTimeout(() => {
-      timers.delete(settleTimer); host.clearInterval(runTimer); timers.delete(runTimer);
+    const finish = () => {
+      autonomousStepTimer = null;
+      point = origin;
+      applyPoint(origin);
       autonomousPose = 'land';
+      root.dataset.autonomous = 'false';
+      update();
       const clearPoseTimer = host.setTimeout(() => { timers.delete(clearPoseTimer); autonomousPose = null; update(); }, 850);
       timers.add(clearPoseTimer);
-      if (!destroyed) root.dataset.autonomous = 'false';
+    };
+    const tick = () => {
+      if (autonomousStepTimer !== null) timers.delete(autonomousStepTimer);
+      autonomousStepTimer = null;
+      if (destroyed || token !== autonomousRunToken) return;
+      if (step >= steps * 2) { finish(); return; }
+      const delta = step < steps ? direction * stepPx : -direction * stepPx;
+      point = constrain({ x: point.x + delta, y: point.y }, bounds);
+      autonomousPose = frames[step % frames.length];
+      step += 1;
       update();
-    }, 1100);
-    timers.add(settleTimer);
+      autonomousStepTimer = host.setTimeout(tick, stepMs);
+      timers.add(autonomousStepTimer);
+    };
+    tick();
     return true;
   }
   function clearHold() {
@@ -571,7 +579,7 @@ export function createCompanion(host, context) {
         update();
       }
       scheduleLeisure();
-    }, 8500 + Math.random() * 8500);
+    }, 12000 + Math.random() * 8000);
     timers.add(timer);
   }
   for (const pose of [...poses, ...Object.values(runPoses).flat()]) loadAsset(pose);
@@ -624,6 +632,8 @@ export function onClean() { onDisable(); }
 // 1.14–1.16 load the entry module without an activate hook. Newer hosts also
 // invoke onActivate; its guards keep both routes on the same single instance.
 if (typeof window !== 'undefined' && typeof window.SillyTavern?.getContext === 'function') onActivate();
+
+
 
 
 

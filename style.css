@@ -80,10 +80,17 @@
 }
 .erii-companion__message-action:hover:not(:disabled) { background: #f9e6dc; }
 .erii-companion__message-action:disabled { opacity: .55; cursor: default; }
-.erii-companion-settings { padding: 8px 0; }
-.erii-companion-settings summary { cursor: pointer; padding: 6px 0; }
+.erii-companion-settings { padding: 8px 0; color: #ffecef !important; }
+.erii-companion-settings summary { cursor: pointer; padding: 6px 0; color: #fff7f7 !important; font-weight: 700; }
 .erii-companion-settings label { display: flex; gap: 8px; align-items: center; margin: 10px 0; }
 .erii-companion-settings input[type="range"] { max-width: 150px; }
+.erii-companion-settings button {
+  appearance: none; border: 1px solid rgba(255, 214, 221, .9) !important; border-radius: 6px;
+  background: rgba(112, 39, 52, .92) !important; color: #fff8f8 !important;
+  text-shadow: none !important; box-shadow: 0 1px 3px rgba(30, 0, 8, .28) !important;
+  padding: 6px 10px; font-weight: 700; line-height: 1.3;
+}
+.erii-companion-settings button:hover { background: rgba(150, 55, 70, .96) !important; color: #fff !important; }
 body[data-erii-replace-database-pet] .acu-desk-pet,
 body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !important; pointer-events: none !important; }
 @media (prefers-reduced-motion: reduce) {
