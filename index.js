@@ -6,11 +6,15 @@ import { createMotion } from './motion.js';
 const ID = 'erii-database-pet';
 const defaults = { enabled: true, idleActions: true, hideOriginal: true, size: 88, side: 'right', position: null };
 const poses = ['idle', 'received', 'writing', 'complete', 'error', 'tea', 'reading', 'origami', 'duck', 'stretch', 'rest', 'gift', 'lifted', 'land', 'wave', 'peek'];
+const runPoses = { left: Array.from({ length: 8 }, (_, i) => `run-left-${String(i + 1).padStart(2, '0')}`), right: Array.from({ length: 8 }, (_, i) => `run-right-${String(i + 1).padStart(2, '0')}`) };
 const labels = { idle: '等你下一条记录', received: '收到新任务', writing: '认真整理记录', complete: '完成啦',
   error: '这条记录需要检查', tea: '喝一口茶', reading: '翻翻小书', origami: '折一只纸鹤', duck: '陪小黄鸭玩',
   stretch: '伸个懒腰', rest: '靠着小枕头休息', gift: '收到一朵花',
   lifted: '轻轻拎起来', land: '坐稳啦', wave: '向你打招呼', peek: '抱着小本子探头' };
-const imageUrls = Object.fromEntries(poses.map(pose => [pose, new URL(`assets/${pose}.webp`, import.meta.url).href]));
+const imageUrls = Object.fromEntries([
+  ...poses.map(pose => [pose, new URL(`assets/${pose}.webp`, import.meta.url).href]),
+  ...Object.values(runPoses).flat().map(pose => [pose, new URL(`assets/${pose}.webp`, import.meta.url).href]),
+]);
 let active = null;
 let bootTimer = null;
 let stopped = true;
@@ -59,11 +63,13 @@ export function createCompanion(host, context) {
   let swapVersion = 0;
   let shownSprite = 0;
   let taskStopBusy = false;
+  let autonomousPose = null;
+  let autonomousRunToken = 0;
   const loaded = new Map();
   const localActions = [];
   const root = el(doc, 'div', undefined, 'erii-companion');
   root.id = `${ID}-root`;
-  root.dataset.version = '0.5.3';
+  root.dataset.version = '0.5.4';
   root.dataset.pose = 'idle';
   root.style.transition = 'none';
   // Panels are siblings: a transformed ancestor would change their fixed coordinates.
@@ -300,7 +306,7 @@ export function createCompanion(host, context) {
     root.hidden = settings.enabled === false;
     overlay.hidden = root.hidden;
     const snapshot = model.snapshot;
-    const pose = dragging?.moved ? 'lifted' : Date.now() < landingUntil ? 'land' : model.pose();
+    const pose = dragging?.moved ? 'lifted' : autonomousPose || (Date.now() < landingUntil ? 'land' : model.pose());
     if (pose !== lastPose) {
       lastPose = pose;
       showPose(pose);
@@ -373,11 +379,28 @@ export function createCompanion(host, context) {
     const next = constrain({ x: point.x + direction * distance, y: point.y + vertical }, bounds);
     if (Math.abs(next.x - point.x) < 12 && Math.abs(next.y - point.y) < 8) return false;
     model.leisure(direction < 0 ? 'peek' : 'wave');
+    const token = ++autonomousRunToken;
+    const frames = direction < 0 ? runPoses.left : runPoses.right;
+    let frame = 0;
+    autonomousPose = frames[0];
+    const runTimer = host.setInterval(() => {
+      if (destroyed || token !== autonomousRunToken) { host.clearInterval(runTimer); timers.delete(runTimer); return; }
+      autonomousPose = frames[frame++ % frames.length];
+      update();
+    }, 120);
+    timers.add(runTimer);
     root.dataset.autonomous = 'true';
     applyPoint(next);
     point = next;
     landingUntil = Date.now() + 900;
-    const settleTimer = host.setTimeout(() => { timers.delete(settleTimer); if (!destroyed) root.dataset.autonomous = 'false'; }, 1100);
+    const settleTimer = host.setTimeout(() => {
+      timers.delete(settleTimer); host.clearInterval(runTimer); timers.delete(runTimer);
+      autonomousPose = 'land';
+      const clearPoseTimer = host.setTimeout(() => { timers.delete(clearPoseTimer); autonomousPose = null; update(); }, 850);
+      timers.add(clearPoseTimer);
+      if (!destroyed) root.dataset.autonomous = 'false';
+      update();
+    }, 1100);
     timers.add(settleTimer);
     return true;
   }
@@ -551,7 +574,7 @@ export function createCompanion(host, context) {
     }, 8500 + Math.random() * 8500);
     timers.add(timer);
   }
-  for (const pose of poses) loadAsset(pose);
+  for (const pose of [...poses, ...Object.values(runPoses).flat()]) loadAsset(pose);
   connect(); mountSettings(); watchInput(); update(); position(); scheduleLeisure();
   // Establish the saved location before enabling movement easing (no fly-in from 0,0).
   root.getBoundingClientRect();
@@ -601,5 +624,6 @@ export function onClean() { onDisable(); }
 // 1.14–1.16 load the entry module without an activate hook. Newer hosts also
 // invoke onActivate; its guards keep both routes on the same single instance.
 if (typeof window !== 'undefined' && typeof window.SillyTavern?.getContext === 'function') onActivate();
+
 
 
