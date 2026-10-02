@@ -71,7 +71,15 @@
   overflow: auto; padding: 8px 12px; border: 1px solid #d7b9af; border-radius: 8px;
   background: #fff9f0; white-space: pre-wrap; overflow-wrap: anywhere;
   pointer-events: auto; box-shadow: none; backdrop-filter: none;
+  display: flex; align-items: center; gap: 8px;
 }
+.erii-companion__message-text { flex: 1 1 auto; min-width: 0; }
+.erii-companion__message-action {
+  flex: 0 0 auto; border: 1px solid #c88982; border-radius: 5px; background: #fffdf8;
+  color: #a4483b; padding: 3px 8px; cursor: pointer;
+}
+.erii-companion__message-action:hover:not(:disabled) { background: #f9e6dc; }
+.erii-companion__message-action:disabled { opacity: .55; cursor: default; }
 .erii-companion-settings { padding: 8px 0; }
 .erii-companion-settings summary { cursor: pointer; padding: 6px 0; }
 .erii-companion-settings label { display: flex; gap: 8px; align-items: center; margin: 10px 0; }

@@ -36,7 +36,7 @@ export function readDatabaseView(doc) {
   const current = props.task;
   const task = current && typeof current.id === 'string' ? {
     id: clean(current.id), feature: clean(current.feature), detail: clean(current.detail),
-    kind: tone(current.kind), busy: current.busy === true,
+    kind: tone(current.kind), busy: current.busy === true, dismissible: current.dismissible === true, action: current.action && typeof current.action.run === 'function' ? { label: clean(current.action.label || '停止'), variant: current.action.variant === 'danger' ? 'danger' : 'default', run: current.action.run } : null,
   } : null;
   const incoming = props.slide?.type === 'notice' ? props.slide.notice : null;
   const notice = incoming && typeof incoming.id === 'string' ? {
@@ -91,3 +91,4 @@ export function createDatabaseObserver(host, { now = () => Date.now(), interval 
     destroy() { destroyed = true; host.clearInterval(timer); subscribers.clear(); observed.clear(); },
   };
 }
+

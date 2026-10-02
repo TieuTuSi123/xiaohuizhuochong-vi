@@ -50,17 +50,20 @@ export function createCompanion(host, context) {
   let inputElement = null;
   let geometryDirty = true;
   let holdTimer = null;
+  let mobileBookTimer = null;
   let longPressed = false;
+  let mobileBookOpened = false;
   let suppressClick = false;
   let hoverUntil = 0;
   let landingUntil = 0;
   let swapVersion = 0;
   let shownSprite = 0;
+  let taskStopBusy = false;
   const loaded = new Map();
   const localActions = [];
   const root = el(doc, 'div', undefined, 'erii-companion');
   root.id = `${ID}-root`;
-  root.dataset.version = '0.5.0';
+  root.dataset.version = '0.5.3';
   root.dataset.pose = 'idle';
   root.style.transition = 'none';
   // Panels are siblings: a transformed ancestor would change their fixed coordinates.
@@ -68,9 +71,9 @@ export function createCompanion(host, context) {
   overlay.id = `${ID}-ui`;
   const portrait = el(doc, 'button', undefined, 'erii-companion__portrait');
   portrait.type = 'button';
-  portrait.setAttribute('aria-label', '绘梨衣：单击、连点或长按互动，拖动移动；右键查看任务');
+  portrait.setAttribute('aria-label', '绘梨衣：单击、连点或长按互动；手机长按打开小本子，电脑右键查看任务');
   portrait.setAttribute('aria-expanded', 'false');
-  portrait.title = '轻点互动 · 连点有不同反应 · 拖动移动 · 右键看小本子';
+  portrait.title = '轻点互动 · 连点有不同反应 · 手机长按打开小本子 · 拖动移动 · 电脑右键看小本子';
   const sway = el(doc, 'span', undefined, 'erii-companion__sway');
   const breath = el(doc, 'span', undefined, 'erii-companion__breath');
   const stage = el(doc, 'span', undefined, 'erii-companion__stage');
@@ -113,6 +116,12 @@ export function createCompanion(host, context) {
   message.hidden = true;
   message.setAttribute('role', 'status');
   message.setAttribute('aria-live', 'polite');
+  const messageText = el(doc, 'span', undefined, 'erii-companion__message-text');
+  const messageStop = el(doc, 'button', '停止', 'erii-companion__message-action');
+  messageStop.type = 'button';
+  messageStop.hidden = true;
+  messageStop.setAttribute('aria-label', '停止数据库任务');
+  message.append(messageText, messageStop);
   const notebook = el(doc, 'section', undefined, 'erii-companion__notebook');
   notebook.id = `${ID}-notebook`;
   notebook.hidden = true;
@@ -301,13 +310,21 @@ export function createCompanion(host, context) {
     const replace = settings.enabled !== false && settings.hideOriginal && snapshot.connected && hasDecodedPose && !assetFailed;
     if (doc.body.hasAttribute('data-erii-replace-database-pet') !== Boolean(replace))
       doc.body.toggleAttribute('data-erii-replace-database-pet', Boolean(replace));
+    const activeTask = snapshot.tasks.find(task => task.busy) || null;
+    const hasTaskMessage = Boolean(activeTask && snapshot.busy);
+    const hasNoticeMessage = Boolean(model.history.length && Date.now() < terminalUntil);
     const wasHidden = message.hidden;
-    message.hidden = Boolean(dragging?.moved) || notebook.hidden === false || snapshot.silent || !snapshot.connected || Date.now() >= terminalUntil || !model.history.length || !settings.enabled;
+    message.hidden = Boolean(dragging?.moved) || notebook.hidden === false || snapshot.silent || !snapshot.connected || (!hasTaskMessage && !hasNoticeMessage) || !settings.enabled;
     let changed = wasHidden !== message.hidden;
     if (!message.hidden) {
       const newest = model.history[0];
-      message.dataset.kind = newest.kind;
-      if (message.textContent !== newest.text) { message.textContent = newest.text; changed = true; }
+      const text = hasTaskMessage ? `正在${activeTask.feature || '处理任务'}…` : newest.text;
+      message.dataset.kind = hasTaskMessage ? activeTask.kind : newest.kind;
+      if (messageText.textContent !== text) { messageText.textContent = text; changed = true; }
+      const canStop = Boolean(hasTaskMessage && activeTask.action?.run);
+      messageStop.hidden = !canStop;
+      messageStop.disabled = taskStopBusy;
+      messageStop.textContent = taskStopBusy ? '停止中…' : (activeTask?.action?.label || '停止');
     }
     updateNotebook();
     if (changed && !dragging?.moved) scheduleLayout();
@@ -342,13 +359,42 @@ export function createCompanion(host, context) {
     openBook.setAttribute('aria-controls', notebook.id);
     settingsMount.append(openBook);
     listen(openBook, 'click', () => setNotebook(true));
-    settingsMount.append(el(doc, 'p', '轻点或连点小绘可互动，按住不动让她放松；右键或这里打开小本子。聚焦小绘后，Shift+Enter 也可查看任务。'));
+    settingsMount.append(el(doc, 'p', '轻点或连点小绘可互动；普通长按让她放松，手机长按约 1.4 秒打开小本子。电脑可右键打开，或使用这里的按钮。'));
     settingsControls = { sync() { for (const [key, input] of fields) input.checked = settings[key] === true; range.value = String(settings.size); } };
     target.append(settingsMount);
   }
 
   function resetPosition() { cancelDrag(); settings.position = null; landingUntil = Date.now() + 1000; save(); }
-  function clearHold() { if (holdTimer !== null) host.clearTimeout(holdTimer); holdTimer = null; }
+  function autonomousWander() {
+    if (destroyed || !bounds || !point || dragging || !notebook.hidden || model.snapshot.busy) return false;
+    const distance = 46 + Math.random() * 96;
+    const direction = Math.random() < 0.5 ? -1 : 1;
+    const vertical = (Math.random() - 0.5) * 34;
+    const next = constrain({ x: point.x + direction * distance, y: point.y + vertical }, bounds);
+    if (Math.abs(next.x - point.x) < 12 && Math.abs(next.y - point.y) < 8) return false;
+    model.leisure(direction < 0 ? 'peek' : 'wave');
+    root.dataset.autonomous = 'true';
+    applyPoint(next);
+    point = next;
+    landingUntil = Date.now() + 900;
+    const settleTimer = host.setTimeout(() => { timers.delete(settleTimer); if (!destroyed) root.dataset.autonomous = 'false'; }, 1100);
+    timers.add(settleTimer);
+    return true;
+  }
+  function clearHold() {
+    if (holdTimer !== null) host.clearTimeout(holdTimer);
+    if (mobileBookTimer !== null) host.clearTimeout(mobileBookTimer);
+    holdTimer = null; mobileBookTimer = null;
+  }
+  listen(messageStop, 'click', async event => {
+    event.stopPropagation();
+    const task = model.snapshot.tasks.find(item => item.busy);
+    if (!task?.action?.run || taskStopBusy) return;
+    taskStopBusy = true; update();
+    try { await task.action.run(); }
+    catch { messageText.textContent = '停止任务失败，请在数据库面板重试。'; }
+    finally { taskStopBusy = false; update(); }
+  });
   // The hot path writes only the pet transform and sway. No panel rendering or layout reads.
   function flushDrag() {
     dragFrame = null;
@@ -363,7 +409,7 @@ export function createCompanion(host, context) {
     dragFrame = null;
     const pointerId = dragging?.id;
     dragging = null;
-    longPressed = false;
+    longPressed = false; mobileBookOpened = false;
     root.dataset.dragging = 'false'; root.style.setProperty('--erii-tilt', '0deg');
     try { if (pointerId !== undefined && portrait.hasPointerCapture(pointerId)) portrait.releasePointerCapture(pointerId); } catch { /* capture already released */ }
   }
@@ -403,7 +449,7 @@ export function createCompanion(host, context) {
   }
   listen(portrait, 'pointerdown', event => {
     if (event.button !== 0 || event.isPrimary === false || dragging) return;
-    position(); suppressClick = false; longPressed = false;
+    position(); suppressClick = false; longPressed = false; mobileBookOpened = false;
     const rendered = root.getBoundingClientRect();
     point = constrain({ x: rendered.x, y: rendered.y }, bounds);
     dragging = { id: event.pointerId, startX: event.clientX, startY: event.clientY, origin: { ...point }, pending: { ...point }, moved: false, lastX: event.clientX, tilt: 0 };
@@ -414,6 +460,14 @@ export function createCompanion(host, context) {
       longPressed = true; suppressClick = true; landingUntil = 0;
       model.startComfort(); update();
     }, 550);
+    if (event.pointerType === 'touch') {
+      mobileBookTimer = host.setTimeout(() => {
+        mobileBookTimer = null;
+        if (!dragging || dragging.moved) return;
+        mobileBookOpened = true; longPressed = true; suppressClick = true;
+        model.endComfort(); setNotebook(true); update();
+      }, 1400);
+    }
   });
   listen(portrait, 'pointermove', event => {
     if (event.pointerId !== dragging?.id) return;
@@ -485,12 +539,16 @@ export function createCompanion(host, context) {
       timers.delete(timer);
       if (destroyed) return;
       if (!doc.hidden && settings.enabled && settings.idleActions && !dragging && notebook.hidden && model.pose() === 'idle') {
-        const choices = ['tea', 'reading', 'origami', 'duck', 'stretch', 'rest'];
-        model.leisure(choices[Math.floor(Math.random() * choices.length)]);
+        if (Math.random() < 0.32) autonomousWander();
+        else if (Math.random() < 0.28) { model.tap(); }
+        else {
+          const choices = ['tea', 'reading', 'origami', 'duck', 'stretch', 'rest', 'peek', 'wave'];
+          model.leisure(choices[Math.floor(Math.random() * choices.length)]);
+        }
         update();
       }
       scheduleLeisure();
-    }, 12000 + Math.random() * 8000);
+    }, 8500 + Math.random() * 8500);
     timers.add(timer);
   }
   for (const pose of poses) loadAsset(pose);
@@ -543,3 +601,5 @@ export function onClean() { onDisable(); }
 // 1.14–1.16 load the entry module without an activate hook. Newer hosts also
 // invoke onActivate; its guards keep both routes on the same single instance.
 if (typeof window !== 'undefined' && typeof window.SillyTavern?.getContext === 'function') onActivate();
+
+
