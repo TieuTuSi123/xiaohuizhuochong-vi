@@ -70,7 +70,7 @@ export function createCompanion(host, context) {
   const localActions = [];
   const root = el(doc, 'div', undefined, 'erii-companion');
   root.id = `${ID}-root`;
-  root.dataset.version = '0.5.6';
+  root.dataset.version = '0.5.7';
   root.dataset.pose = 'idle';
   root.style.transition = 'none';
   // Panels are siblings: a transformed ancestor would change their fixed coordinates.
@@ -374,13 +374,15 @@ export function createCompanion(host, context) {
   function resetPosition() { cancelDrag(); settings.position = null; landingUntil = Date.now() + 1000; save(); }
   function autonomousWander() {
     if (destroyed || !bounds || !point || dragging || !notebook.hidden || model.snapshot.busy) return false;
-    const stepPx = 8;
-    const stepMs = 260;
-    const steps = 12;
-    const direction = Math.random() < 0.5 ? -1 : 1;
+    const stepPx = 10;
+    const stepMs = 280;
     const origin = { ...point };
-    const room = direction < 0 ? origin.x - bounds.left : bounds.left + bounds.width - bounds.size - origin.x;
-    if (room < stepPx * 3) return false;
+    const roomLeft = origin.x - bounds.minX;
+    const roomRight = bounds.maxX - origin.x;
+    if (Math.max(roomLeft, roomRight) < stepPx * 4) return false;
+    const direction = roomLeft < stepPx * 4 ? 1 : roomRight < stepPx * 4 ? -1 : Math.random() < 0.5 ? -1 : 1;
+    const room = direction < 0 ? roomLeft : roomRight;
+    const steps = Math.min(12, Math.max(4, Math.floor(room / stepPx)));
     model.leisure(direction < 0 ? 'peek' : 'wave');
     const token = ++autonomousRunToken;
     const frames = direction < 0 ? runPoses.left : runPoses.right;
@@ -403,6 +405,7 @@ export function createCompanion(host, context) {
       if (step >= steps * 2) { finish(); return; }
       const delta = step < steps ? direction * stepPx : -direction * stepPx;
       point = constrain({ x: point.x + delta, y: point.y }, bounds);
+      applyPoint(point);
       autonomousPose = frames[step % frames.length];
       step += 1;
       update();
@@ -632,6 +635,7 @@ export function onClean() { onDisable(); }
 // 1.14–1.16 load the entry module without an activate hook. Newer hosts also
 // invoke onActivate; its guards keep both routes on the same single instance.
 if (typeof window !== 'undefined' && typeof window.SillyTavern?.getContext === 'function') onActivate();
+
 
 
 
