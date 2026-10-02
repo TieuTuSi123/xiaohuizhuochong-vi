@@ -1,4 +1,5 @@
 export const PROTOCOL = 'acu-companion/v1';
+export const COMFORT_RELEASE_MS = 12000;
 const KINDS = new Set(['info', 'success', 'warning', 'error']);
 const text = value => typeof value === 'string' ? value.slice(0, 600) : '';
 
@@ -22,6 +23,10 @@ export class CompanionModel {
     this.history = [];
     this.reaction = null;
     this.idle = null;
+    this.tapTimes = [];
+    this.sequence = null;
+    this.comforting = false;
+    this.lastInteraction = '';
   }
   ingest(raw) {
     const next = normalizeSnapshot(raw);
@@ -34,12 +39,13 @@ export class CompanionModel {
     }
     const added = next.tasks.filter(task => task.busy && !previous.tasks.some(old => old.id === task.id));
     if (added.length || (next.busy && !previous.busy)) { this.reaction = { pose: 'received', until: this.now() + 1400, source: 'database' }; this.idle = null; }
-    if (next.busy) this.idle = null;
+    if (next.busy) { this.idle = null; this.resetInteraction(); }
     for (const notice of next.notices) {
       if (!notice.id || this.seen.has(notice.id)) continue;
       this.seen.add(notice.id);
       this.history.unshift(notice);
       this.history = this.history.slice(0, 20);
+      if (['error', 'warning', 'success'].includes(notice.kind)) this.resetInteraction();
       if (notice.kind === 'error' || notice.kind === 'warning') this.reaction = { pose: 'error', until: this.now() + 5000, source: 'database' };
       else if (notice.kind === 'success') this.reaction = { pose: 'complete', until: this.now() + 3500, source: 'database' };
     }
@@ -49,20 +55,61 @@ export class CompanionModel {
   pose() {
     if (this.reaction && this.reaction.until > this.now()) return this.reaction.pose;
     if (this.snapshot.busy) return 'writing';
+    const step = this.sequence?.find(step => step.until > this.now());
+    if (step) return step.pose;
     return this.idle && this.idle.until > this.now() ? this.idle.pose : 'idle';
   }
+  canInteract() {
+    return !this.snapshot.busy && !(this.reaction?.until > this.now() && this.reaction.source === 'database');
+  }
+  resetInteraction() {
+    this.tapTimes = []; this.sequence = null; this.comforting = false;
+    this.lastInteraction = '';
+  }
+  tap() {
+    if (!this.canInteract()) { this.tapTimes = []; return false; }
+    if (this.sequence?.some(step => step.until > this.now())) return false;
+    const now = this.now();
+    this.tapTimes = [...this.tapTimes.filter(time => now - time < 2600), now];
+    const recent = this.tapTimes.filter(time => now - time < 1200).length;
+    this.idle = null; this.comforting = false; this.sequence = null;
+    if (this.tapTimes.length >= 6) {
+      this.tapTimes = [];
+      this.reaction = null;
+      this.sequence = [{ pose: 'peek', until: now + 900 }, { pose: 'duck', until: now + 2400 }, { pose: 'wave', until: now + 3900 }];
+      return this.lastInteraction = 'playful';
+    }
+    const [pose, duration, action] = recent >= 3 ? ['peek', 1600, 'bashful'] : recent === 2 ? ['duck', 2400, 'duck'] : ['wave', 1600, 'greet'];
+    this.reaction = { pose, until: now + duration, source: 'local' };
+    return this.lastInteraction = action;
+  }
+  startComfort() {
+    this.tapTimes = [];
+    if (!this.canInteract()) return false;
+    this.sequence = null; this.idle = null; this.comforting = true;
+    this.reaction = { pose: 'rest', until: Infinity, source: 'local' };
+    this.lastInteraction = 'comfort';
+    return true;
+  }
+  endComfort() {
+    if (!this.comforting) return;
+    this.comforting = false;
+    if (this.reaction?.source === 'local' && this.reaction.pose === 'rest') this.reaction.until = this.now() + COMFORT_RELEASE_MS;
+  }
   leisure(pose) {
-    if (!['tea', 'reading', 'origami', 'duck', 'stretch', 'rest', 'wave', 'peek'].includes(pose) || this.snapshot.busy || (this.reaction?.until > this.now() && this.reaction.source === 'database')) return false;
+    if (!['tea', 'reading', 'origami', 'duck', 'stretch', 'rest', 'wave', 'peek'].includes(pose) || !this.canInteract() || this.comforting || this.sequence?.some(step => step.until > this.now())) return false;
     this.reaction = null;
     this.idle = { pose, until: this.now() + (pose === 'wave' || pose === 'peek' ? 2000 : 10000) };
     return true;
   }
   interruptLocal() {
+    this.resetInteraction();
     this.idle = null;
     if (this.reaction?.source === 'local') this.reaction = null;
   }
   gift() {
-    if (this.snapshot.busy || (this.reaction?.until > this.now() && this.reaction.source === 'database')) return false;
+    if (!this.canInteract()) return false;
+    this.resetInteraction();
     this.reaction = { pose: 'gift', until: this.now() + 3500, source: 'local' };
     return true;
   }

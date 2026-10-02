@@ -1,6 +1,8 @@
 .erii-companion {
   --erii-size: 88px;
   position: fixed;
+  top: 0;
+  left: 0;
   z-index: 9420;
   width: var(--erii-size);
   height: var(--erii-size);
@@ -8,7 +10,12 @@
   font: 13px/1.55 "Microsoft YaHei", "PingFang SC", sans-serif;
   pointer-events: none;
   text-shadow: none;
-  transition: left .26s cubic-bezier(.2,.8,.2,1), top .26s cubic-bezier(.2,.8,.2,1);
+  will-change: transform;
+  transition: transform .26s cubic-bezier(.2,.8,.2,1);
+}
+.erii-companion--ui {
+  width: 0; height: 0; z-index: 9421;
+  transform: none; transition: none; will-change: auto;
 }
 .erii-companion[data-dragging="true"] { transition: none; }
 .erii-companion *, .erii-companion *::before, .erii-companion *::after { box-sizing: border-box; }
@@ -22,13 +29,20 @@
 }
 .erii-companion[data-dragging="true"] .erii-companion__portrait { cursor: grabbing !important; }
 .erii-companion__portrait:hover { background: transparent !important; opacity: 1; }
-.erii-companion__sway, .erii-companion__stage { position: relative; display: block; width: 100%; height: 100%; pointer-events: none; }
-.erii-companion__sway { transform: rotate(var(--erii-tilt, 0deg)); transform-origin: 50% 25%; transition: transform .15s ease-out; }
+.erii-companion__sway, .erii-companion__breath, .erii-companion__stage { position: relative; display: block; width: 100%; height: 100%; pointer-events: none; }
+.erii-companion__sway { transform: rotate(var(--erii-tilt, 0deg)); transform-origin: 50% 25%; transition: transform .08s ease-out; }
+.erii-companion__breath { transform-origin: 50% 88%; animation: erii-breath 3.8s cubic-bezier(.37,0,.63,1) infinite; }
+.erii-companion[data-dragging="true"] .erii-companion__breath { animation-play-state: paused; }
+@keyframes erii-breath {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  35% { transform: translateY(.2px) scale(1.006, .988); }
+  70% { transform: translateY(-.8px) scale(.997, 1.012); }
+}
 .erii-companion__stage { transform-origin: 50% 88%; }
 .erii-companion__sprite {
   position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain;
   user-select: none; pointer-events: none; filter: none !important; image-rendering: auto;
-  opacity: 0; transition: opacity .14s ease-in-out;
+  opacity: 0; transition: opacity .05s ease-out;
 }
 .erii-companion__sprite[data-visible="true"] { opacity: 1; }
 .erii-companion__notebook {
@@ -66,4 +80,5 @@ body[data-erii-replace-database-pet] .acu-desk-pet,
 body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !important; pointer-events: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .erii-companion, .erii-companion__sprite, .erii-companion__sway { transition: none !important; }
+  .erii-companion__breath { animation: none !important; }
 }
