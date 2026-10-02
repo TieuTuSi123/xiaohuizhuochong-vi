@@ -53,7 +53,11 @@
 }
 .erii-companion__header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .erii-companion__header strong { color: #923d3f; font-size: 15px; }
-.erii-companion__close { border: 0; background: transparent; color: #923d3f; width: 28px; height: 28px; font-size: 22px !important; }
+.erii-companion__close {
+  position: relative; top: -4px; right: -5px;
+  border: 0; background: transparent; color: #923d3f;
+  width: 28px; height: 28px; font-size: 22px !important;
+}
 .erii-companion p { margin: 5px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .erii-companion h4 { margin: 14px 0 6px; font-size: 12px; color: #9c7770; }
 .erii-companion__connection { color: #9c7770; font-size: 11px; padding-bottom: 8px; border-bottom: 1px dashed #e8cfc3; }

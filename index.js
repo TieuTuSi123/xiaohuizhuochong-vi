@@ -63,7 +63,7 @@ export function createCompanion(host, context) {
   const localActions = [];
   const root = el(doc, 'div', undefined, 'erii-companion');
   root.id = `${ID}-root`;
-  root.dataset.version = '0.5.9';
+  root.dataset.version = '0.5.10';
   root.dataset.pose = 'idle';
   root.style.transition = 'none';
   // Panels are siblings: a transformed ancestor would change their fixed coordinates.
@@ -146,10 +146,11 @@ export function createCompanion(host, context) {
   }
   const flower = el(doc, 'button', '送她一朵花');
   flower.type = 'button';
+  leisureControls.append(flower);
   const databaseOpen = el(doc, 'button', '打开数据库本体', 'erii-companion__database-open');
   databaseOpen.type = 'button';
   databaseOpen.setAttribute('aria-label', '打开数据库本体');
-  notebook.append(header, databaseOpen, connection, taskList, historyTitle, historyList, help, leisureControls, flower);
+  notebook.append(header, databaseOpen, connection, taskList, historyTitle, historyList, help, leisureControls);
   root.append(portrait);
   overlay.append(message, notebook);
   doc.body.append(root, overlay);
