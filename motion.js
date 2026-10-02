@@ -44,6 +44,10 @@ const tracks = {
     poseFrame(.23, -.3, -1.8, -3.7), poseFrame(.58, .3, -.6, 2.7), poseFrame(.82, 0, -.3, -1), neutral(1)] },
   peek: { duration: 620, iterations: 1, frames: [neutral(0), poseFrame(.2, .3, .9, 1, 1.018, .98, rise),
     poseFrame(.52, -1, -2, -3, .995, 1.014), poseFrame(.78, .3, -.3, 1), neutral(1)] },
+  'edge-left': { duration: 4800, origin: '12% 72%', bridge: 280, frames: [neutral(0), poseFrame(.45, 2, -.4, 1.4), neutral(1)] },
+  'edge-right': { duration: 4800, origin: '88% 72%', bridge: 280, frames: [neutral(0), poseFrame(.45, -2, -.4, -1.4), neutral(1)] },
+  'edge-bottom': { duration: 5200, bridge: 280, frames: [neutral(0), poseFrame(.45, 0, -1.8, .6), neutral(1)] },
+  'edge-top': { duration: 5200, bridge: 280, frames: [neutral(0), poseFrame(.45, 0, -1.8, -.6), neutral(1)] },
 };
 
 // Browser frames are independent of the 250ms database sampling. Only a pose

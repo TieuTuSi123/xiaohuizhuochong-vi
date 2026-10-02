@@ -41,3 +41,13 @@ export function toRatio(point, bounds) {
   return { x: clamp((point.x - bounds.minX) / Math.max(1, bounds.maxX - bounds.minX), 0, 1),
     y: clamp((point.y - bounds.minY) / Math.max(1, bounds.maxY - bounds.minY), 0, 1) };
 }
+
+// Only classifies a position. It never moves the pet or saves a new coordinate.
+export function dockEdge(point, bounds) {
+  if (!point || !bounds) return null;
+  const distances = [
+    ['top', point.y - bounds.minY], ['bottom', bounds.maxY - point.y],
+    ['left', point.x - bounds.minX], ['right', bounds.maxX - point.x],
+  ].sort((a, b) => a[1] - b[1]);
+  return distances[0][1] <= 16 ? distances[0][0] : null;
+}

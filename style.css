@@ -29,7 +29,13 @@
 }
 .erii-companion[data-dragging="true"] .erii-companion__portrait { cursor: grabbing !important; }
 .erii-companion__portrait:hover { background: transparent !important; opacity: 1; }
-.erii-companion__sway, .erii-companion__breath, .erii-companion__stage { position: relative; display: block; width: 100%; height: 100%; pointer-events: none; }
+.erii-companion__edge-frame, .erii-companion__sway, .erii-companion__breath, .erii-companion__stage { position: relative; display: block; width: 100%; height: 100%; pointer-events: none; }
+.erii-companion__edge-frame { transition: transform .16s ease; }
+.erii-companion[data-edge="left"] .erii-companion__edge-frame { transform: translateX(-16px); }
+.erii-companion[data-edge="right"] .erii-companion__edge-frame { transform: translateX(16px); }
+.erii-companion[data-edge="bottom"] .erii-companion__edge-frame { transform: translateY(10px); }
+.erii-companion[data-edge="top"] .erii-companion__edge-frame { transform: translateY(-14px) rotate(180deg); }
+.erii-companion[data-dragging="true"] .erii-companion__edge-frame { transition: none; }
 .erii-companion__sway { transform: rotate(var(--erii-tilt, 0deg)); transform-origin: 50% 25%; transition: transform .08s ease-out; }
 .erii-companion__breath { transform-origin: 50% 88%; animation: erii-breath 3.8s cubic-bezier(.37,0,.63,1) infinite; }
 .erii-companion[data-dragging="true"] .erii-companion__breath { animation-play-state: paused; }
@@ -51,13 +57,14 @@
   background: #fff9f0; border: 1px solid #dab6aa; border-left: 5px solid #a94446;
   border-radius: 5px 12px 12px 5px; box-shadow: none; backdrop-filter: none;
 }
-.erii-companion__header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.erii-companion__header { display: flex; align-items: center; padding-right: 40px; min-height: 38px; margin-bottom: 18px; }
 .erii-companion__header strong { color: #923d3f; font-size: 15px; }
 .erii-companion__close {
-  position: relative; top: -4px; right: -5px;
+  position: absolute; top: 4px; right: 4px; margin: 0; padding: 0;
   border: 0; background: transparent; color: #923d3f;
-  width: 28px; height: 28px; font-size: 22px !important;
+  width: 32px; height: 32px; font-size: 24px !important; line-height: 1;
 }
+.erii-companion__close:hover { background: #f9e6dc; border-radius: 6px; }
 .erii-companion p { margin: 5px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .erii-companion h4 { margin: 14px 0 6px; font-size: 12px; color: #9c7770; }
 .erii-companion__connection { color: #9c7770; font-size: 11px; padding-bottom: 8px; border-bottom: 1px dashed #e8cfc3; }
@@ -90,6 +97,21 @@
 }
 .erii-companion__message-action:hover:not(:disabled) { background: #f9e6dc; }
 .erii-companion__message-action:disabled { opacity: .55; cursor: default; }
+.erii-companion__story {
+  position: fixed; width: var(--erii-page-width, 310px); max-height: 300px;
+  overflow: auto; overscroll-behavior: contain; pointer-events: auto;
+  padding: 12px 14px; border: 1px solid #d7b9af; border-radius: 14px 14px 4px 14px;
+  background: #fff9f0; color: #613531; text-align: left;
+}
+.erii-companion__story-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.erii-companion__story-heading strong { font-size: 14px; color: #923d3f; }
+.erii-companion__story p { margin: 8px 0 12px; font-size: 13px; line-height: 1.85; }
+.erii-companion__story-close { flex: 0 0 32px; width: 32px; height: 32px; border: 0; padding: 0; color: #923d3f; background: transparent; font-size: 22px !important; }
+.erii-companion__story-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #9c7770; font-size: 11px; }
+.erii-companion__story-next, .erii-companion__story-open { border: 1px solid #dec2b8; border-radius: 6px; background: #fffdf8; color: #8f4144; padding: 6px 10px; }
+.erii-companion__story-open { display: block; margin-top: 12px; width: 100%; }
+.erii-companion__story-next:hover, .erii-companion__story-open:hover:not(:disabled) { background: #f9e6dc; }
+.erii-companion__story-open:disabled { opacity: .45; cursor: default; }
 .erii-companion-settings { padding: 8px 0; color: #ffecef !important; }
 .erii-companion-settings summary { cursor: pointer; padding: 6px 0; color: #fff7f7 !important; font-weight: 700; }
 .erii-companion-settings label { display: flex; gap: 8px; align-items: center; margin: 10px 0; }
@@ -104,6 +126,6 @@
 body[data-erii-replace-database-pet] .acu-desk-pet,
 body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !important; pointer-events: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .erii-companion, .erii-companion__sprite, .erii-companion__sway { transition: none !important; }
+  .erii-companion, .erii-companion__sprite, .erii-companion__sway, .erii-companion__edge-frame { transition: none !important; }
   .erii-companion__breath { animation: none !important; }
 }

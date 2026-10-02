@@ -1,16 +1,20 @@
 import { CompanionModel } from './model.js';
 import { createDatabaseObserver } from './database-observer.js';
-import { readBounds, fromRatio, toRatio, constrain } from './position.js';
+import { readBounds, fromRatio, toRatio, constrain, dockEdge } from './position.js';
 import { createMotion } from './motion.js';
+import { StoryCarousel } from './stories.js';
 
 const ID = 'erii-database-pet';
-const defaults = { enabled: true, idleActions: true, hideOriginal: true, size: 88, side: 'right', position: null };
+const defaults = { enabled: true, idleActions: true, edgePeeks: true, healingStories: true, hideOriginal: true, size: 88, side: 'right', position: null };
 const poses = ['idle', 'received', 'writing', 'complete', 'error', 'tea', 'reading', 'origami', 'duck', 'stretch', 'rest', 'gift', 'lifted', 'land', 'wave', 'peek'];
 const labels = { idle: '等你下一条记录', received: '收到新任务', writing: '认真整理记录', complete: '完成啦',
   error: '这条记录需要检查', tea: '喝一口茶', reading: '翻翻小书', origami: '折一只纸鹤', duck: '陪小黄鸭玩',
   stretch: '伸个懒腰', rest: '靠着小枕头休息', gift: '收到一朵花',
   lifted: '轻轻拎起来', land: '坐稳啦', wave: '向你打招呼', peek: '抱着小本子探头' };
 const imageUrls = Object.fromEntries(poses.map(pose => [pose, new URL(`assets/${pose}.webp`, import.meta.url).href]));
+const edgeAssets = { left: 'edge-left-v2', right: 'edge-right-v2', bottom: 'edge-bottom', top: 'edge-bottom' };
+for (const [edge, asset] of Object.entries(edgeAssets))
+  imageUrls[`edge-${edge}`] = new URL(`assets/${asset}.webp`, import.meta.url).href;
 let active = null;
 let bootTimer = null;
 let stopped = true;
@@ -29,6 +33,7 @@ export function createCompanion(host, context) {
   settings.size = Math.min(112, Math.max(56, Number(settings.size) || 88));
   settings.side = settings.side === 'left' ? 'left' : 'right';
   const model = new CompanionModel();
+  const storyteller = new StoryCarousel();
   const subscriptions = [];
   const timers = new Set();
   let dataSource = null;
@@ -59,11 +64,12 @@ export function createCompanion(host, context) {
   let swapVersion = 0;
   let shownSprite = 0;
   let taskStopBusy = false;
+  let failedEdge = null;
   const loaded = new Map();
   const localActions = [];
   const root = el(doc, 'div', undefined, 'erii-companion');
   root.id = `${ID}-root`;
-  root.dataset.version = '0.5.10';
+  root.dataset.version = '0.5.12';
   root.dataset.pose = 'idle';
   root.style.transition = 'none';
   // Panels are siblings: a transformed ancestor would change their fixed coordinates.
@@ -75,6 +81,7 @@ export function createCompanion(host, context) {
   portrait.setAttribute('aria-expanded', 'false');
   portrait.title = '轻点互动 · 连点有不同反应 · 手机长按打开小本子 · 拖动移动 · 电脑右键看小本子';
   const sway = el(doc, 'span', undefined, 'erii-companion__sway');
+  const edgeFrame = el(doc, 'span', undefined, 'erii-companion__edge-frame');
   const breath = el(doc, 'span', undefined, 'erii-companion__breath');
   const stage = el(doc, 'span', undefined, 'erii-companion__stage');
   const sprites = [0, 1].map(index => {
@@ -84,7 +91,7 @@ export function createCompanion(host, context) {
     stage.append(sprite);
     return sprite;
   });
-  breath.append(stage); sway.append(breath); portrait.append(sway);
+  breath.append(stage); sway.append(breath); edgeFrame.append(sway); portrait.append(edgeFrame);
   const motion = createMotion(stage, host);
   function loadAsset(pose) {
     if (!loaded.has(pose)) loaded.set(pose, new Promise(resolve => {
@@ -99,12 +106,17 @@ export function createCompanion(host, context) {
     const version = ++swapVersion;
     const ok = await loadAsset(pose);
     if (destroyed || version !== swapVersion) return;
-    if (!ok) { assetFailed = true; update(); return; }
+    if (!ok) {
+      if (pose.startsWith('edge-')) { failedEdge = pose; lastPose = ''; }
+      else assetFailed = true;
+      update(); return;
+    }
     const next = shownSprite === 0 ? 1 : 0;
     sprites[next].src = imageUrls[pose];
     try { await sprites[next].decode?.(); } catch { /* preloaded image remains usable */ }
     if (destroyed || version !== swapVersion) return;
     root.dataset.pose = pose;
+    root.dataset.edge = pose.startsWith('edge-') ? pose.slice(5) : '';
     motion.play(pose);
     sprites[next].dataset.visible = 'true';
     sprites[shownSprite].dataset.visible = 'false';
@@ -150,9 +162,27 @@ export function createCompanion(host, context) {
   const databaseOpen = el(doc, 'button', '打开数据库本体', 'erii-companion__database-open');
   databaseOpen.type = 'button';
   databaseOpen.setAttribute('aria-label', '打开数据库本体');
-  notebook.append(header, databaseOpen, connection, taskList, historyTitle, historyList, help, leisureControls);
+  const storyOpen = el(doc, 'button', '听一个小故事', 'erii-companion__story-open');
+  storyOpen.type = 'button';
+  notebook.append(header, databaseOpen, connection, taskList, historyTitle, historyList, help, leisureControls, storyOpen);
+  const storyBubble = el(doc, 'section', undefined, 'erii-companion__story');
+  storyBubble.hidden = true;
+  storyBubble.setAttribute('aria-label', '小绘的治愈小故事');
+  const storyHeading = el(doc, 'div', undefined, 'erii-companion__story-heading');
+  const storyTitle = el(doc, 'strong');
+  const storyClose = el(doc, 'button', '×', 'erii-companion__story-close');
+  storyClose.type = 'button'; storyClose.setAttribute('aria-label', '收起小故事');
+  storyHeading.append(storyTitle, storyClose);
+  const storyText = el(doc, 'p');
+  // Update only when a new story starts, rather than announcing every sample.
+  storyText.setAttribute('aria-live', 'polite');
+  const storyNext = el(doc, 'button', '换一篇', 'erii-companion__story-next');
+  storyNext.type = 'button';
+  const storyFoot = el(doc, 'div', undefined, 'erii-companion__story-foot');
+  storyFoot.append(el(doc, 'span', '小绘的小故事'), storyNext);
+  storyBubble.append(storyHeading, storyText, storyFoot);
   root.append(portrait);
-  overlay.append(message, notebook);
+  overlay.append(message, notebook, storyBubble);
   doc.body.append(root, overlay);
 
   function listen(target, name, handler, options) {
@@ -162,7 +192,6 @@ export function createCompanion(host, context) {
   function save() {
     store[ID] = { ...(store[ID] || {}), ...settings };
     context.saveSettingsDebounced?.();
-    update();
     position();
     settingsControls?.sync();
   }
@@ -171,6 +200,7 @@ export function createCompanion(host, context) {
     save();
   }
   function setNotebook(open) {
+    if (open) storyteller.dismiss();
     notebook.hidden = !open;
     portrait.setAttribute('aria-expanded', String(open));
     if (open) { updateNotebook(); close.focus({ preventScroll: true }); }
@@ -183,7 +213,7 @@ export function createCompanion(host, context) {
       || doc.getElementById('shujuku_v120-menu-item')
       || [...doc.querySelectorAll('#extensionsMenu .list-group-item')].find(item =>
         item.querySelector('.fa-database') && /数据库/.test(item.textContent || ''));
-    if (menuItem instanceof HTMLElement) {
+    if (menuItem instanceof host.HTMLElement) {
       menuItem.click();
       return true;
     }
@@ -234,6 +264,7 @@ export function createCompanion(host, context) {
       }
     }
     flower.disabled = snapshot.busy;
+    storyOpen.disabled = snapshot.busy;
     for (const button of localActions) button.disabled = snapshot.busy;
     flower.title = snapshot.busy ? '等她整理完记录再送花' : '送花只影响桌宠，不改数据库任务';
     if (!notebook.hidden) scheduleLayout();
@@ -266,7 +297,7 @@ export function createCompanion(host, context) {
     ? new host.ResizeObserver(() => scheduleLayout(true)) : null;
   const panelObserver = typeof host.ResizeObserver === 'function'
     ? new host.ResizeObserver(() => scheduleLayout()) : null;
-  panelObserver?.observe(notebook); panelObserver?.observe(message);
+  panelObserver?.observe(notebook); panelObserver?.observe(message); panelObserver?.observe(storyBubble);
   function position() {
     if (destroyed) return;
     bounds = readBounds(host, doc, settings.size);
@@ -277,6 +308,7 @@ export function createCompanion(host, context) {
     overlay.style.setProperty('--erii-page-width', `${Math.max(160, Math.min(310, width - 24))}px`);
     overlay.style.setProperty('--erii-page-height', `${Math.max(120, Math.min(420, height - 32))}px`);
     if (!dragging?.moved) placePanels();
+    update();
   }
   function placePanels() {
     if (destroyed || !bounds || !point || dragging?.moved) return;
@@ -305,6 +337,18 @@ export function createCompanion(host, context) {
     }
     if (!notebook.hidden) placePanel(notebook, 420);
     if (!message.hidden) placePanel(message, 130);
+    if (!storyBubble.hidden) placePanel(storyBubble, 300);
+  }
+  function storyBlocked() {
+    return settings.enabled === false || doc.hidden || model.snapshot.silent || model.snapshot.busy
+      || Date.now() < terminalUntil || !model.canInteract() || !notebook.hidden || Boolean(dragging);
+  }
+  function tellStory() {
+    // Close the notebook first, so the bubble has room to sit beside her.
+    if (!model.canInteract() || model.snapshot.silent || settings.enabled === false) return;
+    setNotebook(false);
+    if (storyBlocked()) return;
+    storyteller.show(); update();
   }
   function update() {
     if (destroyed) return;
@@ -312,7 +356,14 @@ export function createCompanion(host, context) {
     root.hidden = settings.enabled === false;
     overlay.hidden = root.hidden;
     const snapshot = model.snapshot;
-    const pose = dragging?.moved ? 'lifted' : (Date.now() < landingUntil ? 'land' : model.pose());
+    const now = Date.now();
+    const localPose = model.pose();
+    const canPeek = settings.enabled && settings.edgePeeks && !dragging
+      && notebook.hidden && localPose === 'idle' && !snapshot.busy && !doc.hidden;
+    const edge = canPeek ? dockEdge(point, bounds) : null;
+    const edgePose = edge && `edge-${edge}`;
+    const pose = dragging?.moved ? 'lifted' : edgePose && edgePose !== failedEdge ? edgePose
+      : now < landingUntil ? 'land' : localPose;
     if (pose !== lastPose) {
       lastPose = pose;
       showPose(pose);
@@ -339,6 +390,15 @@ export function createCompanion(host, context) {
       messageStop.textContent = taskStopBusy ? '停止中…' : (activeTask?.action?.label || '停止');
     }
     updateNotebook();
+    const beforeStory = storyBubble.hidden;
+    storyteller.tick({ blocked: storyBlocked(), automatic: settings.healingStories === true && localPose === 'idle' });
+    const story = storyteller.current;
+    storyBubble.hidden = !story;
+    if (story && storyTitle.textContent !== story.title) {
+      storyTitle.textContent = story.title; storyText.textContent = story.text;
+      storyBubble.scrollTop = 0; changed = true;
+    }
+    changed ||= beforeStory !== storyBubble.hidden;
     if (changed && !dragging?.moved) scheduleLayout();
   }
   function mountSettings() {
@@ -349,7 +409,7 @@ export function createCompanion(host, context) {
     settingsMount.id = `${ID}-settings`;
     settingsMount.append(el(doc, 'summary', '绘梨衣 · 数据库桌宠'));
     const fields = [];
-    for (const [key, label] of [['enabled', '显示绘梨衣'], ['idleActions', '空闲时做小动作'], ['hideOriginal', '隐藏数据库原桌宠和原气泡']]) {
+    for (const [key, label] of [['enabled', '显示绘梨衣'], ['idleActions', '空闲时做小动作'], ['hideOriginal', '隐藏数据库原桌宠和原气泡'], ['edgePeeks', '拖到边缘后探头'], ['healingStories', '空闲时讲治愈小故事']]) {
       const row = el(doc, 'label');
       const input = el(doc, 'input');
       input.type = 'checkbox';
@@ -376,7 +436,7 @@ export function createCompanion(host, context) {
     target.append(settingsMount);
   }
 
-  function resetPosition() { cancelDrag(); settings.position = null; landingUntil = Date.now() + 1000; save(); }
+  function resetPosition() { cancelDrag(); model.interruptLocal(); settings.position = null; landingUntil = 0; save(); }
   function clearHold() {
     if (holdTimer !== null) host.clearTimeout(holdTimer);
     if (mobileBookTimer !== null) host.clearTimeout(mobileBookTimer);
@@ -440,7 +500,7 @@ export function createCompanion(host, context) {
   }
   function interactTap() {
     if (settings.enabled === false || destroyed) return;
-    landingUntil = 0;
+    landingUntil = 0; storyteller.dismiss();
     model.tap(); update();
   }
   listen(portrait, 'pointerdown', event => {
@@ -449,6 +509,7 @@ export function createCompanion(host, context) {
     const rendered = root.getBoundingClientRect();
     point = constrain({ x: rendered.x, y: rendered.y }, bounds);
     dragging = { id: event.pointerId, startX: event.clientX, startY: event.clientY, origin: { ...point }, pending: { ...point }, moved: false, lastX: event.clientX, tilt: 0 };
+    storyteller.dismiss(); update();
     try { portrait.setPointerCapture(event.pointerId); } catch { /* keyboard/synthetic test may have no live pointer */ }
     holdTimer = host.setTimeout(() => {
       holdTimer = null;
@@ -486,7 +547,8 @@ export function createCompanion(host, context) {
   listen(portrait, 'lostpointercapture', event => finishDrag(event, true));
   listen(host, 'blur', () => finishDrag(null, true));
   listen(portrait, 'pointerenter', event => {
-    if (event.pointerType === 'mouse' && !dragging && model.pose() === 'idle' && Date.now() > hoverUntil) {
+    if (event.pointerType === 'mouse' && !dragging && model.pose() === 'idle' && Date.now() > hoverUntil
+      && !(settings.edgePeeks && dockEdge(point, bounds))) {
       hoverUntil = Date.now() + 12000; model.leisure('peek'); update();
     }
   });
@@ -505,6 +567,7 @@ export function createCompanion(host, context) {
     const delta = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
     if (!delta) return;
     event.preventDefault(); position();
+    model.interruptLocal(); landingUntil = 0;
     const step = event.shiftKey ? 28 : 10;
     point = constrain({ x: point.x + delta[0] * step, y: point.y + delta[1] * step }, bounds);
     rememberPosition();
@@ -512,6 +575,22 @@ export function createCompanion(host, context) {
   listen(close, 'click', () => setNotebook(false));
   listen(flower, 'click', () => { model.gift(); update(); });
   listen(databaseOpen, 'click', openDatabaseApp);
+  listen(storyOpen, 'click', tellStory);
+  listen(storyNext, 'click', () => {
+    if (storyBlocked()) return;
+    storyteller.show(); update();
+    if (storyBubble.matches(':hover')) storyteller.pause('hover');
+    if (storyBubble.contains(doc.activeElement)) storyteller.pause('focus');
+  });
+  listen(storyClose, 'click', () => { storyteller.dismiss(); update(); portrait.focus({ preventScroll: true }); });
+  listen(storyBubble, 'pointerenter', () => storyteller.pause('hover'));
+  listen(storyBubble, 'pointerleave', () => storyteller.resume('hover'));
+  listen(storyBubble, 'focusin', () => storyteller.pause('focus'));
+  listen(storyBubble, 'focusout', event => {
+    if (!storyBubble.contains(event.relatedTarget)) storyteller.resume('focus');
+  });
+  // On a phone, touching the text freezes expiry until it is deliberately closed.
+  listen(storyBubble, 'pointerdown', event => { if (event.pointerType === 'touch') storyteller.pause('touch'); });
   for (const button of localActions) listen(button, 'click', () => {
     if (model.leisure(button.dataset.action)) { setNotebook(false); update(); }
   });
@@ -519,6 +598,7 @@ export function createCompanion(host, context) {
     if (event.key !== 'Escape') return;
     if (dragging) finishDrag(null, true);
     if (!notebook.hidden) setNotebook(false);
+    if (!storyBubble.hidden) { storyteller.dismiss(); update(); }
   });
   listen(host, 'resize', () => scheduleLayout(true));
   if (host.visualViewport) {
@@ -533,7 +613,7 @@ export function createCompanion(host, context) {
     const timer = host.setTimeout(() => {
       timers.delete(timer);
       if (destroyed) return;
-      if (!doc.hidden && settings.enabled && settings.idleActions && !dragging && notebook.hidden && model.pose() === 'idle') {
+      if (!doc.hidden && settings.enabled && settings.idleActions && !dragging && notebook.hidden && !storyteller.current && model.pose() === 'idle' && !root.dataset.edge) {
         if (Math.random() < 0.28) { model.tap(); }
         else {
           const choices = ['tea', 'reading', 'origami', 'duck', 'stretch', 'rest', 'peek', 'wave'];
@@ -545,8 +625,8 @@ export function createCompanion(host, context) {
     }, 12000 + Math.random() * 8000);
     timers.add(timer);
   }
-  for (const pose of poses) loadAsset(pose);
-  connect(); mountSettings(); watchInput(); update(); position(); scheduleLeisure();
+  for (const pose of Object.keys(imageUrls)) loadAsset(pose);
+  connect(); mountSettings(); watchInput(); position(); scheduleLeisure();
   // Establish the saved location before enabling movement easing (no fly-in from 0,0).
   root.getBoundingClientRect();
   root.style.transition = '';
@@ -556,6 +636,7 @@ export function createCompanion(host, context) {
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      storyteller.dismiss();
       swapVersion++; cancelDrag(); motion.destroy(); loaded.clear();
       if (layoutFrame !== null) host.cancelAnimationFrame(layoutFrame);
       geometryObserver?.disconnect(); panelObserver?.disconnect();
