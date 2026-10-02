@@ -58,6 +58,12 @@
 .erii-companion h4 { margin: 14px 0 6px; font-size: 12px; color: #9c7770; }
 .erii-companion__connection { color: #9c7770; font-size: 11px; padding-bottom: 8px; border-bottom: 1px dashed #e8cfc3; }
 .erii-companion__help { color: #9c7770; font-size: 11px; margin-top: 12px !important; }
+.erii-companion__database-open {
+  display: block; width: 100%; margin: 0 0 12px; padding: 8px 10px;
+  border: 1px solid #b86b68; border-radius: 7px; background: #a94446;
+  color: #fffaf6; font-weight: 700; line-height: 1.35;
+}
+.erii-companion__database-open:hover { background: #913a3d; }
 .erii-companion__task, .erii-companion__record { padding: 7px 0; border-bottom: 1px solid #ecdcd0; }
 .erii-companion__record { font-size: 12px; }
 .erii-companion [data-kind="error"], .erii-companion [data-kind="warning"] { color: #a4483b; }

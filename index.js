@@ -63,7 +63,7 @@ export function createCompanion(host, context) {
   const localActions = [];
   const root = el(doc, 'div', undefined, 'erii-companion');
   root.id = `${ID}-root`;
-  root.dataset.version = '0.5.8';
+  root.dataset.version = '0.5.9';
   root.dataset.pose = 'idle';
   root.style.transition = 'none';
   // Panels are siblings: a transformed ancestor would change their fixed coordinates.
@@ -137,8 +137,7 @@ export function createCompanion(host, context) {
   const taskList = el(doc, 'div', undefined, 'erii-companion__tasks');
   const historyTitle = el(doc, 'h4', '最近的记录');
   const historyList = el(doc, 'div', undefined, 'erii-companion__history');
-  const controls = el(doc, 'div', undefined, 'erii-companion__controls');
-  const help = el(doc, 'p', '单击挥手 · 双击抱鸭 · 连点躲一躲 · 长按小憩 · 拖动移动', 'erii-companion__help');
+  const help = el(doc, 'p', '单击挥手 · 双击抱鸭 · 连点躲一躲 · 长按小憩 · 拖动移动 · 电脑右键开关小本子', 'erii-companion__help');
   const leisureControls = el(doc, 'div', undefined, 'erii-companion__controls');
   for (const [pose, caption] of [['tea', '喝茶'], ['reading', '看书'], ['origami', '折纸'], ['duck', '抱小鸭'], ['stretch', '伸懒腰'], ['rest', '小憩']]) {
     const button = el(doc, 'button', caption);
@@ -147,12 +146,10 @@ export function createCompanion(host, context) {
   }
   const flower = el(doc, 'button', '送她一朵花');
   flower.type = 'button';
-  const reposition = el(doc, 'button', '换一边坐');
-  reposition.type = 'button';
-  const reset = el(doc, 'button', '回到默认位置');
-  reset.type = 'button';
-  controls.append(flower, reposition, reset);
-  notebook.append(header, connection, taskList, historyTitle, historyList, help, leisureControls, controls);
+  const databaseOpen = el(doc, 'button', '打开数据库本体', 'erii-companion__database-open');
+  databaseOpen.type = 'button';
+  databaseOpen.setAttribute('aria-label', '打开数据库本体');
+  notebook.append(header, databaseOpen, connection, taskList, historyTitle, historyList, help, leisureControls, flower);
   root.append(portrait);
   overlay.append(message, notebook);
   doc.body.append(root, overlay);
@@ -178,6 +175,20 @@ export function createCompanion(host, context) {
     if (open) { updateNotebook(); close.focus({ preventScroll: true }); }
     else portrait.focus({ preventScroll: true });
     position();
+  }
+  function openDatabaseApp() {
+    setNotebook(false);
+    const menuItem = doc.getElementById('acu-v2-menu-item')
+      || doc.getElementById('shujuku_v120-menu-item')
+      || [...doc.querySelectorAll('#extensionsMenu .list-group-item')].find(item =>
+        item.querySelector('.fa-database') && /数据库/.test(item.textContent || ''));
+    if (menuItem instanceof HTMLElement) {
+      menuItem.click();
+      return true;
+    }
+    setNotebook(true);
+    connection.textContent = '未找到数据库入口，请先启用数据库扩展';
+    return false;
   }
   function accept(snapshot) {
     if (!model.ingest(snapshot)) return;
@@ -485,7 +496,7 @@ export function createCompanion(host, context) {
   listen(portrait, 'contextmenu', event => {
     event.preventDefault();
     if (dragging?.moved || longPressed || event.pointerType === 'touch') return;
-    setNotebook(true);
+    setNotebook(notebook.hidden);
   });
   listen(portrait, 'keydown', event => {
     if (event.key === 'Enter' && event.shiftKey) { event.preventDefault(); setNotebook(true); return; }
@@ -498,9 +509,8 @@ export function createCompanion(host, context) {
     rememberPosition();
   });
   listen(close, 'click', () => setNotebook(false));
-  listen(reset, 'click', resetPosition);
   listen(flower, 'click', () => { model.gift(); update(); });
-  listen(reposition, 'click', () => { settings.side = root.dataset.side === 'left' ? 'right' : 'left'; settings.position = null; landingUntil = Date.now() + 1300; save(); });
+  listen(databaseOpen, 'click', openDatabaseApp);
   for (const button of localActions) listen(button, 'click', () => {
     if (model.leisure(button.dataset.action)) { setNotebook(false); update(); }
   });
