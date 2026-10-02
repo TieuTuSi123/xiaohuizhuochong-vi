@@ -6,15 +6,11 @@ import { createMotion } from './motion.js';
 const ID = 'erii-database-pet';
 const defaults = { enabled: true, idleActions: true, hideOriginal: true, size: 88, side: 'right', position: null };
 const poses = ['idle', 'received', 'writing', 'complete', 'error', 'tea', 'reading', 'origami', 'duck', 'stretch', 'rest', 'gift', 'lifted', 'land', 'wave', 'peek'];
-const runPoses = { left: Array.from({ length: 8 }, (_, i) => `run-left-${String(i + 1).padStart(2, '0')}`), right: Array.from({ length: 8 }, (_, i) => `run-right-${String(i + 1).padStart(2, '0')}`) };
 const labels = { idle: '等你下一条记录', received: '收到新任务', writing: '认真整理记录', complete: '完成啦',
   error: '这条记录需要检查', tea: '喝一口茶', reading: '翻翻小书', origami: '折一只纸鹤', duck: '陪小黄鸭玩',
   stretch: '伸个懒腰', rest: '靠着小枕头休息', gift: '收到一朵花',
   lifted: '轻轻拎起来', land: '坐稳啦', wave: '向你打招呼', peek: '抱着小本子探头' };
-const imageUrls = Object.fromEntries([
-  ...poses.map(pose => [pose, new URL(`assets/${pose}.webp`, import.meta.url).href]),
-  ...Object.values(runPoses).flat().map(pose => [pose, new URL(`assets/${pose}.webp`, import.meta.url).href]),
-]);
+const imageUrls = Object.fromEntries(poses.map(pose => [pose, new URL(`assets/${pose}.webp`, import.meta.url).href]));
 let active = null;
 let bootTimer = null;
 let stopped = true;
@@ -63,14 +59,11 @@ export function createCompanion(host, context) {
   let swapVersion = 0;
   let shownSprite = 0;
   let taskStopBusy = false;
-  let autonomousPose = null;
-  let autonomousRunToken = 0;
-  let autonomousStepTimer = null;
   const loaded = new Map();
   const localActions = [];
   const root = el(doc, 'div', undefined, 'erii-companion');
   root.id = `${ID}-root`;
-  root.dataset.version = '0.5.7';
+  root.dataset.version = '0.5.8';
   root.dataset.pose = 'idle';
   root.style.transition = 'none';
   // Panels are siblings: a transformed ancestor would change their fixed coordinates.
@@ -307,7 +300,7 @@ export function createCompanion(host, context) {
     root.hidden = settings.enabled === false;
     overlay.hidden = root.hidden;
     const snapshot = model.snapshot;
-    const pose = dragging?.moved ? 'lifted' : autonomousPose || (Date.now() < landingUntil ? 'land' : model.pose());
+    const pose = dragging?.moved ? 'lifted' : (Date.now() < landingUntil ? 'land' : model.pose());
     if (pose !== lastPose) {
       lastPose = pose;
       showPose(pose);
@@ -372,49 +365,6 @@ export function createCompanion(host, context) {
   }
 
   function resetPosition() { cancelDrag(); settings.position = null; landingUntil = Date.now() + 1000; save(); }
-  function autonomousWander() {
-    if (destroyed || !bounds || !point || dragging || !notebook.hidden || model.snapshot.busy) return false;
-    const stepPx = 10;
-    const stepMs = 280;
-    const origin = { ...point };
-    const roomLeft = origin.x - bounds.minX;
-    const roomRight = bounds.maxX - origin.x;
-    if (Math.max(roomLeft, roomRight) < stepPx * 4) return false;
-    const direction = roomLeft < stepPx * 4 ? 1 : roomRight < stepPx * 4 ? -1 : Math.random() < 0.5 ? -1 : 1;
-    const room = direction < 0 ? roomLeft : roomRight;
-    const steps = Math.min(12, Math.max(4, Math.floor(room / stepPx)));
-    model.leisure(direction < 0 ? 'peek' : 'wave');
-    const token = ++autonomousRunToken;
-    const frames = direction < 0 ? runPoses.left : runPoses.right;
-    let step = 0;
-    root.dataset.autonomous = 'true';
-    const finish = () => {
-      autonomousStepTimer = null;
-      point = origin;
-      applyPoint(origin);
-      autonomousPose = 'land';
-      root.dataset.autonomous = 'false';
-      update();
-      const clearPoseTimer = host.setTimeout(() => { timers.delete(clearPoseTimer); autonomousPose = null; update(); }, 850);
-      timers.add(clearPoseTimer);
-    };
-    const tick = () => {
-      if (autonomousStepTimer !== null) timers.delete(autonomousStepTimer);
-      autonomousStepTimer = null;
-      if (destroyed || token !== autonomousRunToken) return;
-      if (step >= steps * 2) { finish(); return; }
-      const delta = step < steps ? direction * stepPx : -direction * stepPx;
-      point = constrain({ x: point.x + delta, y: point.y }, bounds);
-      applyPoint(point);
-      autonomousPose = frames[step % frames.length];
-      step += 1;
-      update();
-      autonomousStepTimer = host.setTimeout(tick, stepMs);
-      timers.add(autonomousStepTimer);
-    };
-    tick();
-    return true;
-  }
   function clearHold() {
     if (holdTimer !== null) host.clearTimeout(holdTimer);
     if (mobileBookTimer !== null) host.clearTimeout(mobileBookTimer);
@@ -573,8 +523,7 @@ export function createCompanion(host, context) {
       timers.delete(timer);
       if (destroyed) return;
       if (!doc.hidden && settings.enabled && settings.idleActions && !dragging && notebook.hidden && model.pose() === 'idle') {
-        if (Math.random() < 0.32) autonomousWander();
-        else if (Math.random() < 0.28) { model.tap(); }
+        if (Math.random() < 0.28) { model.tap(); }
         else {
           const choices = ['tea', 'reading', 'origami', 'duck', 'stretch', 'rest', 'peek', 'wave'];
           model.leisure(choices[Math.floor(Math.random() * choices.length)]);
@@ -585,7 +534,7 @@ export function createCompanion(host, context) {
     }, 12000 + Math.random() * 8000);
     timers.add(timer);
   }
-  for (const pose of [...poses, ...Object.values(runPoses).flat()]) loadAsset(pose);
+  for (const pose of poses) loadAsset(pose);
   connect(); mountSettings(); watchInput(); update(); position(); scheduleLeisure();
   // Establish the saved location before enabling movement easing (no fly-in from 0,0).
   root.getBoundingClientRect();
