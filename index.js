@@ -64,12 +64,13 @@ export function createCompanion(host, context) {
   let swapVersion = 0;
   let shownSprite = 0;
   let taskStopBusy = false;
+  let stopFeedback = null;
   let failedEdge = null;
   const loaded = new Map();
   const localActions = [];
   const root = el(doc, 'div', undefined, 'erii-companion');
   root.id = `${ID}-root`;
-  root.dataset.version = '0.5.12';
+  root.dataset.version = '0.5.14';
   root.dataset.pose = 'idle';
   root.style.transition = 'none';
   // Panels are siblings: a transformed ancestor would change their fixed coordinates.
@@ -179,7 +180,7 @@ export function createCompanion(host, context) {
   const storyNext = el(doc, 'button', '换一篇', 'erii-companion__story-next');
   storyNext.type = 'button';
   const storyFoot = el(doc, 'div', undefined, 'erii-companion__story-foot');
-  storyFoot.append(el(doc, 'span', '小绘的小故事'), storyNext);
+  storyFoot.append(el(doc, 'span', '每 30 秒换一篇'), storyNext);
   storyBubble.append(storyHeading, storyText, storyFoot);
   root.append(portrait);
   overlay.append(message, notebook, storyBubble);
@@ -202,9 +203,10 @@ export function createCompanion(host, context) {
   function setNotebook(open) {
     if (open) storyteller.dismiss();
     notebook.hidden = !open;
+    if (open) overlay.hidden = false;
     portrait.setAttribute('aria-expanded', String(open));
     if (open) { updateNotebook(); close.focus({ preventScroll: true }); }
-    else portrait.focus({ preventScroll: true });
+    else (settings.enabled === false ? settingsMount?.querySelector('button[aria-controls]') : portrait)?.focus({ preventScroll: true });
     position();
   }
   function openDatabaseApp() {
@@ -238,7 +240,7 @@ export function createCompanion(host, context) {
     const snapshot = model.snapshot;
     root.dataset.source = dataSource?.getSnapshot().source || 'waiting';
     const version = JSON.stringify([snapshot.tasks, model.history, snapshot.busy, snapshot.connected,
-      snapshot.activityKnown, root.dataset.source, assetFailed]);
+      snapshot.activityKnown, root.dataset.source, assetFailed, settings.enabled]);
     if (version === lastNotebookVersion) return;
     lastNotebookVersion = version;
     connection.textContent = assetFailed ? '动作素材加载失败，请更新扩展后刷新页面' :
@@ -263,9 +265,9 @@ export function createCompanion(host, context) {
         historyList.append(card);
       }
     }
-    flower.disabled = snapshot.busy;
-    storyOpen.disabled = snapshot.busy;
-    for (const button of localActions) button.disabled = snapshot.busy;
+    flower.disabled = snapshot.busy || settings.enabled === false;
+    storyOpen.disabled = snapshot.busy || settings.enabled === false;
+    for (const button of localActions) button.disabled = snapshot.busy || settings.enabled === false;
     flower.title = snapshot.busy ? '等她整理完记录再送花' : '送花只影响桌宠，不改数据库任务';
     if (!notebook.hidden) scheduleLayout();
   }
@@ -350,11 +352,15 @@ export function createCompanion(host, context) {
     if (storyBlocked()) return;
     storyteller.show(); update();
   }
+  function currentTask() {
+    // Cached carousel observations are notebook records, never stop targets.
+    return model.snapshot.tasks.find(task => task.id === model.snapshot.activeTaskId && task.busy) || null;
+  }
   function update() {
     if (destroyed) return;
     if (settings.enabled === false && dragging) cancelDrag();
     root.hidden = settings.enabled === false;
-    overlay.hidden = root.hidden;
+    overlay.hidden = root.hidden && notebook.hidden;
     const snapshot = model.snapshot;
     const now = Date.now();
     const localPose = model.pose();
@@ -373,19 +379,24 @@ export function createCompanion(host, context) {
     const replace = settings.enabled !== false && settings.hideOriginal && snapshot.connected && hasDecodedPose && !assetFailed;
     if (doc.body.hasAttribute('data-erii-replace-database-pet') !== Boolean(replace))
       doc.body.toggleAttribute('data-erii-replace-database-pet', Boolean(replace));
-    const activeTask = snapshot.tasks.find(task => task.busy) || null;
-    const hasTaskMessage = Boolean(activeTask && snapshot.busy);
+    const activeTask = currentTask();
+    const hasTaskMessage = snapshot.busy;
     const hasNoticeMessage = Boolean(model.history.length && Date.now() < terminalUntil);
+    const newest = model.history[0];
+    const failureNotice = hasNoticeMessage && ['error', 'warning'].includes(newest.kind);
+    const feedback = stopFeedback?.until > now && snapshot.busy
+      && (!snapshot.activeTaskId || stopFeedback.taskId === snapshot.activeTaskId) ? stopFeedback : null;
     const wasHidden = message.hidden;
     message.hidden = Boolean(dragging?.moved) || notebook.hidden === false || snapshot.silent || !snapshot.connected || (!hasTaskMessage && !hasNoticeMessage) || !settings.enabled;
     let changed = wasHidden !== message.hidden;
     if (!message.hidden) {
-      const newest = model.history[0];
-      const text = hasTaskMessage ? `正在${activeTask.feature || '处理任务'}…` : newest.text;
-      message.dataset.kind = hasTaskMessage ? activeTask.kind : newest.kind;
+      const text = feedback ? feedback.text : failureNotice ? newest.text : hasTaskMessage
+        ? activeTask ? `正在${activeTask.feature || '处理任务'}…` : '数据库正在处理任务，等待进度同步…' : newest.text;
+      message.dataset.kind = feedback ? feedback.kind : failureNotice ? newest.kind : hasTaskMessage ? activeTask?.kind || 'info' : newest.kind;
       if (messageText.textContent !== text) { messageText.textContent = text; changed = true; }
-      const canStop = Boolean(hasTaskMessage && activeTask.action?.run);
+      const canStop = Boolean(hasTaskMessage && activeTask?.action?.run);
       messageStop.hidden = !canStop;
+      messageStop.dataset.taskId = activeTask?.id || '';
       messageStop.disabled = taskStopBusy;
       messageStop.textContent = taskStopBusy ? '停止中…' : (activeTask?.action?.label || '停止');
     }
@@ -444,12 +455,18 @@ export function createCompanion(host, context) {
   }
   listen(messageStop, 'click', async event => {
     event.stopPropagation();
-    const task = model.snapshot.tasks.find(item => item.busy);
-    if (!task?.action?.run || taskStopBusy) return;
-    taskStopBusy = true; update();
+    if (taskStopBusy || message.hidden || messageStop.hidden) return;
+    const displayedId = messageStop.dataset.taskId;
+    dataSource?.refresh();
+    const task = currentTask();
+    if (!task?.action?.run || task.id !== displayedId) {
+      stopFeedback = { taskId: task?.id || '', text: '任务提示已更新，请确认后再停止。', kind: 'warning', until: Date.now() + 8000 };
+      update(); return;
+    }
+    taskStopBusy = true; stopFeedback = null; update();
     try { await task.action.run(); }
-    catch { messageText.textContent = '停止任务失败，请在数据库面板重试。'; }
-    finally { taskStopBusy = false; update(); }
+    catch { stopFeedback = { taskId: task.id, text: '停止任务失败，请重试或打开数据库面板。', kind: 'error', until: Date.now() + 8000 }; }
+    finally { taskStopBusy = false; dataSource?.refresh(); update(); }
   });
   // The hot path writes only the pet transform and sway. No panel rendering or layout reads.
   function flushDrag() {

@@ -54,7 +54,7 @@ export class StoryCarousel {
   tick({ blocked, automatic = true }) {
     if (blocked) { this.dismiss(); return; }
     if (!automatic && this.current?.origin === 'automatic') this.dismiss();
-    if (this.current && !this.pauses.size && this.now() >= this.until) this.dismiss();
+    if (this.current && !this.pauses.size && this.now() >= this.until) this.show(this.current.origin);
     if (!this.current && automatic && this.now() >= this.due) this.show('automatic');
   }
 }

@@ -53,7 +53,7 @@ export function readDatabaseView(doc) {
 
 export function createDatabaseObserver(host, { now = () => Date.now(), interval = 250 } = {}) {
   const subscribers = new Set();
-  let snapshot = { protocol: PROTOCOL, connected: false, source: 'waiting', busy: false, activityKnown: false, tasks: [], notices: [], silent: false, version: 0 };
+  let snapshot = { protocol: PROTOCOL, connected: false, source: 'waiting', busy: false, activityKnown: false, activeTaskId: '', tasks: [], notices: [], silent: false, version: 0 };
   let signature = '';
   let destroyed = false;
   const observed = new Map();
@@ -69,9 +69,12 @@ export function createDatabaseObserver(host, { now = () => Date.now(), interval 
     const tasks = view.busy ? [...observed.values()].map(record => record.task).slice(-20) : view.task ? [view.task] : [];
     const next = { protocol: PROTOCOL, connected: view.connected, source: view.source,
       busy: view.busy, activityKnown: view.activityKnown, tasks,
+      activeTaskId: view.busy && view.task?.busy ? view.task.id : '',
       notices: view.notice ? [view.notice] : [], silent: false };
     const key = JSON.stringify(next);
-    if (key === signature) return;
+    // JSON omits functions. A new native stop handler must still reach the UI.
+    const actionChanged = tasks.some((task, index) => task.action?.run !== snapshot.tasks[index]?.action?.run);
+    if (key === signature && !actionChanged) return;
     signature = key;
     snapshot = { ...next, version: snapshot.version + 1 };
     for (const listener of subscribers) {
@@ -82,6 +85,7 @@ export function createDatabaseObserver(host, { now = () => Date.now(), interval 
   const timer = host.setInterval(sample, interval);
   return {
     getSnapshot: () => snapshot,
+    refresh() { sample(); return snapshot; },
     subscribe(listener) {
       if (typeof listener !== 'function' || destroyed) return () => {};
       subscribers.add(listener);

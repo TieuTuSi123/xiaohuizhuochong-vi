@@ -8,6 +8,7 @@ export function normalizeSnapshot(value) {
   return {
     protocol: PROTOCOL, connected: value.connected === true, busy: value.busy === true,
     silent: value.silent === true, activityKnown: value.activityKnown !== false, version: Number(value.version) || 0,
+    activeTaskId: value.activeTaskId === undefined ? text(value.tasks.find(task => task.busy)?.id) : text(value.activeTaskId),
     tasks: value.tasks.slice(0, 100).map(item => ({ id: text(item.id), feature: text(item.feature),
       detail: text(item.detail), kind: KINDS.has(item.kind) ? item.kind : 'info', busy: item.busy === true,
       dismissible: item.dismissible === true,
