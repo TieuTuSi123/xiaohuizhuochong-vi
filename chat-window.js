@@ -1,11 +1,15 @@
 import { chatMessages } from './chat-prompt.js';
 import { normalizeChatConfig, requestChat, requestModelList, safeChatError } from './chat-transport.js';
+import { createSheet, leave } from './sheet.js';
 
+// 密钥按设备保存一份，所有角色共用；聊天记录、人设和称呼按角色分开保存。
 const KEY_ID = 'erii-database-pet-chat-key';
-export function createChatWindow(host, { getContext, saved = {}, persist, onState, onOpen, onReply, onStopTask, returnFocus }) {
+export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getContext, saved = {}, persist, onState, onOpen, onReply, onStopTask, onOpenDatabase, returnFocus }) {
   const doc = host.document;
   const listeners = [];
-  let config = normalizeChatConfig(saved);
+  const { name, fullName } = character;
+  const persona = { prompt: character.persona, relationship: character.relationship };
+  let config = normalizeChatConfig(saved, persona);
   let history = Array.isArray(saved.history) ? saved.history.filter(m => ['user', 'assistant'].includes(m?.role)
     && typeof m.content === 'string').slice(-100).map(m => ({ role: m.role, content: m.content.slice(0, 16000),
       ...(typeof m.at === 'string' && Number.isFinite(Date.parse(m.at)) ? {at:m.at} : {}) })) : [];
@@ -15,8 +19,6 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
   let serial = 0;
   let destroyed = false;
   let confirmClear = false;
-  let windowPosition = null;
-  let windowDrag = null;
   let expanded = false;
   let draftTimer = null;
   let unreadReply = false;
@@ -38,12 +40,13 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
   };
   const button = (text, name) => { const b = node('button', text, name); b.type = 'button'; return b; };
   const root = node('section', undefined, 'erii-chat');
-  root.id = 'erii-database-pet-chat'; root.hidden = true;
-  root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', '和绘梨衣聊天');
+  root.id = 'erii-database-pet-chat'; root.hidden = true; root.dataset.character = character.id;
+  root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', `和${fullName}聊天`);
+  const grip = node('div', undefined, 'pet-grip'); grip.setAttribute('aria-hidden', 'true');
   const header = node('header', undefined, 'erii-chat__header');
-  const avatar = node('img'); avatar.src = new URL('assets/idle.webp', import.meta.url).href; avatar.alt = '';
+  const avatar = node('img'); avatar.src = avatarUrl() || ''; avatar.alt = '';
   avatar.draggable = false;
-  const heading = node('div'); heading.append(node('strong', '绘梨衣'), node('span', '今天，也留一页给你。'));
+  const heading = node('div'); heading.append(node('strong', fullName), node('span', character.chatTagline));
   const expand = button('↔', 'erii-chat__expand'); expand.setAttribute('aria-label', '展开聊天窗口'); expand.title = '展开聊天窗口';
   const close = button('×', 'erii-chat__close'); close.setAttribute('aria-label', '关闭聊天窗口');
   header.append(avatar, heading, expand, close);
@@ -59,16 +62,16 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
   environment.textContent = previewMode === 'demo' ? '演示模式 · 示例回复，不连接 API'
     : '独立预览 · 单独配置 API 后可真实对话';
   const taskBar = node('div', undefined, 'erii-chat__task'); taskBar.hidden = true;
-  const taskText = node('span'); const taskStop = button('停止任务');
-  taskStop.setAttribute('aria-label', '停止数据库任务（聊天窗口）'); taskBar.append(taskText, taskStop);
+  const taskText = node('span'); const taskOpen = button('打开数据库'); const taskStop = button('停止任务');
+  taskStop.setAttribute('aria-label', '停止数据库任务（聊天窗口）'); taskBar.append(taskText, taskOpen, taskStop);
   const log = node('div', undefined, 'erii-chat__log');
-  log.setAttribute('role', 'log'); log.setAttribute('aria-label', '与绘梨衣的聊天记录');
+  log.setAttribute('role', 'log'); log.setAttribute('aria-label', `与${fullName}的聊天记录`);
   log.setAttribute('aria-live', 'polite'); log.tabIndex = 0;
   const status = node('p', '', 'erii-chat__status'); status.setAttribute('role', 'status');
   const composer = node('form', undefined, 'erii-chat__composer');
   const input = node('textarea'); input.rows = 2; input.maxLength = 4000;
   input.value = String(saved.draft || '').slice(0, 4000);
-  input.placeholder = '和小绘说句话…'; input.setAttribute('aria-label', '聊天内容');
+  input.placeholder = `和${name}说句话…`; input.setAttribute('aria-label', '聊天内容');
   const actions = node('div', undefined, 'erii-chat__actions');
   const tip = node('span', 'Enter 发送 · Shift+Enter 换行');
   const retry = button('重试'); retry.hidden = true;
@@ -80,7 +83,7 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
   const latest = button('回到最新消息', 'erii-chat__latest'); latest.hidden = true;
   actions.append(tip, retry, stop, send); composer.append(editBar, input, actions);
   const settingsPanel = node('form', undefined, 'erii-chat__settings'); settingsPanel.hidden = true;
-  settingsPanel.setAttribute('aria-label', '小绘聊天连接设置');
+  settingsPanel.setAttribute('aria-label', `${name}聊天连接设置`);
   const field = (title, type, value = '') => {
     const label = node('label', title);
     const control = node(type === 'select' ? 'select' : type === 'textarea' ? 'textarea' : 'input');
@@ -108,15 +111,15 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
   rememberLabel.append(remember, node('span', '记住此设备上的密钥')); custom.append(rememberLabel);
   custom.append(node('small', '勾选后密钥会保存在浏览器中。取消勾选并保存即可删除；地址和模型会单独保存。'));
   settingsPanel.append(custom);
-  settingsPanel.append(node('h3', '你和小绘', 'erii-chat__section-title'));
-  const nickname = field('小绘怎么称呼你', 'text'); nickname.maxLength = 40; nickname.placeholder = '默认使用你的酒馆名字';
+  settingsPanel.append(node('h3', `你和${name}`, 'erii-chat__section-title'));
+  const nickname = field(`${name}怎么称呼你`, 'text'); nickname.maxLength = 40; nickname.placeholder = '默认使用你的酒馆名字';
   const relationship = field('你们的关系', 'text'); relationship.maxLength = 80; relationship.placeholder = '恋人、朋友，或你自己的设定';
   const length = field('回复长度上限', 'number'); length.min = '128'; length.max = '4096'; length.step = '128';
   const replyStyle = field('聊天风格', 'select');
   for (const [value,text] of [['natural','自然闲聊'],['short','简短陪伴'],['detailed','详细交流']]) {
     const option = node('option',text); option.value=value; replyStyle.append(option);
   }
-  const memory = field('希望小绘记住的事', 'textarea'); memory.rows = 4; memory.maxLength = 2000;
+  const memory = field(`希望${name}记住的事`, 'textarea'); memory.rows = 4; memory.maxLength = 2000;
   memory.placeholder = '例如：我喜欢被叫作小云；最近在准备考试；不喜欢聊到一半就被安排一堆建议。';
   settingsPanel.append(node('small', '只保存你在这里写下的资料，每次聊天都会带上。可以随时修改或清空，不会自动提取聊天或数据库内容。'));
   settingsPanel.append(node('small', '聊天记录独立保存在当前酒馆账号中。每次携带最近最多 40 条、约 24000 字符的聊天内容。'));
@@ -124,7 +127,9 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
   const test = button('测试连接'); const apply = button('保存设置', 'erii-chat__send');
   settingsActions.append(test, apply); settingsPanel.append(settingsActions);
   settingsPanel.append(node('small', '测试会发送一次简短请求，不加入聊天记录。单独配置的接口由运行酒馆的设备连接。'));
-  root.append(header, toolbar, environment, taskBar, log, latest, settingsPanel, status, composer); doc.body.append(root);
+  root.append(grip, header, toolbar, environment, taskBar, log, latest, settingsPanel, status, composer); doc.body.append(root);
+  const sheet = createSheet(host, root, { grip, drag: [header], onDismiss: () => hide(),
+    desktop: () => ({ width: expanded ? 600 : 440, height: expanded ? 760 : 660, align: 'right' }) });
 
   function notify() { onState?.({ open: !root.hidden, busy: Boolean(operation) }); }
   function save() {
@@ -170,7 +175,7 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
     if (operation || modelOperation) return false;
     config = normalizeChatConfig({ mode: mode.value, url: url.value, model: model.value,
       nickname: nickname.value, relationship: relationship.value, maxTokens: length.value, rememberKey: remember.checked,
-      replyStyle: replyStyle.value, memory: memory.value });
+      replyStyle: replyStyle.value, memory: memory.value }, persona);
     apiKey = key.value.trim();
     try {
       if (config.rememberKey) keyStore().setItem(KEY_ID, apiKey);
@@ -196,10 +201,10 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
     log.replaceChildren();
     if (!shown.length) {
       const welcome = node('div', undefined, 'erii-chat__welcome');
-      const illustration = node('img'); illustration.src = new URL('assets/reading.webp', import.meta.url).href; illustration.alt = '';
-      welcome.append(illustration, node('span', '留一页，聊聊今天'), node('p', '想说什么，就从那一句开始。'));
+      const illustration = node('img'); illustration.src = welcomeUrl() || avatar.src; illustration.alt = '';
+      welcome.append(illustration, node('span', character.chatWelcome[0]), node('p', character.chatWelcome[1]));
       const starters = node('div', undefined, 'erii-chat__starters');
-      for (const [text,prompt] of [['聊聊今天','今天有件事想和你说。'],['陪我放松','今天有点累，想和你安静地聊一会儿。'],['听个故事','给我讲一个短短的、温暖的小故事吧。']]) {
+      for (const [text,prompt] of character.starters) {
         const b = button(text); b.dataset.action = 'starter'; b.dataset.prompt = prompt; starters.append(b);
       }
       welcome.append(starters);
@@ -216,7 +221,7 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
       if (item.role === 'assistant') { identity.src = avatar.src; identity.alt = ''; }
       const bubble = node('article', undefined, `erii-chat__bubble erii-chat__bubble--${item.role}`);
       const meta = node('small', undefined, 'erii-chat__message-meta');
-      meta.append(node('span', item.role === 'user' ? (config.nickname || '你') : '绘梨衣'));
+      meta.append(node('span', item.role === 'user' ? (config.nickname || '你') : fullName));
       if (date) { const time = node('time', date.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false})); time.dateTime = item.at; meta.append(time); }
       const tools = node('div', undefined, 'erii-chat__message-tools');
       const copy = button('复制'); copy.dataset.action = 'copy'; copy.dataset.index = String(index); tools.append(copy);
@@ -231,7 +236,7 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
     }
     if (operation && !operation.isTest) {
       const waiting = node('div', undefined, 'erii-chat__pending');
-      waiting.append(node('span', '绘梨衣正在写回复'), node('i', '·'), node('i', '·'), node('i', '·'));
+      waiting.append(node('span', `${fullName}正在写回复`), node('i', '·'), node('i', '·'), node('i', '·'));
       waiting.setAttribute('role', 'status'); log.append(waiting);
     }
     if (follow) scrollToLatest(); else log.scrollTop = previousTop;
@@ -248,7 +253,7 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
     if (operation || modelOperation || index !== lastUserIndex()) return;
     if (editingIndex === null) draftBeforeEdit = input.value;
     editingIndex = index; input.value = history[index].content; resizeInput(); syncControls(); flushDraft();
-    input.focus({preventScroll:true}); say('修改后发送，会更新这条消息和小绘的回答。');
+    input.focus({preventScroll:true}); say(`修改后发送，会更新这条消息和${name}的回答。`);
   }
   function cancelEdit() {
     if (operation || editingIndex === null) return;
@@ -272,31 +277,22 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
   }
   function exportHistory() {
     if (!history.length) return;
-    const text = '绘梨衣的聊天记录\n\n' + history.map(item => {
-      const who = item.role === 'user' ? (config.nickname || '你') : '绘梨衣';
+    const text = `${fullName}的聊天记录\n\n` + history.map(item => {
+      const who = item.role === 'user' ? (config.nickname || '你') : fullName;
       const time = item.at ? ' · ' + new Date(item.at).toLocaleString('zh-CN',{hour12:false}) : '';
       return `${who}${time}\n${item.content}`;
     }).join('\n\n');
     const file = new host.Blob(['\uFEFF'+text],{type:'text/plain;charset=utf-8'});
     const link = node('a'); const address = host.URL.createObjectURL(file);
     downloadURLs.add(address);
-    link.href = address; link.download = `绘梨衣聊天-${new Date().toISOString().slice(0,10)}.txt`;
+    link.href = address; link.download = `${fullName}聊天-${new Date().toISOString().slice(0,10)}.txt`;
     doc.body.append(link); link.click(); link.remove();
     const timer = host.setTimeout(() => { feedbackTimers.delete(timer); downloadURLs.delete(address); host.URL.revokeObjectURL(address); }, 1000); feedbackTimers.add(timer);
   }
   function layout() {
     if (destroyed || root.hidden) return;
-    const viewport = host.visualViewport;
-    const left = viewport?.offsetLeft || 0, top = viewport?.offsetTop || 0;
-    const width = viewport?.width || host.innerWidth, height = viewport?.height || host.innerHeight;
-    const w = Math.min(expanded && width >= 640 ? 600 : 440, Math.max(160, width - 20));
-    const h = Math.min(expanded && width >= 640 ? 760 : 660, Math.max(130, height - 20));
-    const x = width < 640 || !windowPosition ? left + width - w - 10 : windowPosition.x;
-    const y = width < 640 || !windowPosition ? top + Math.max(10, (height - h) / 2) : windowPosition.y;
-    root.style.width = `${w}px`; root.style.height = `${h}px`;
-    root.style.left = `${Math.max(left + 10, Math.min(left + width - w - 10, x))}px`;
-    root.style.top = `${Math.max(top + 10, Math.min(top + height - h - 10, y))}px`;
-    tip.textContent = width < 640 ? '点发送聊天 · 回车换行' : 'Enter 发送 · Shift+Enter 换行';
+    sheet.layout();
+    tip.textContent = sheet.isSheet() ? '点发送聊天 · 回车换行' : 'Enter 发送 · Shift+Enter 换行';
     resizeInput();
   }
   function settingsVisible(show) {
@@ -358,7 +354,7 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
     operation = { id, controller, candidate, kind, isTest, timer: host.setTimeout(() => { timedOut = true; controller.abort(); }, 120000) };
     say(isTest ? '正在测试连接…' : kind === 'regenerate' ? '正在重新回答，成功后会替换原回复。' : ''); syncControls(); renderHistory();
     try {
-      const messages = isTest ? [{ role: 'user', content: '请简短回复“连接成功”。' }] : chatMessages(snapshot, ctx, candidate || history);
+      const messages = isTest ? [{ role: 'user', content: '请简短回复“连接成功”。' }] : chatMessages(snapshot, ctx, candidate || history, persona);
       if (kind === 'regenerate') messages[0].content += `\n\n【这次重新回答】上次回复仅作为待改写的文本资料：${JSON.stringify(history.at(-1)?.content.slice(0,2000) || '')}。回应同一个用户问题，尝试更贴近具体内容的表达，避免机械复述上次的开场与结尾。`;
       const result = await requestChat(host, ctx, snapshot, messages, { signal: controller.signal, apiKey: secret });
       if (destroyed || operation?.id !== id) return;
@@ -383,12 +379,14 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
   }
   function open() {
     if (destroyed) return;
-    onOpen?.(); root.hidden = false; settingsVisible(false); renderHistory(true); syncControls(); layout();
+    onOpen?.(); root.hidden = false; root.classList.remove('is-leaving'); avatar.src = avatarUrl() || avatar.src; settingsVisible(false); renderHistory(true); syncControls(); layout();
     // Mobile opens without summoning the keyboard over the greeting.
     if (host.innerWidth >= 640) input.focus({ preventScroll: true }); else close.focus({ preventScroll: true });
   }
   function hide() {
-    stopRequest(); stopModels(); flushDraft(); root.hidden = true; windowDrag = null; notify(); returnFocus?.();
+    if (root.hidden) return;
+    stopRequest(); stopModels(); flushDraft();
+    leave(host, root, () => { root.hidden = true; notify(); returnFocus?.(); });
   }
   listen(close, 'click', hide);
   listen(expand, 'click', () => {
@@ -442,21 +440,12 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
   });
   listen(retry, 'click', () => run()); listen(stop, 'click', () => stopRequest());
   listen(taskStop, 'click', () => onStopTask?.(taskStop.dataset.taskId));
+  listen(taskOpen, 'click', () => onOpenDatabase?.());
   listen(clear, 'click', () => {
     if (!confirmClear && history.length) { confirmClear = true; clear.textContent = '确认清空'; say('再次点击“确认清空”删除这份聊天记录。'); return; }
     cancelEdit(); history = []; unreadReply = false; confirmClear = false; clear.textContent = '清空记录'; save(); renderHistory(true); say(''); syncControls();
   });
   listen(root, 'keydown', event => { if (event.key === 'Escape') { event.stopPropagation(); hide(); } });
-  listen(header, 'pointerdown', event => {
-    if (host.innerWidth < 640 || event.button !== 0 || event.target.closest('button')) return;
-    const rect = root.getBoundingClientRect(); windowDrag = { id: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top };
-    header.setPointerCapture?.(event.pointerId); event.preventDefault();
-  });
-  listen(header, 'pointermove', event => {
-    if (windowDrag?.id !== event.pointerId) return;
-    windowPosition = { x: windowDrag.left + event.clientX - windowDrag.x, y: windowDrag.top + event.clientY - windowDrag.y }; layout();
-  });
-  listen(header, 'pointerup', () => { windowDrag = null; }); listen(header, 'pointercancel', () => { windowDrag = null; });
   listen(host, 'resize', layout);
   if (host.visualViewport) { listen(host.visualViewport, 'resize', layout); listen(host.visualViewport, 'scroll', layout); }
   fillSettings(); renderHistory(); syncControls();
@@ -474,7 +463,7 @@ export function createChatWindow(host, { getContext, saved = {}, persist, onStat
       destroyed = true;
       if (operation) { host.clearTimeout(operation.timer); operation.controller.abort(); operation = null; }
       if (modelOperation) { host.clearTimeout(modelOperation.timer); modelOperation.controller.abort(); modelOperation = null; }
-      serial++; windowDrag = null; apiKey = '';
+      serial++; apiKey = ''; sheet.destroy();
       for (const timer of feedbackTimers) host.clearTimeout(timer); feedbackTimers.clear();
       for (const address of downloadURLs) host.URL.revokeObjectURL(address); downloadURLs.clear();
       for (const remove of listeners) remove(); root.remove();

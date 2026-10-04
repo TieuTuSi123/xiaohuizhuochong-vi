@@ -1,26 +1,58 @@
+/* =========================================================================
+   数据库桌宠 · 精装手帐
+   纸张、烫金线、纸胶带、印章；三个角色各一套色。所有样式都挂在本扩展的
+   命名空间下，按钮和输入框显式写颜色，避免被酒馆主题改掉。
+   ========================================================================= */
+
+.erii-companion, .erii-chat, .erii-life, .erii-house {
+  --pet-accent: #b8333e; --pet-accent-2: #d9545d; --pet-accent-ink: #7d1f27;
+  --pet-ink: #4a2622; --pet-muted: #9a726a; --pet-faint: #c2a59c;
+  --pet-paper: #fdf6ee; --pet-paper-2: #f7eadf; --pet-card: #fffdf9;
+  --pet-line: #e9d3c6; --pet-soft: #f9e4dc; --pet-cover: #4b1d22; --pet-cover-2: #6b2a30;
+  --pet-gold: #c79a3e; --pet-gold-hi: #f3dc9a; --pet-gold-lo: #9c7426;
+  --pet-tape: rgba(214, 72, 86, .52); --pet-tape-dot: rgba(255, 255, 255, .7);
+  --pet-shadow: rgba(110, 40, 30, .2); --pet-good: #4f7a52; --pet-warn: #b0662a; --pet-bad: #b23a33;
+  --pet-hand: "LXGW WenKai", "LXGW WenKai Screen", "霞鹜文楷", "KaiTi", "STKaiti", "Kaiti SC", "楷体", serif;
+  --pet-body: "HarmonyOS Sans SC", "MiSans", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --pet-serif: "Palatino Linotype", "Book Antiqua", Palatino, "Iowan Old Style", Georgia, serif;
+  --pet-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .3  0 0 0 0 .2  0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --pet-ease: cubic-bezier(.2, .8, .2, 1);
+  --pet-spring: cubic-bezier(.34, 1.56, .64, 1);
+}
+[data-character="zero"] {
+  --pet-accent: #3f6fa6; --pet-accent-2: #6b97c9; --pet-accent-ink: #1f3d63;
+  --pet-ink: #223047; --pet-muted: #6c7f97; --pet-faint: #a7b6c8;
+  --pet-paper: #f7fafd; --pet-paper-2: #e9f0f8; --pet-card: #ffffff;
+  --pet-line: #d2deec; --pet-soft: #e3edf8; --pet-cover: #1b2c45; --pet-cover-2: #2b4467;
+  --pet-gold: #c3a45a; --pet-gold-hi: #f1e3b0; --pet-gold-lo: #957b39;
+  --pet-tape: rgba(120, 165, 215, .5); --pet-tape-dot: rgba(255, 255, 255, .8);
+  --pet-shadow: rgba(30, 50, 90, .2);
+}
+[data-character="naidan"] {
+  --pet-accent: #e0801a; --pet-accent-2: #f6a93b; --pet-accent-ink: #94500b;
+  --pet-ink: #4d3410; --pet-muted: #98794a; --pet-faint: #cdb486;
+  --pet-paper: #fffaec; --pet-paper-2: #fff0c9; --pet-card: #fffdf5;
+  --pet-line: #f0dca8; --pet-soft: #fff0c4; --pet-cover: #6e430d; --pet-cover-2: #8f5a14;
+  --pet-gold: #d29a2a; --pet-gold-hi: #ffe28a; --pet-gold-lo: #a06f12;
+  --pet-tape: rgba(255, 186, 52, .62); --pet-tape-dot: rgba(255, 120, 40, .45);
+  --pet-shadow: rgba(120, 80, 10, .22);
+}
+
+/* ---------- 桌宠本体 ---------- */
 .erii-companion {
   --erii-size: 88px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 9420;
-  width: var(--erii-size);
-  height: var(--erii-size);
-  color: #613531;
-  font: 13px/1.55 "Microsoft YaHei", "PingFang SC", sans-serif;
-  pointer-events: none;
-  text-shadow: none;
+  position: fixed; top: 0; left: 0; z-index: 9420;
+  width: var(--erii-size); height: var(--erii-size);
+  color: var(--pet-ink); font: 13px/1.6 var(--pet-body);
+  pointer-events: none; text-shadow: none;
   will-change: transform;
   transition: transform .26s cubic-bezier(.2,.8,.2,1);
 }
-.erii-companion--ui {
-  width: 0; height: 0; z-index: 9421;
-  transform: none; transition: none; will-change: auto;
-}
+.erii-companion--ui { width: 0; height: 0; z-index: 9421; transform: none; transition: none; will-change: auto; }
 .erii-companion[data-dragging="true"] { transition: none; }
 .erii-companion *, .erii-companion *::before, .erii-companion *::after { box-sizing: border-box; }
 .erii-companion[hidden], .erii-companion [hidden] { display: none !important; }
-.erii-companion button { font: inherit; cursor: pointer; text-shadow: none; box-shadow: none; }
+.erii-companion button { font: inherit; cursor: pointer; text-shadow: none !important; box-shadow: none; margin: 0; }
 .erii-companion__portrait {
   display: block; width: 100%; height: 100%; margin: 0; padding: 0;
   border: 0; outline-offset: 3px; background: transparent !important;
@@ -29,6 +61,7 @@
 }
 .erii-companion[data-dragging="true"] .erii-companion__portrait { cursor: grabbing !important; }
 .erii-companion__portrait:hover { background: transparent !important; opacity: 1; }
+.erii-companion__portrait:focus-visible { outline: 2px dashed color-mix(in srgb, var(--pet-accent) 55%, transparent); outline-offset: 2px; border-radius: 40%; }
 .erii-companion__edge-frame, .erii-companion__sway, .erii-companion__breath, .erii-companion__stage { position: relative; display: block; width: 100%; height: 100%; pointer-events: none; }
 .erii-companion__edge-frame { transition: transform .16s ease; }
 .erii-companion[data-edge="left"] .erii-companion__edge-frame { transform: translateX(-16px); }
@@ -51,265 +84,605 @@
   opacity: 0; transition: opacity .05s ease-out;
 }
 .erii-companion__sprite[data-visible="true"] { opacity: 1; }
+/* 奶蛋的图来自数据库，几乎撑满画框：缩一点，让脚底和两位女孩对齐；探头图旋转到对应边。 */
+.erii-companion[data-character="naidan"] .erii-companion__sprite { transform: translateY(-2%) scale(.9); transform-origin: 50% 100%; }
+.erii-companion[data-character="naidan"][data-edge="bottom"] .erii-companion__sprite,
+.erii-companion[data-character="naidan"][data-edge="top"] .erii-companion__sprite { transform: translateY(4%) scale(1.04); }
+.erii-companion[data-character="naidan"][data-edge="left"] .erii-companion__sprite { transform: translateX(12%) rotate(90deg) scale(1.04); transform-origin: 50% 50%; }
+.erii-companion[data-character="naidan"][data-edge="right"] .erii-companion__sprite { transform: translateX(-12%) rotate(-90deg) scale(1.04); transform-origin: 50% 50%; }
+
+/* ---------- 通用：纸张、图标、按钮、量表 ---------- */
+.pet-icon { display: inline-grid; place-items: center; width: 1.15em; height: 1.15em; flex: 0 0 auto; line-height: 0; }
+.pet-icon svg { width: 100%; height: 100%; }
+.pet-grip { display: none; }
+.pet-meter { display: grid; grid-template-columns: auto auto 1fr 2.2em; align-items: center; gap: 6px; font-size: 11px; color: var(--pet-muted); }
+.pet-meter .pet-icon { color: var(--pet-accent); width: 15px; height: 15px; }
+.pet-meter__bar { position: relative; height: 7px; border-radius: 99px; background: color-mix(in srgb, var(--pet-line) 70%, transparent); overflow: hidden; box-shadow: inset 0 1px 1px rgba(0,0,0,.06); }
+.pet-meter__bar i { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: inherit;
+  background: linear-gradient(90deg, var(--pet-accent-2), var(--pet-accent)); transition: width .6s var(--pet-ease); }
+.pet-meter[data-low="true"] .pet-meter__bar i { background: linear-gradient(90deg, #f0b45a, var(--pet-warn)); }
+.pet-meter[data-low="true"] .pet-icon { color: var(--pet-warn); animation: pet-nudge 2.4s ease-in-out infinite; }
+.pet-meter__value { font: italic 600 11px/1 var(--pet-serif); color: var(--pet-ink); text-align: right; font-variant-numeric: tabular-nums; }
+@keyframes pet-nudge { 0%, 86%, 100% { transform: none; } 90% { transform: rotate(-12deg); } 95% { transform: rotate(10deg); } }
+
+/* ---------- 小本子 ---------- */
 .erii-companion__notebook {
-  position: fixed; width: var(--erii-page-width, 310px); max-height: var(--erii-page-height, 420px);
-  overflow: auto; overscroll-behavior: contain; pointer-events: auto; padding: 14px;
-  background: #fff9f0; border: 1px solid #dab6aa; border-left: 5px solid #a94446;
-  border-radius: 5px 12px 12px 5px; box-shadow: none; backdrop-filter: none;
+  position: fixed; width: var(--erii-page-width, 330px); max-height: var(--erii-page-height, 460px);
+  overflow: auto; overscroll-behavior: contain; pointer-events: auto; scrollbar-width: thin;
+  padding: 14px 14px 12px 24px; color: var(--pet-ink);
+  background:
+    linear-gradient(90deg, var(--pet-accent-ink) 0 9px, color-mix(in srgb, var(--pet-accent-ink) 30%, transparent) 9px 11px, transparent 11px),
+    repeating-linear-gradient(180deg, transparent 0 25px, color-mix(in srgb, var(--pet-accent) 6%, transparent) 25px 26px),
+    var(--pet-grain), var(--pet-paper);
+  border: 1px solid var(--pet-line); border-radius: 6px 16px 16px 6px;
+  box-shadow: 0 18px 40px -18px var(--pet-shadow), 0 3px 10px -4px var(--pet-shadow);
+  animation: pet-pop .26s var(--pet-ease);
 }
-.erii-companion__header { display: flex; align-items: center; padding-right: 40px; min-height: 38px; margin-bottom: 18px; }
-.erii-companion__header strong { color: #923d3f; font-size: 15px; }
+.erii-companion__notebook::before {
+  content: ""; position: absolute; left: 13px; top: 10px; bottom: 10px; width: 0;
+  border-left: 1.5px dashed color-mix(in srgb, var(--pet-gold-hi) 75%, transparent); pointer-events: none;
+}
+.erii-companion__notebook::after {
+  content: ""; position: absolute; right: 26px; top: -7px; width: 64px; height: 18px; transform: rotate(4deg);
+  background: radial-gradient(circle, var(--pet-tape-dot) 1.2px, transparent 1.6px) 0 0 / 8px 8px, var(--pet-tape);
+  clip-path: polygon(2% 0, 98% 6%, 100% 40%, 97% 100%, 3% 94%, 0 55%); opacity: .9; pointer-events: none;
+}
+.erii-nb__head { position: relative; display: flex; align-items: center; gap: 10px; margin: 0 0 10px; padding-right: 30px; min-height: 52px; }
+.erii-nb__avatar { flex: 0 0 52px; width: 52px; height: 52px; border-radius: 50%; padding: 3px; overflow: hidden;
+  background: var(--pet-card); border: 1.5px solid var(--pet-gold); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pet-gold-hi) 40%, transparent), 0 4px 10px -4px var(--pet-shadow); transform: rotate(-4deg); }
+.erii-nb__avatar img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; transform: scale(1.5) translateY(12%); }
+.erii-companion[data-character="naidan"] .erii-nb__avatar img, .erii-nb[data-character="naidan"] .erii-nb__avatar img { transform: scale(1.12) translateY(6%); }
+.erii-nb__who { flex: 1 1 auto; min-width: 0; display: grid; gap: 1px; }
+.erii-nb__title { font: 600 17px/1.25 var(--pet-hand); color: var(--pet-accent-ink); letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.erii-nb__subtitle { font-size: 10.5px; color: var(--pet-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.erii-nb__hearts, .erii-house__hearts { display: inline-flex; gap: 2px; color: var(--pet-line); }
+.erii-nb__hearts .pet-icon { width: 13px; height: 13px; }
+.erii-nb__hearts .is-on, .erii-house__hearts .is-on { color: var(--pet-accent); }
+.erii-nb__hearts .is-on svg, .erii-house__hearts .is-on svg { fill: currentColor; }
+.erii-nb__mood, .erii-house__mood-stamp {
+  flex: 0 0 auto; display: grid; place-items: center; min-width: 42px; height: 42px; padding: 0 4px; border-radius: 50%;
+  font: 600 12px/1 var(--pet-hand); color: var(--pet-accent); transform: rotate(9deg);
+  border: 1.5px solid currentColor; box-shadow: inset 0 0 0 2.5px var(--pet-paper), inset 0 0 0 3.5px currentColor; opacity: .82;
+}
+.erii-nb__mood[data-mood="hungry"], .erii-nb__mood[data-mood="dirty"], .erii-house__mood-stamp[data-mood="hungry"], .erii-house__mood-stamp[data-mood="dirty"] { color: var(--pet-warn); }
+.erii-nb__mood[data-mood="worried"], .erii-nb__mood[data-mood="sulky"], .erii-house__mood-stamp[data-mood="worried"], .erii-house__mood-stamp[data-mood="sulky"] { color: #7a6bb0; }
+.erii-nb__mood[data-mood="happy"], .erii-house__mood-stamp[data-mood="happy"] { color: var(--pet-good); }
 .erii-companion__close {
-  position: absolute; top: 4px; right: 4px; margin: 0; padding: 0;
-  border: 0; background: transparent; color: #923d3f;
-  width: 32px; height: 32px; font-size: 24px !important; line-height: 1;
+  position: absolute; top: 2px; right: 0; margin: 0; padding: 0;
+  border: 0 !important; background: transparent !important; color: var(--pet-accent-ink) !important;
+  width: 32px; height: 32px; font-size: 24px !important; line-height: 1; border-radius: 8px;
 }
-.erii-companion__close:hover { background: #f9e6dc; border-radius: 6px; }
+.erii-companion__close:hover { background: var(--pet-soft) !important; }
+.erii-nb__needs { display: grid; gap: 5px; margin: 0 0 10px; padding: 8px 10px; border-radius: 10px; background: color-mix(in srgb, var(--pet-card) 70%, transparent); border: 1px dashed var(--pet-line); }
+.erii-nb__section { margin: 12px 0 0; }
+.erii-nb__label { position: relative; display: flex; align-items: center; gap: 8px; margin: 0 0 7px; font: 600 12px/1.2 var(--pet-hand); letter-spacing: 3px; color: var(--pet-accent-ink); }
+.erii-nb__label::after { content: ""; flex: 1; height: 3px; border-block: 1px solid var(--pet-gold); opacity: .55; }
 .erii-companion p { margin: 5px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-.erii-companion h4 { margin: 14px 0 6px; font-size: 12px; color: #9c7770; }
-.erii-companion__connection { color: #9c7770; font-size: 11px; padding-bottom: 8px; border-bottom: 1px dashed #e8cfc3; }
-.erii-companion__help { color: #9c7770; font-size: 11px; margin-top: 12px !important; }
-.erii-companion__database-open {
-  display: block; width: 100%; margin: 0 0 12px; padding: 8px 10px;
-  border: 1px solid #b86b68; border-radius: 7px; background: #a94446;
-  color: #fffaf6; font-weight: 700; line-height: 1.35;
+.erii-companion h4 { margin: 14px 0 6px; font-size: 12px; color: var(--pet-muted); }
+.erii-companion .erii-nb__label { margin-top: 0; }
+.erii-companion__connection { color: var(--pet-muted); font-size: 11px; padding-bottom: 6px; }
+.erii-companion__help { color: var(--pet-faint); font-size: 10.5px; margin-top: 12px !important; line-height: 1.6; }
+.erii-nb__shortcuts { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 2px 0 8px; }
+.erii-nb__shortcut {
+  grid-column: span 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  min-height: 52px; padding: 6px 4px; border-radius: 10px; font-size: 11px !important; line-height: 1.25;
+  border: 1px solid var(--pet-line) !important; background: var(--pet-card) !important; color: var(--pet-ink) !important;
+  transition: transform .18s var(--pet-ease), box-shadow .18s, border-color .18s;
 }
-.erii-companion__database-open:hover { background: #913a3d; }
-.erii-companion__task, .erii-companion__record { padding: 7px 0; border-bottom: 1px solid #ecdcd0; }
-.erii-companion__record { font-size: 12px; }
-.erii-companion [data-kind="error"], .erii-companion [data-kind="warning"] { color: #a4483b; }
-.erii-companion [data-kind="success"] { color: #4c7856; }
-.erii-companion__controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.erii-companion__controls button { border: 1px solid #dec2b8; border-radius: 6px; background: #fffdf8; color: #8f4144; padding: 6px 10px; }
-.erii-companion__controls button:hover:not(:disabled) { background: #f9e6dc; }
-.erii-companion__controls button:disabled { opacity: .45; cursor: default; }
+.erii-nb__shortcut .pet-icon { width: 19px; height: 19px; color: var(--pet-accent); }
+.erii-nb__shortcut:nth-child(5), .erii-nb__shortcut:nth-child(6) { grid-column: span 3; }
+.erii-nb__shortcut:hover { transform: translateY(-2px); border-color: var(--pet-accent-2) !important; box-shadow: 0 6px 14px -8px var(--pet-shadow) !important; }
+.erii-companion .erii-companion__database-open {
+  grid-column: 1 / -1; flex-direction: row; min-height: 40px; gap: 8px; font-size: 13px !important; font-weight: 700; letter-spacing: 1px;
+  color: #fffaf4 !important; border: 1px solid var(--pet-accent-ink) !important;
+  background: linear-gradient(180deg, var(--pet-accent-2), var(--pet-accent) 55%, var(--pet-accent-ink)) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pet-gold-hi) 60%, transparent), 0 6px 14px -8px var(--pet-shadow) !important;
+}
+.erii-companion .erii-companion__database-open .pet-icon { color: var(--pet-gold-hi); }
+.erii-companion__tasks .erii-nb__empty, .erii-companion__history .erii-nb__empty { color: var(--pet-faint); font-size: 11px; }
+.erii-companion__task, .erii-companion__record { position: relative; padding: 6px 0 6px 12px; border-bottom: 1px dashed var(--pet-line); font-size: 12px; }
+.erii-companion__task::before, .erii-companion__record::before { content: ""; position: absolute; left: 0; top: 12px; width: 6px; height: 6px; border-radius: 50%; background: var(--pet-accent-2); }
+.erii-companion__task strong, .erii-companion__record strong { display: block; color: var(--pet-accent-ink); font-size: 12px; }
+.erii-companion [data-kind="error"], .erii-companion [data-kind="warning"] { color: var(--pet-bad); }
+.erii-companion [data-kind="error"]::before, .erii-companion [data-kind="warning"]::before { background: var(--pet-bad); }
+.erii-companion [data-kind="success"] { color: var(--pet-good); }
+.erii-companion [data-kind="success"]::before { background: var(--pet-good); }
+.erii-companion__controls { display: flex; flex-wrap: wrap; gap: 6px; }
+.erii-companion .pet-chip, .erii-companion__controls button {
+  display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--pet-line) !important; border-radius: 99px;
+  background: var(--pet-card) !important; color: var(--pet-accent-ink) !important; padding: 5px 11px; font-size: 12px !important; line-height: 1.3;
+  transition: background .15s, transform .15s var(--pet-ease);
+}
+.erii-companion .pet-chip:hover:not(:disabled) { background: var(--pet-soft) !important; transform: translateY(-1px); }
+.erii-companion .pet-chip--accent { border-color: color-mix(in srgb, var(--pet-accent) 45%, var(--pet-line)) !important; background: color-mix(in srgb, var(--pet-soft) 70%, var(--pet-card)) !important; }
+.erii-companion .pet-chip--accent .pet-icon { color: var(--pet-accent); }
+.erii-companion .pet-chip:disabled, .erii-companion__controls button:disabled { opacity: .45; cursor: default; }
+.erii-companion .erii-companion__story-open {
+  display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; width: 100%;
+  border: 1px dashed color-mix(in srgb, var(--pet-accent) 40%, var(--pet-line)) !important; border-radius: 10px;
+  background: transparent !important; color: var(--pet-accent-ink) !important; padding: 7px 10px; font-family: var(--pet-hand); font-size: 13px !important;
+}
+.erii-companion .erii-companion__story-open:hover:not(:disabled) { background: var(--pet-soft) !important; }
+.erii-companion .erii-companion__story-open:disabled { opacity: .45; cursor: default; }
+.erii-nb__rooms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin: 14px -2px 0; border-radius: 12px; overflow: hidden;
+  border: 1px solid var(--pet-line); background: var(--pet-card); }
+.erii-companion .erii-nb__room {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; min-height: 52px;
+  border: 0 !important; border-right: 1px solid var(--pet-line) !important; border-radius: 0; background: transparent !important;
+  color: var(--pet-ink) !important; font-size: 11.5px !important; transition: background .15s;
+}
+.erii-companion .erii-nb__room:last-child { border-right: 0 !important; }
+.erii-companion .erii-nb__room .pet-icon { width: 19px; height: 19px; color: var(--pet-accent); }
+.erii-companion .erii-nb__room:hover { background: var(--pet-soft) !important; }
+
+/* ---------- 气泡（台词、任务、生活、故事） ---------- */
 .erii-companion__message, .erii-companion__life-bubble {
-  position: fixed; width: max-content; max-width: var(--erii-page-width, 310px); max-height: 130px;
-  overflow: auto; padding: 8px 12px; border: 1px solid #d7b9af; border-radius: 8px;
-  background: #fff9f0; white-space: pre-wrap; overflow-wrap: anywhere;
-  pointer-events: auto; box-shadow: none; backdrop-filter: none;
-  display: flex; align-items: center; gap: 8px;
+  position: fixed; width: max-content; max-width: min(300px, var(--erii-page-width, 300px)); max-height: 150px;
+  overflow: auto; padding: 8px 12px 9px; border: 1px solid var(--pet-line); border-radius: 14px;
+  background: var(--pet-grain), var(--pet-card); color: var(--pet-ink);
+  pointer-events: auto; box-shadow: 0 10px 24px -14px var(--pet-shadow), 0 2px 6px -3px var(--pet-shadow);
+  animation: pet-bubble .34s var(--pet-spring);
 }
-.erii-companion__message-text, .erii-companion__life-text { flex: 1 1 auto; min-width: 0; max-height: 108px; overflow: auto; }
+.erii-companion__message { display: grid; gap: 2px; padding-top: 12px; overflow: visible; max-height: none; }
+.erii-companion__message::after, .erii-companion__life-bubble::after, .erii-companion__story::after {
+  content: ""; position: absolute; left: calc(var(--tail-x, 50%) - 6px); width: 12px; height: 12px;
+  background: var(--pet-card); border: 1px solid var(--pet-line); transform: rotate(45deg); pointer-events: none;
+}
+.erii-companion__message[data-place="above"]::after, .erii-companion__life-bubble[data-place="above"]::after, .erii-companion__story[data-place="above"]::after { bottom: -7px; border-top-color: transparent; border-left-color: transparent; }
+.erii-companion__message[data-place="below"]::after, .erii-companion__life-bubble[data-place="below"]::after, .erii-companion__story[data-place="below"]::after { top: -7px; border-bottom-color: transparent; border-right-color: transparent; }
+.erii-companion__message[data-place="side"]::after, .erii-companion__life-bubble[data-place="side"]::after, .erii-companion__story[data-place="side"]::after { display: none; }
+.erii-bubble__name {
+  position: absolute; left: 10px; top: -9px; padding: 1px 9px; border-radius: 99px; font: 600 11px/1.5 var(--pet-hand); letter-spacing: 1px;
+  color: #fffaf4; background: linear-gradient(180deg, var(--pet-accent-2), var(--pet-accent)); box-shadow: 0 2px 5px -2px var(--pet-shadow);
+}
+.erii-bubble__line { margin: 2px 0 0 !important; font: 14px/1.6 var(--pet-hand); color: var(--pet-ink); }
+.erii-companion__message-text { display: block; min-width: 0; max-height: 96px; overflow: auto; font-size: 11.5px; color: var(--pet-muted); white-space: pre-wrap; overflow-wrap: anywhere; }
+.erii-bubble__line:not([hidden]) + .erii-companion__message-text:not([hidden]) { margin-top: 3px; padding-top: 4px; border-top: 1px dashed var(--pet-line); }
+.erii-companion__message[data-tone="task"] .erii-bubble__line:empty { display: none; }
+.erii-companion__message[data-kind="error"], .erii-companion__message[data-kind="warning"] { border-color: color-mix(in srgb, var(--pet-bad) 40%, var(--pet-line)); }
+.erii-companion__message[data-kind="error"] .erii-companion__message-text, .erii-companion__message[data-kind="warning"] .erii-companion__message-text { color: var(--pet-bad); }
+.erii-companion__message[data-kind="success"] .erii-companion__message-text { color: var(--pet-good); }
+.erii-companion__message[data-tone="speech"] { cursor: pointer; }
+.erii-bubble__actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 4px; }
+.erii-companion__life-bubble { display: flex; align-items: center; gap: 8px; overflow: visible; max-height: none; font-size: 12px; color: var(--pet-accent-ink); }
+.erii-companion__message-text, .erii-companion__life-text { flex: 1 1 auto; }
 .erii-companion__message-action, .erii-companion__life-claim {
-  flex: 0 0 auto; border: 1px solid #c88982; border-radius: 5px; background: #fffdf8;
-  color: #a4483b; padding: 3px 8px; cursor: pointer;
-  align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 3px; flex: 0 0 auto; border: 1px solid color-mix(in srgb, var(--pet-accent) 50%, var(--pet-line)) !important; border-radius: 99px;
+  background: var(--pet-card) !important; color: var(--pet-accent-ink) !important; padding: 3px 10px; font-size: 11.5px !important; cursor: pointer;
 }
-.erii-companion__message-action:hover:not(:disabled), .erii-companion__life-claim:hover:not(:disabled) { background: #f9e6dc; }
+.erii-companion__message-action:hover:not(:disabled), .erii-companion__life-claim:hover:not(:disabled) { background: var(--pet-soft) !important; }
 .erii-companion__message-action:disabled, .erii-companion__life-claim:disabled { opacity: .55; cursor: default; }
+.erii-companion__life-claim { background: linear-gradient(180deg, var(--pet-gold-hi), var(--pet-gold)) !important; border-color: var(--pet-gold-lo) !important; color: #4a3204 !important; font-weight: 700; }
 .erii-companion__story {
   position: fixed; width: var(--erii-page-width, 310px); max-height: 300px;
   overflow: auto; overscroll-behavior: contain; pointer-events: auto;
-  padding: 12px 14px; border: 1px solid #d7b9af; border-radius: 14px 14px 4px 14px;
-  background: #fff9f0; color: #613531; text-align: left;
+  padding: 12px 16px; border: 1px solid var(--pet-line); border-radius: 16px 16px 6px 16px;
+  background: repeating-linear-gradient(180deg, transparent 0 27px, color-mix(in srgb, var(--pet-accent) 7%, transparent) 27px 28px), var(--pet-grain), var(--pet-card);
+  color: var(--pet-ink); text-align: left; box-shadow: 0 14px 30px -16px var(--pet-shadow);
+  animation: pet-bubble .34s var(--pet-spring);
 }
+.erii-companion__story::after { display: none; }
 .erii-companion__story-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.erii-companion__story-heading strong { font-size: 14px; color: #923d3f; }
-.erii-companion__story p { margin: 8px 0 12px; font-size: 13px; line-height: 1.85; }
-.erii-companion__story-close { flex: 0 0 32px; width: 32px; height: 32px; border: 0; padding: 0; color: #923d3f; background: transparent; font-size: 22px !important; }
-.erii-companion__story-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #9c7770; font-size: 11px; }
-.erii-companion__story-next, .erii-companion__story-open { border: 1px solid #dec2b8; border-radius: 6px; background: #fffdf8; color: #8f4144; padding: 6px 10px; }
-.erii-companion__story-open { display: block; margin-top: 12px; width: 100%; }
-.erii-companion__story-next:hover, .erii-companion__story-open:hover:not(:disabled) { background: #f9e6dc; }
-.erii-companion__story-open:disabled { opacity: .45; cursor: default; }
-.erii-companion-settings { padding: 8px 0; color: #ffecef !important; }
-.erii-companion-settings summary { cursor: pointer; padding: 6px 0; color: #fff7f7 !important; font-weight: 700; }
-.erii-companion-settings label { display: flex; gap: 8px; align-items: center; margin: 10px 0; }
-.erii-companion-settings input[type="range"] { max-width: 150px; }
-.erii-companion-settings select { max-width: 210px; border-radius: 6px; padding: 5px 8px; background: #fff9f0 !important; color: #613531 !important; text-shadow: none; }
-.erii-companion-settings button {
-  appearance: none; border: 1px solid rgba(255, 214, 221, .9) !important; border-radius: 6px;
-  background: rgba(112, 39, 52, .92) !important; color: #fff8f8 !important;
-  text-shadow: none !important; box-shadow: 0 1px 3px rgba(30, 0, 8, .28) !important;
-  padding: 6px 10px; font-weight: 700; line-height: 1.3;
-}
-.erii-companion-settings button:hover { background: rgba(150, 55, 70, .96) !important; color: #fff !important; }
-body[data-erii-replace-database-pet] .acu-desk-pet,
-body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !important; pointer-events: none !important; }
+.erii-companion__story-heading strong { font: 600 16px/1.4 var(--pet-hand); color: var(--pet-accent-ink); letter-spacing: 1px; }
+.erii-companion__story p { margin: 8px 0 12px; font: 14px/28px var(--pet-hand); }
+.erii-companion__story-close { flex: 0 0 32px; width: 32px; height: 32px; border: 0 !important; padding: 0; color: var(--pet-accent-ink) !important; background: transparent !important; font-size: 22px !important; }
+.erii-companion__story-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--pet-muted); font-size: 11px; }
+.erii-companion__story-next { border: 1px solid var(--pet-line) !important; border-radius: 99px; background: var(--pet-card) !important; color: var(--pet-accent-ink) !important; padding: 4px 12px; }
+.erii-companion__story-next:hover { background: var(--pet-soft) !important; }
+
+@keyframes pet-pop { from { opacity: 0; transform: translateY(6px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes pet-bubble { from { opacity: 0; transform: translateY(6px) scale(.9); } to { opacity: 1; transform: none; } }
+@keyframes pet-window-in { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes pet-window-out { to { opacity: 0; transform: translateY(8px) scale(.97); } }
+@keyframes pet-sheet-in { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes pet-sheet-out { to { transform: translateY(100%); } }
+
+/* ---------- 浮窗与底部抽屉 ---------- */
+.erii-chat, .erii-life, .erii-house { animation: pet-window-in .26s var(--pet-ease); }
+.erii-chat.is-leaving, .erii-life.is-leaving, .erii-house.is-leaving { animation: pet-window-out .18s ease-in forwards; pointer-events: none; }
+.pet-sheet { border-radius: 20px 20px 0 0 !important; animation: pet-sheet-in .32s var(--pet-ease) !important; box-shadow: 0 -16px 40px -18px rgba(0, 0, 0, .45) !important; }
+.pet-sheet.is-leaving { animation: pet-sheet-out .22s ease-in forwards !important; }
+.pet-sheet > .pet-grip { display: block; flex: 0 0 auto; position: relative; height: 18px; margin: 0 0 -4px; cursor: grab; touch-action: none; }
+.pet-sheet > .pet-grip::before { content: ""; position: absolute; left: 50%; top: 7px; width: 42px; height: 5px; margin-left: -21px; border-radius: 99px; background: color-mix(in srgb, var(--pet-muted) 55%, transparent); }
+.erii-companion__notebook.pet-sheet { position: fixed; padding: 6px 16px 18px; max-height: none; border-left: 1px solid var(--pet-line);
+  background: repeating-linear-gradient(180deg, transparent 0 25px, color-mix(in srgb, var(--pet-accent) 6%, transparent) 25px 26px), var(--pet-grain), var(--pet-paper); }
+.erii-companion__notebook.pet-sheet::before { display: none; }
+.erii-companion__notebook.pet-sheet::after { right: 22px; top: -6px; }
+.erii-companion__notebook.pet-sheet .erii-nb__head { touch-action: none; }
+
+/* ---------- 聊天窗 ---------- */
 .erii-chat {
   position: fixed; z-index: 9460; display: flex; flex-direction: column;
   width: 440px; height: 660px; overflow: hidden; pointer-events: auto;
-  border: 1px solid #dab6aa; border-radius: 16px; background: #fffaf3; color: #613531;
-  font: 13px/1.6 "Microsoft YaHei", "PingFang SC", sans-serif;
-  text-align: left; text-shadow: none !important; backdrop-filter: none; box-shadow: none;
+  border: 1px solid var(--pet-line); border-radius: 18px; background: var(--pet-grain), var(--pet-paper); color: var(--pet-ink);
+  font: 13px/1.6 var(--pet-body);
+  text-align: left; text-shadow: none !important; backdrop-filter: none;
+  box-shadow: 0 30px 60px -30px var(--pet-shadow), 0 8px 20px -10px var(--pet-shadow);
 }
-.erii-chat *, .erii-chat *::before, .erii-chat *::after { box-sizing: border-box; }
+.erii-chat, .erii-chat *, .erii-chat *::before, .erii-chat *::after { box-sizing: border-box; }
 .erii-chat[hidden], .erii-chat [hidden] { display: none !important; }
 .erii-chat button, .erii-chat input, .erii-chat textarea, .erii-chat select {
   font: inherit; text-shadow: none !important; box-shadow: none !important; margin: 0;
 }
 .erii-chat button {
-  appearance: none; cursor: pointer; padding: 6px 10px; min-height: 34px;
-  border: 1px solid #dec2b8; border-radius: 7px; background: #fffdf8; color: #8f4144 !important;
-  line-height: 1.4; white-space: nowrap; flex-shrink: 0;
+  appearance: none; cursor: pointer; padding: 6px 11px; min-height: 34px;
+  border: 1px solid var(--pet-line) !important; border-radius: 99px; background: var(--pet-card) !important; color: var(--pet-accent-ink) !important;
+  line-height: 1.4; white-space: nowrap; flex-shrink: 0; transition: background .15s;
 }
-.erii-chat button:hover:not(:disabled) { background: #f9e6dc; }
+.erii-chat button:hover:not(:disabled) { background: var(--pet-soft) !important; }
 .erii-chat button:disabled { opacity: .55; cursor: default; }
 .erii-chat button:focus-visible, .erii-chat input:focus-visible, .erii-chat textarea:focus-visible, .erii-chat select:focus-visible {
-  outline: 2px solid #b86b68; outline-offset: 2px;
+  outline: 2px solid var(--pet-accent-2); outline-offset: 2px;
 }
 .erii-chat__header {
-  position: relative; display: flex; gap: 10px; align-items: center; flex: 0 0 auto;
-  padding: 12px 96px 12px 14px; min-height: 74px; border-bottom: 1px solid #ecd8cc;
-  background: #f9ede3; cursor: move; touch-action: none;
+  position: relative; display: flex; gap: 12px; align-items: center; flex: 0 0 auto;
+  padding: 14px 96px 12px 16px; min-height: 76px; border-bottom: 1px solid var(--pet-line);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--pet-paper-2) 90%, transparent), transparent), var(--pet-grain), var(--pet-paper-2); cursor: move; touch-action: none;
 }
-.erii-chat__header img { display: block; width: 46px; height: 46px; object-fit: contain; }
-.erii-chat__header strong { display: block; font: 600 21px/1.35 "KaiTi", "STKaiti", "Microsoft YaHei", serif; color: #923d3f; letter-spacing: 2px; }
-.erii-chat__header span { display: block; color: #9c7770; font-size: 11px; }
+.erii-chat__header::after {
+  content: ""; position: absolute; left: 18px; top: -5px; width: 58px; height: 16px; transform: rotate(-5deg);
+  background: radial-gradient(circle, var(--pet-tape-dot) 1.2px, transparent 1.6px) 0 0 / 8px 8px, var(--pet-tape); opacity: .9;
+  clip-path: polygon(2% 0, 98% 8%, 100% 45%, 96% 100%, 3% 92%, 0 50%);
+}
+.erii-chat__header img { display: block; width: 50px; height: 50px; object-fit: cover; object-position: 50% 12%; border-radius: 50%; padding: 2px; background: var(--pet-card); border: 1.5px solid var(--pet-gold); }
+.erii-chat[data-character="naidan"] .erii-chat__header img { object-fit: contain; }
+.erii-chat__header strong { display: block; font: 600 22px/1.3 var(--pet-hand); color: var(--pet-accent-ink); letter-spacing: 2px; }
+.erii-chat__header span { display: block; color: var(--pet-muted); font-size: 11px; }
 .erii-chat .erii-chat__close {
-  position: absolute; top: 5px; right: 5px; width: 38px; height: 38px;
-  border: 0; background: transparent; font-size: 24px; padding: 0;
+  position: absolute; top: 6px; right: 6px; width: 38px; height: 38px; min-height: 0;
+  border: 0 !important; background: transparent !important; font-size: 24px; padding: 0; border-radius: 10px;
 }
-.erii-chat .erii-chat__expand { position: absolute; right: 49px; top: 8px; width: 32px; min-height: 32px; padding: 0; border: 0; background: transparent; font-size: 21px; }
-.erii-chat__toolbar { display: flex; gap: 6px; align-items: center; padding: 8px 12px; flex: 0 0 auto; }
-.erii-chat__connection { flex: 1 1 auto; min-width: 0; color: #9c7770; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.erii-chat__toolbar button { font-size: 11px; padding: 5px 8px; }
-.erii-chat__environment { margin: 0; padding: 6px 12px; color: #855348; background: #f8eddf; font-size: 11px; flex: 0 0 auto; }
-.erii-chat__log { flex: 1 1 auto; min-height: 0; overflow: auto; overflow-anchor: none; overscroll-behavior: contain; padding: 12px 16px; }
-.erii-chat__welcome { padding: 22px 6px; text-align: center; color: #9c7770; }
-.erii-chat__welcome img { display: block; width: 92px; height: 92px; object-fit: contain; margin: 0 auto 12px; }
-.erii-chat__welcome span { display: block; color: #923d3f; font-size: 16px; letter-spacing: 1px; }
-.erii-chat__welcome p { margin: 10px 0; font-size: 12px; }
+.erii-chat .erii-chat__expand { position: absolute; right: 48px; top: 9px; width: 32px; min-height: 32px; padding: 0; border: 0 !important; background: transparent !important; font-size: 20px; border-radius: 10px; }
+.erii-chat__toolbar { display: flex; gap: 6px; align-items: center; padding: 8px 12px; flex: 0 0 auto; border-bottom: 1px dashed var(--pet-line); }
+.erii-chat__connection { flex: 1 1 auto; min-width: 0; color: var(--pet-muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.erii-chat__toolbar button { font-size: 11px; padding: 4px 10px; min-height: 30px; }
+.erii-chat__environment { margin: 0; padding: 6px 12px; color: var(--pet-accent-ink); background: var(--pet-soft); font-size: 11px; flex: 0 0 auto; }
+.erii-chat__log { flex: 1 1 auto; min-height: 0; overflow: auto; overflow-anchor: none; overscroll-behavior: contain; padding: 14px 16px;
+  background: repeating-linear-gradient(180deg, transparent 0 31px, color-mix(in srgb, var(--pet-accent) 4%, transparent) 31px 32px); }
+.erii-chat__welcome { padding: 24px 6px; text-align: center; color: var(--pet-muted); }
+.erii-chat__welcome img { display: block; width: 104px; height: 104px; object-fit: contain; margin: 0 auto 12px; filter: drop-shadow(0 8px 10px var(--pet-shadow)); }
+.erii-chat__welcome span { display: block; color: var(--pet-accent-ink); font: 600 19px/1.5 var(--pet-hand); letter-spacing: 2px; }
+.erii-chat__welcome p { margin: 8px 0; font-size: 12px; }
 .erii-chat__starters { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-top: 18px; }
 .erii-chat__starters button { font-size: 12px; }
-.erii-chat__day { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 5px 0 18px; font-size: 10px; color: #9c7770; }
-.erii-chat__day::before, .erii-chat__day::after { content: ""; width: 32px; height: 1px; background: #e6d3c5; }
-.erii-chat__row { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 17px; }
+.erii-chat__day { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 5px 0 18px; font: italic 11px/1 var(--pet-serif); color: var(--pet-muted); }
+.erii-chat__day::before, .erii-chat__day::after { content: ""; width: 36px; height: 3px; border-block: 1px solid var(--pet-gold); opacity: .5; }
+.erii-chat__row { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 16px; animation: pet-pop .3s var(--pet-ease); }
 .erii-chat__row--user { flex-direction: row-reverse; }
-.erii-chat__avatar { width: 30px; height: 34px; object-fit: contain; flex: 0 0 auto; margin-top: 4px; }
-.erii-chat__avatar--user { display: grid; place-items: center; height: 29px; border-radius: 50%; color: #a94446; background: #f2ddd1; font-size: 11px; }
-.erii-chat__bubble { max-width: 91%; width: fit-content; margin: 0 0 14px; padding: 9px 12px; border: 1px solid #ecd8cc; border-radius: 12px 12px 12px 3px; background: #fffef9; }
-.erii-chat__row .erii-chat__bubble { max-width: calc(100% - 38px); margin: 0; min-width: 78px; }
-.erii-chat__bubble--user { margin-left: auto; border-color: #e5c4b6; border-radius: 12px 12px 3px 12px; background: #f8e4db; }
-.erii-chat__bubble small { display: block; font-size: 10px; color: #9c7770; margin-bottom: 3px; }
-.erii-chat__bubble p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: #613531; line-height: 1.85; }
+.erii-chat__avatar { width: 32px; height: 32px; object-fit: cover; object-position: 50% 12%; flex: 0 0 auto; margin-top: 4px; border-radius: 50%; border: 1px solid var(--pet-gold); background: var(--pet-card); }
+.erii-chat[data-character="naidan"] .erii-chat__avatar { object-fit: contain; }
+.erii-chat__avatar--user { display: grid; place-items: center; height: 32px; color: #fffaf4; background: linear-gradient(180deg, var(--pet-accent-2), var(--pet-accent)); font-size: 12px; border: 0; }
+.erii-chat__bubble { max-width: 91%; width: fit-content; margin: 0 0 14px; padding: 9px 13px; border: 1px solid var(--pet-line); border-radius: 14px 14px 14px 4px; background: var(--pet-card); box-shadow: 0 6px 14px -12px var(--pet-shadow); }
+.erii-chat__row .erii-chat__bubble { max-width: calc(100% - 40px); margin: 0; min-width: 78px; }
+.erii-chat__bubble--user { margin-left: auto; border-color: color-mix(in srgb, var(--pet-accent) 25%, var(--pet-line)); border-radius: 14px 14px 4px 14px; background: color-mix(in srgb, var(--pet-soft) 85%, var(--pet-card)); }
+.erii-chat__bubble small { display: block; font-size: 10px; color: var(--pet-muted); margin-bottom: 3px; }
+.erii-chat__bubble p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--pet-ink); line-height: 1.85; }
 .erii-chat__bubble .erii-chat__message-meta { display: flex; justify-content: space-between; gap: 18px; align-items: baseline; }
-.erii-chat__message-meta time { opacity: .85; font-size: 9px; white-space: nowrap; }
+.erii-chat__message-meta span { font-family: var(--pet-hand); font-size: 11.5px; color: var(--pet-accent-ink); }
+.erii-chat__message-meta time { opacity: .85; font: italic 10px/1 var(--pet-serif); white-space: nowrap; }
 .erii-chat__message-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 7px 0 -2px; }
-.erii-chat__message-tools button { border: 0; background: transparent; padding: 2px 0; min-height: 24px; font-size: 10px; color: #9c7770 !important; }
-.erii-chat__message-tools button:hover:not(:disabled) { color: #a94446 !important; background: transparent; text-decoration: underline; }
-.erii-chat__pending { display: flex; align-items: center; gap: 6px; color: #9c7770; font-size: 11px; padding: 1px 0 9px 38px; }
-.erii-chat__pending i { font-size: 20px; font-style: normal; animation: erii-chat-thinking 1.4s ease-in-out infinite; }
+.erii-chat .erii-chat__message-tools button { border: 0 !important; background: transparent !important; padding: 2px 0; min-height: 24px; font-size: 10px; color: var(--pet-muted) !important; }
+.erii-chat .erii-chat__message-tools button:hover:not(:disabled) { color: var(--pet-accent) !important; text-decoration: underline; }
+.erii-chat__pending { display: flex; align-items: center; gap: 6px; color: var(--pet-muted); font-size: 11px; padding: 1px 0 9px 40px; font-family: var(--pet-hand); }
+.erii-chat__pending i { font-size: 20px; font-style: normal; animation: erii-chat-thinking 1.4s ease-in-out infinite; color: var(--pet-accent); }
 .erii-chat__pending i:nth-of-type(2) { animation-delay: .2s; }
 .erii-chat__pending i:nth-of-type(3) { animation-delay: .4s; }
-@keyframes erii-chat-thinking { 0%, 70%, 100% { opacity: .35; } 35% { opacity: 1; } }
-.erii-chat .erii-chat__latest { align-self: center; margin: 0 0 5px; min-height: 28px; padding: 4px 12px; border-radius: 20px; font-size: 11px; background: #f9e6dc; }
-.erii-chat__status { flex: 0 0 auto; margin: 0; padding: 6px 14px; font-size: 11px; color: #9c7770; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 76px; overflow: auto; }
+@keyframes erii-chat-thinking { 0%, 70%, 100% { opacity: .35; transform: none; } 35% { opacity: 1; transform: translateY(-2px); } }
+.erii-chat .erii-chat__latest { align-self: center; margin: 0 0 5px; min-height: 28px; padding: 4px 12px; font-size: 11px; background: var(--pet-soft) !important; }
+.erii-chat__status { flex: 0 0 auto; margin: 0; padding: 6px 14px; font-size: 11px; color: var(--pet-muted); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 76px; overflow: auto; }
 .erii-chat__status:empty { display: none; }
-.erii-chat [data-kind="error"], .erii-chat [data-kind="warning"] { color: #a4483b; }
-.erii-chat [data-kind="success"] { color: #4c7856; }
-.erii-chat__composer { flex: 0 0 auto; padding: 10px 12px 12px; border-top: 1px solid #ecd8cc; background: #f9f0e8; }
-.erii-chat__edit-bar { display: flex; gap: 8px; align-items: center; font-size: 10px; color: #9c7770; padding: 0 0 7px; }
+.erii-chat [data-kind="error"], .erii-chat [data-kind="warning"] { color: var(--pet-bad); }
+.erii-chat [data-kind="success"] { color: var(--pet-good); }
+.erii-chat__composer { flex: 0 0 auto; padding: 10px 12px 12px; border-top: 1px solid var(--pet-line); background: var(--pet-grain), var(--pet-paper-2); }
+.erii-chat__edit-bar { display: flex; gap: 8px; align-items: center; font-size: 10px; color: var(--pet-muted); padding: 0 0 7px; }
 .erii-chat__edit-bar span { flex: 1; }
 .erii-chat__edit-bar button { min-height: 27px; font-size: 10px; padding: 3px 7px; }
 .erii-chat textarea, .erii-chat input:not([type="checkbox"]), .erii-chat select {
-  display: block; width: 100%; max-width: 100%; border: 1px solid #dab6aa; border-radius: 7px;
-  background: #fffef9 !important; color: #613531 !important; padding: 8px 10px;
+  display: block; width: 100%; max-width: 100%; border: 1px solid var(--pet-line) !important; border-radius: 12px;
+  background: var(--pet-card) !important; color: var(--pet-ink) !important; padding: 8px 11px;
   min-height: 38px; outline: none;
 }
 .erii-chat textarea { resize: none; min-height: 48px; max-height: 110px; line-height: 1.5; }
-.erii-chat textarea::placeholder, .erii-chat input::placeholder { color: #a2867d; opacity: 1; }
+.erii-chat textarea::placeholder, .erii-chat input::placeholder { color: var(--pet-faint); opacity: 1; }
 .erii-chat__actions { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
-.erii-chat__actions span { flex: 1 1 auto; font-size: 10px; color: #9c7770; }
-.erii-chat .erii-chat__send { background: #a94446; border-color: #a94446; color: #fffaf6 !important; padding-right: 18px; padding-left: 18px; }
-.erii-chat .erii-chat__send:hover:not(:disabled) { background: #913a3d; }
+.erii-chat__actions span { flex: 1 1 auto; font-size: 10px; color: var(--pet-muted); }
+.erii-chat .erii-chat__send { background: linear-gradient(180deg, var(--pet-accent-2), var(--pet-accent)) !important; border-color: var(--pet-accent-ink) !important; color: #fffaf6 !important; padding-right: 20px; padding-left: 20px; font-weight: 700; }
+.erii-chat .erii-chat__send:hover:not(:disabled) { background: var(--pet-accent-ink) !important; }
 .erii-chat__settings { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 4px 16px 16px; }
-.erii-chat__settings label { display: block; margin: 10px 0; font-size: 12px; color: #8f4144; }
-.erii-chat__section-title { font-size: 13px; font-weight: 600; color: #8f4144; margin: 16px 0 4px; padding-bottom: 7px; border-bottom: 1px solid #ead7ca; }
+.erii-chat__settings label { display: block; margin: 10px 0; font-size: 12px; color: var(--pet-accent-ink); }
+.erii-chat__section-title { font: 600 14px/1.4 var(--pet-hand); letter-spacing: 2px; color: var(--pet-accent-ink); margin: 18px 0 4px; padding-bottom: 7px; border-bottom: 1px solid var(--pet-line); }
 .erii-chat__settings textarea { min-height: 106px; max-height: 160px; }
 .erii-chat__settings label input, .erii-chat__settings label select { margin-top: 5px; }
-.erii-chat__settings small { display: block; font-size: 11px; color: #9c7770; margin: 7px 0; line-height: 1.7; }
+.erii-chat__settings small { display: block; font-size: 11px; color: var(--pet-muted); margin: 7px 0; line-height: 1.7; }
 .erii-chat__settings .erii-chat__remember { display: flex; align-items: center; gap: 8px; }
-.erii-chat__remember input { width: 16px; height: 16px; margin: 0 !important; accent-color: #a94446; }
-.erii-chat__settings-actions { display: flex; gap: 8px; margin-top: 16px; padding: 10px 0 6px; position: sticky; bottom: 0; background: #fffaf3; border-top: 1px solid #ead7ca; }
+.erii-chat__remember input { width: 16px; height: 16px; margin: 0 !important; accent-color: var(--pet-accent); }
+.erii-chat__settings-actions { display: flex; gap: 8px; margin-top: 16px; padding: 10px 0 6px; position: sticky; bottom: 0; background: var(--pet-paper); border-top: 1px solid var(--pet-line); }
 .erii-chat__fetch-models { margin-top: 4px; }
 .erii-chat__model-status:empty { display: none; }
-.erii-chat__task { display: flex; align-items: center; gap: 8px; background: #f6e7dc; border-block: 1px solid #e8cfc3; padding: 7px 12px; font-size: 11px; flex: 0 0 auto; }
+.erii-chat__task { display: flex; align-items: center; gap: 8px; background: var(--pet-soft); border-block: 1px solid var(--pet-line); padding: 7px 12px; font-size: 11px; flex: 0 0 auto; }
 .erii-chat__task span { flex: 1 1 auto; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 90px; overflow: auto; }
-.erii-chat__task button { font-size: 11px; min-height: 30px; align-self: flex-start; }
+.erii-chat__task button { font-size: 11px; min-height: 28px; align-self: flex-start; }
+.erii-chat.pet-sheet { border-bottom: 0; }
+.erii-chat.pet-sheet .erii-chat__header { cursor: default; min-height: 62px; padding: 6px 52px 8px 14px; }
+.erii-chat.pet-sheet .erii-chat__header::after { display: none; }
+.erii-chat.pet-sheet .erii-chat__expand { display: none; }
 @media (max-width: 640px) {
-  .erii-chat__header { cursor: default; min-height: 66px; padding: 8px 52px 8px 12px; }
-  .erii-chat .erii-chat__expand { display: none; }
   .erii-chat input, .erii-chat textarea, .erii-chat select { font-size: 16px; }
-  .erii-chat__composer { padding: 8px 10px; }
+  .erii-chat__composer { padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px)); }
   .erii-chat__log { padding: 10px 12px; }
   .erii-chat__actions span { max-width: 110px; }
-  .erii-chat__message-tools button { min-height: 30px; padding: 4px 1px; }
+  .erii-chat .erii-chat__message-tools button { min-height: 30px; padding: 4px 1px; }
 }
+
+/* ---------- 生活手帐 ---------- */
+.erii-life { position: fixed; z-index: 9440; display: flex; flex-direction: column; background: var(--pet-grain), var(--pet-paper); border: 1px solid var(--pet-line); border-radius: 18px; color: var(--pet-ink); font: 13px/1.65 var(--pet-body); text-shadow: none; overflow: hidden;
+  box-shadow: 0 30px 60px -30px var(--pet-shadow), 0 8px 20px -10px var(--pet-shadow); }
+.erii-life, .erii-life *, .erii-life *::before, .erii-life *::after { box-sizing: border-box; }
+.erii-life[hidden], .erii-life [hidden] { display: none !important; }
+.erii-life button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; font: inherit; color: var(--pet-accent-ink) !important; background: var(--pet-card) !important; border: 1px solid var(--pet-line) !important; border-radius: 99px; padding: 7px 13px; min-height: 36px; cursor: pointer; text-shadow: none !important; box-shadow: none; line-height: 1.4; margin: 0; transition: background .15s, transform .15s var(--pet-ease); }
+.erii-life button:hover:not(:disabled) { background: var(--pet-soft) !important; }
+.erii-life button:disabled { opacity: .45; cursor: default; }
+.erii-life button:focus-visible, .erii-life [role="tab"]:focus-visible { outline: 2px solid var(--pet-accent-2); outline-offset: 2px; }
+.erii-life .erii-life__primary { color: #fffaf3 !important; background: linear-gradient(180deg, var(--pet-accent-2), var(--pet-accent)) !important; border-color: var(--pet-accent-ink) !important; font-weight: 700; }
+.erii-life .erii-life__primary:hover:not(:disabled) { background: var(--pet-accent-ink) !important; }
+.erii-life__header { flex: 0 0 auto; position: relative; padding: 16px 60px 10px 22px; touch-action: none; cursor: move;
+  background: linear-gradient(180deg, var(--pet-paper-2), transparent); }
+.erii-life__header::after { content: ""; position: absolute; right: 62px; top: -5px; width: 60px; height: 16px; transform: rotate(5deg);
+  background: radial-gradient(circle, var(--pet-tape-dot) 1.2px, transparent 1.6px) 0 0 / 8px 8px, var(--pet-tape); opacity: .9;
+  clip-path: polygon(2% 0, 98% 8%, 100% 45%, 96% 100%, 3% 92%, 0 50%); }
+.erii-life__eyebrow { color: var(--pet-muted); font-size: 11px; letter-spacing: 4px; }
+.erii-life h2 { font: 700 25px/1.45 var(--pet-hand); margin: 2px 0 0; color: var(--pet-accent-ink); letter-spacing: 2px; }
+.erii-life .erii-life__close { position: absolute; right: 8px; top: 8px; width: 40px; height: 40px; min-height: 0; border: 0 !important; background: transparent !important; padding: 0; font-size: 26px; border-radius: 10px; }
+.erii-life__people { flex: 0 0 auto; display: flex; gap: 8px; padding: 2px 18px 10px; overflow-x: auto; scrollbar-width: none; }
+.erii-life .erii-life__person { flex: 1 0 auto; justify-content: flex-start; gap: 7px; padding: 4px 12px 4px 4px; min-height: 44px; border-radius: 99px; text-align: left; }
+.erii-life__person img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; object-position: 50% 12%; background: var(--pet-paper); border: 1px solid var(--pet-line); }
+.erii-life__person[data-character="naidan"] img { object-fit: contain; }
+.erii-life__person-name { display: block; font: 600 13px/1.2 var(--pet-hand); color: var(--pet-ink); }
+.erii-life__person-state { display: block; font-size: 10px; color: var(--pet-muted); line-height: 1.2; white-space: nowrap; }
+.erii-life__person > span, .erii-life__person > small { grid-column: 2; }
+.erii-life .erii-life__person[aria-selected="true"] { border-color: var(--pet-accent) !important; background: var(--pet-soft) !important; box-shadow: 0 0 0 2px color-mix(in srgb, var(--pet-accent) 25%, transparent) !important; }
+.erii-life .erii-life__person[data-ready="true"] .erii-life__person-state { color: var(--pet-gold-lo); font-weight: 700; }
+.erii-life__wallet { flex: 0 0 auto; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 0 18px; padding: 10px 14px; border-radius: 14px; color: var(--pet-muted);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--pet-gold-hi) 45%, var(--pet-card)), var(--pet-card)); border: 1px solid color-mix(in srgb, var(--pet-gold) 45%, var(--pet-line)); }
+.erii-life__coin { width: 22px; height: 22px; color: var(--pet-gold-lo); }
+.erii-life__wallet strong { color: var(--pet-gold-lo); font: italic 700 30px/1.05 var(--pet-serif); margin-left: auto; }
+.erii-life__wallet > span:last-child { flex-basis: 100%; color: var(--pet-muted); font-size: 11px; }
+.erii-life .erii-life__welfare { min-height: 28px; padding: 3px 10px; font-size: 11px; color: #4a3204 !important; background: linear-gradient(180deg, var(--pet-gold-hi), var(--pet-gold)) !important; border-color: var(--pet-gold-lo) !important; font-weight: 700; }
+.erii-life__scroll { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 14px 20px 12px; scrollbar-width: thin; }
+.erii-life__scene { display: flex; align-items: center; gap: 16px; min-height: 160px; margin-bottom: 14px; }
+.erii-life__scene > img { flex: 0 0 140px; width: 140px; height: 160px; object-fit: contain; padding: 6px 6px 18px; background: #fff; border: 1px solid var(--pet-line); border-radius: 4px;
+  transform: rotate(-3deg); box-shadow: 0 10px 20px -12px var(--pet-shadow); }
+.erii-life__scene-text { flex: 1; min-width: 0; }
+.erii-life h3 { font: 600 17px/1.4 var(--pet-hand); color: var(--pet-accent-ink); margin: 0 0 6px; letter-spacing: 1px; }
+.erii-life p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 4px 0; }
+.erii-life__scene-text p { color: var(--pet-muted); font-size: 12px; line-height: 1.8; }
+.erii-life progress { display: block; width: 100%; height: 8px; margin: 12px 0 5px; border: 0; border-radius: 99px; accent-color: var(--pet-accent); background: var(--pet-line); overflow: hidden; }
+.erii-life progress::-webkit-progress-bar { background: var(--pet-line); border-radius: 99px; }
+.erii-life progress::-webkit-progress-value { background: linear-gradient(90deg, var(--pet-accent-2), var(--pet-accent)); border-radius: 99px; }
+.erii-life progress::-moz-progress-bar { background: linear-gradient(90deg, var(--pet-accent-2), var(--pet-accent)); border-radius: 99px; }
+.erii-life__countdown { display: block; color: var(--pet-muted); font: italic 12px/1.6 var(--pet-serif); font-variant-numeric: tabular-nums; }
+.erii-life__activity-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.erii-life__activity-actions button { font-size: 11.5px; padding: 6px 11px; }
+.erii-life__tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--pet-line); margin-bottom: 12px; }
+.erii-life .erii-life__tabs button { flex: 1; background: transparent !important; border: 0 !important; border-bottom: 3px solid transparent !important; border-radius: 0; color: var(--pet-muted) !important; padding: 9px 3px; }
+.erii-life .erii-life__tabs button[aria-selected="true"] { border-bottom-color: var(--pet-accent) !important; color: var(--pet-accent-ink) !important; font-weight: 700; }
+.erii-life__job { display: flex; align-items: center; gap: 12px; margin: 0 0 8px; padding: 8px 10px; border-radius: 14px; border: 1px solid var(--pet-line); background: var(--pet-card); transition: transform .18s var(--pet-ease), box-shadow .18s; }
+.erii-life__job:hover { transform: translateY(-2px); box-shadow: 0 10px 18px -14px var(--pet-shadow); }
+.erii-life__job > img { flex: 0 0 64px; width: 64px; height: 74px; object-fit: contain; }
+.erii-life__job > div { flex: 1; min-width: 0; }
+.erii-life h4 { margin: 0; font: 600 15px/1.4 var(--pet-hand); color: var(--pet-accent-ink); }
+.erii-life__job p { color: var(--pet-muted); font-size: 11px; }
+.erii-life__job-reward { color: var(--pet-gold-lo); font-size: 11px; font-weight: 700; }
+.erii-life__job > button { flex: 0 0 auto; padding: 7px 12px; font-size: 12px; }
+.erii-life .erii-life__note { font-size: 11px; color: var(--pet-faint); margin-top: 12px; line-height: 1.8; }
+.erii-life__menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.erii-life__food { padding: 12px 10px; text-align: center; border: 1px solid var(--pet-line); border-radius: 16px; background: var(--pet-card); transition: transform .18s var(--pet-ease), box-shadow .18s; }
+.erii-life__food:hover { transform: translateY(-2px) rotate(-.5deg); box-shadow: 0 10px 18px -14px var(--pet-shadow); }
+.erii-life__food-image { display: block; width: 104px; height: 96px; object-fit: contain; margin: 0 auto 6px; }
+.erii-life__food p { color: var(--pet-gold-lo); font-size: 11.5px; }
+.erii-life__food button { margin-top: 7px; width: 100%; font-size: 12px; }
+.erii-life__totals { color: var(--pet-gold-lo); padding-bottom: 12px; font-size: 12px; }
+.erii-life__records { list-style: none; margin: 0; padding: 0; font-size: 12px; }
+.erii-life__records li { display: grid; grid-template-columns: auto 1fr; gap: 0 8px; padding: 9px 0; border-bottom: 1px dashed var(--pet-line); }
+.erii-life__records time { grid-column: 1 / -1; color: var(--pet-faint); font: italic 10px/1.4 var(--pet-serif); }
+.erii-life__who { align-self: start; padding: 0 7px; border-radius: 99px; font: 600 11px/1.6 var(--pet-hand); color: #fff; background: var(--pet-faint); }
+.erii-life__who[data-character="erii"] { background: #c4434e; }
+.erii-life__who[data-character="zero"] { background: #4c7cb3; }
+.erii-life__who[data-character="naidan"] { background: #e0901f; }
+.erii-life__records [data-kind="earned"] span { color: var(--pet-good); }
+.erii-life__records [data-kind="spent"] span { color: var(--pet-gold-lo); }
+.erii-life__task { flex: 0 0 auto; display: flex; align-items: flex-start; gap: 8px; margin: 8px 18px 0; padding: 8px 12px; border-radius: 12px; background: var(--pet-soft); font-size: 11px; }
+.erii-life__task > span { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 72px; overflow: auto; }
+.erii-life__task button { flex: 0 0 auto; min-height: 28px; font-size: 11px; padding: 4px 10px; }
+.erii-life__status { flex: 0 0 auto; min-height: 0; padding: 10px 22px; margin: 0 !important; font-size: 11.5px; color: var(--pet-accent-ink); border-top: 1px solid var(--pet-line); background: var(--pet-paper-2); font-family: var(--pet-hand); }
+.erii-life__status:empty { display: none; }
+.erii-life.pet-sheet .erii-life__header { cursor: default; padding-top: 4px; }
+.erii-life.pet-sheet .erii-life__header::after { display: none; }
+@media (max-width: 480px) {
+  .erii-life__header { padding: 8px 55px 8px 16px; }
+  .erii-life h2 { font-size: 22px; }
+  .erii-life__wallet { margin: 0 12px; }
+  .erii-life__people { padding: 2px 12px 8px; }
+  .erii-life__scroll { padding: 12px 14px; }
+  .erii-life__scene { gap: 12px; min-height: 128px; }
+  .erii-life__scene > img { width: 100px; height: 124px; flex-basis: 100px; }
+  .erii-life h3 { font-size: 15px; }
+  .erii-life__job { gap: 8px; }
+  .erii-life__job > img { width: 52px; height: 64px; flex-basis: 52px; }
+  .erii-life__job > button { font-size: 11px; padding: 7px 9px; }
+}
+
+/* ---------- 桌宠小屋：翻开的图鉴 ---------- */
+.erii-house {
+  position: fixed; z-index: 9445; display: flex; flex-direction: column; overflow: hidden; pointer-events: auto;
+  width: 780px; height: 600px; padding: 0 18px 16px; border-radius: 20px; color: var(--pet-ink); font: 13px/1.6 var(--pet-body); text-align: left; text-shadow: none !important;
+  background:
+    radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--pet-cover-2) 90%, white 10%), transparent 70%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,.035) 0 2px, transparent 2px 5px),
+    var(--pet-cover);
+  box-shadow: 0 40px 80px -36px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.08), inset 0 0 0 6px var(--pet-cover), inset 0 0 0 7px color-mix(in srgb, var(--pet-gold) 55%, transparent);
+}
+.erii-house, .erii-house *, .erii-house *::before, .erii-house *::after { box-sizing: border-box; }
+.erii-house[hidden], .erii-house [hidden] { display: none !important; }
+.erii-house button, .erii-house input { font: inherit; text-shadow: none !important; margin: 0; }
+.erii-house button { cursor: pointer; }
+.erii-house__header { flex: 0 0 auto; position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 14px 6px 8px; cursor: move; touch-action: none; }
+.erii-house__eyebrow { display: block; font: italic 11px/1.4 var(--pet-serif); letter-spacing: 4px; color: color-mix(in srgb, var(--pet-gold-hi) 70%, transparent); }
+.erii-house h2 { margin: 0; font: 700 26px/1.25 var(--pet-hand); letter-spacing: 4px;
+  background: linear-gradient(100deg, var(--pet-gold-lo), var(--pet-gold-hi) 35%, var(--pet-gold) 55%, var(--pet-gold-hi) 75%, var(--pet-gold-lo));
+  background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: pet-foil 7s linear infinite; }
+@keyframes pet-foil { to { background-position: -220% 0; } }
+.erii-house .erii-house__close { width: 40px; height: 40px; border: 0 !important; border-radius: 10px; background: transparent !important; color: var(--pet-gold-hi) !important; font-size: 26px; line-height: 1; padding: 0; }
+.erii-house .erii-house__close:hover { background: rgba(255,255,255,.08) !important; }
+.erii-house__ribbons { flex: 0 0 auto; position: relative; z-index: 2; display: flex; gap: 8px; padding: 0 22px; margin-bottom: -10px; }
+.erii-house .erii-house__ribbon {
+  position: relative; display: flex; align-items: center; gap: 7px; height: 46px; padding: 4px 16px 10px 8px; border: 0 !important;
+  border-radius: 8px 8px 0 0; color: #fff !important; background: var(--pet-accent) !important; box-shadow: inset 0 -10px 12px -10px rgba(0,0,0,.3);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%); opacity: .72; transform: translateY(6px);
+  transition: transform .22s var(--pet-ease), opacity .2s;
+}
+.erii-house .erii-house__ribbon[aria-selected="true"] { opacity: 1; transform: translateY(0); height: 52px; }
+.erii-house .erii-house__ribbon:hover { opacity: 1; }
+.erii-house .erii-house__ribbon:focus-visible { outline: 2px solid var(--pet-gold-hi); outline-offset: 2px; }
+.erii-house__ribbon-no { font: italic 600 11px/1 var(--pet-serif); opacity: .75; }
+.erii-house__ribbon img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; object-position: 50% 12%; background: rgba(255,255,255,.85); }
+.erii-house__ribbon[data-character="naidan"] img { object-fit: contain; }
+.erii-house__ribbon-name { font: 600 14px/1 var(--pet-hand); letter-spacing: 1px; }
+.erii-house__ribbon-badge { display: none; font-size: 10px; padding: 0 6px; border-radius: 99px; background: rgba(255,255,255,.25); }
+.erii-house__ribbon[data-current="true"] .erii-house__ribbon-badge { display: inline-block; }
+.erii-house__book {
+  position: relative; flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; border-radius: 6px;
+  background: var(--pet-grain), var(--pet-paper); perspective: 1600px;
+  box-shadow: 0 2px 0 #fff8 inset, 0 18px 30px -18px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.12);
+}
+.erii-house__book::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 46px; margin-left: -23px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,.09) 42%, rgba(0,0,0,.16) 50%, rgba(0,0,0,.09) 58%, transparent); }
+.erii-house__plate { position: relative; margin: 18px 22px 18px 18px; border-radius: 4px; overflow: hidden; display: grid; place-items: center;
+  background: radial-gradient(90% 70% at 50% 60%, color-mix(in srgb, var(--pet-soft) 80%, white), var(--pet-paper-2)); border: 1px solid color-mix(in srgb, var(--pet-gold) 50%, var(--pet-line)); }
+.erii-house__plate::before, .erii-house__plate::after { content: ""; position: absolute; width: 34px; height: 34px; border: 2px solid var(--pet-gold); pointer-events: none; z-index: 2; }
+.erii-house__plate::before { left: 8px; top: 8px; border-right: 0; border-bottom: 0; }
+.erii-house__plate::after { right: 8px; bottom: 8px; border-left: 0; border-top: 0; }
+.erii-house__aurora { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity .6s; }
+.erii-house[data-fx="fancy"] .erii-house__aurora { opacity: .9; }
+.erii-house__frame { position: relative; z-index: 1; display: grid; place-items: center; width: 100%; height: 100%; padding: 26px 30px 44px; }
+.erii-house__portrait { width: 100%; height: 100%; max-height: 330px; object-fit: contain; filter: drop-shadow(0 16px 14px var(--pet-shadow)); transition: transform .3s var(--pet-spring); }
+.erii-house__portrait:hover { transform: translateY(-4px) scale(1.02); }
+.erii-house__plate[data-character="naidan"] .erii-house__portrait { max-height: 230px; }
+.erii-house__missing { margin: 0; padding: 18px; text-align: center; color: var(--pet-muted); font: 14px/1.8 var(--pet-hand); }
+.erii-house__no { position: absolute; z-index: 2; left: 18px; bottom: 12px; font: italic 600 15px/1 var(--pet-serif); color: var(--pet-gold-lo); letter-spacing: 1px; }
+.erii-house__latin { position: absolute; z-index: 2; right: 14px; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; font: 600 12px/1 var(--pet-serif); letter-spacing: 8px; color: color-mix(in srgb, var(--pet-accent-ink) 55%, transparent); }
+.erii-house__stamp { position: absolute; z-index: 2; right: 18px; bottom: 14px; max-width: 70%; padding: 4px 12px; border-radius: 99px; transform: rotate(-6deg);
+  font: 600 12px/1.4 var(--pet-hand); color: var(--pet-accent); border: 1.5px solid currentColor; background: color-mix(in srgb, var(--pet-paper) 80%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.erii-house__stamp[data-current="true"] { color: var(--pet-good); animation: pet-stamp .5s var(--pet-spring); }
+@keyframes pet-stamp { from { opacity: 0; transform: rotate(-6deg) scale(1.8); } 60% { opacity: 1; transform: rotate(-6deg) scale(.94); } to { transform: rotate(-6deg) scale(1); } }
+.erii-house__page { position: relative; min-height: 0; overflow: auto; padding: 22px 26px 18px 30px; scrollbar-width: thin; transform-origin: 0 50%; backface-visibility: hidden; }
+.erii-house__page.is-turning { animation: pet-turn .55s var(--pet-ease); }
+.erii-house__plate.is-turning .erii-house__frame { animation: pet-fade .45s var(--pet-ease); }
+@keyframes pet-turn { from { transform: rotateY(-92deg); opacity: .2; } 60% { opacity: 1; } to { transform: none; } }
+@keyframes pet-fade { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
+.erii-house[data-fx="simple"] .erii-house__page.is-turning { animation: pet-fade .3s ease; }
+.erii-house__name-row { display: flex; align-items: center; gap: 8px; min-height: 40px; }
+.erii-house__name { margin: 0; font: 700 28px/1.2 var(--pet-hand); color: var(--pet-accent-ink); letter-spacing: 3px; }
+.erii-house .erii-house__rename { width: 30px; height: 30px; border-radius: 50%; border: 1px dashed var(--pet-line) !important; background: transparent !important; color: var(--pet-muted) !important; padding: 0; display: grid; place-items: center; }
+.erii-house .erii-house__rename:hover { color: var(--pet-accent) !important; border-color: var(--pet-accent) !important; }
+.erii-house__name-input { width: 11em; max-width: 100%; padding: 4px 10px; border-radius: 10px; border: 1px solid var(--pet-accent) !important; background: var(--pet-card) !important; color: var(--pet-ink) !important; font: 600 20px/1.3 var(--pet-hand) !important; outline: none; }
+.erii-house__honor { margin: 2px 0 12px; color: var(--pet-muted); font-size: 12px; }
+.erii-house__affection { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; margin-bottom: 10px; }
+.erii-house__hearts .pet-icon { width: 17px; height: 17px; }
+.erii-house__bar { position: relative; height: 8px; border-radius: 99px; background: var(--pet-line); overflow: hidden; }
+.erii-house__bar i { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: linear-gradient(90deg, var(--pet-gold), var(--pet-accent-2), var(--pet-accent)); transition: width .7s var(--pet-ease); }
+.erii-house__points { font: italic 600 12px/1 var(--pet-serif); color: var(--pet-accent-ink); font-variant-numeric: tabular-nums; }
+.erii-house__mood { display: flex; align-items: center; gap: 12px; margin: 4px 0 10px; }
+.erii-house__key { font-size: 11px; color: var(--pet-muted); letter-spacing: 2px; }
+.erii-house__mood-stamp { transform: rotate(-8deg); min-width: 52px; height: 52px; font-size: 14px; }
+.erii-house__needs { display: grid; gap: 6px; margin: 0 0 12px; }
+.erii-house__facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 12px; padding: 10px 0; border-block: 1px solid var(--pet-line); }
+.erii-house__facts div { min-width: 0; }
+.erii-house__facts dt { font-size: 10.5px; color: var(--pet-muted); letter-spacing: 1px; }
+.erii-house__facts dd { margin: 2px 0 0; font: italic 600 14px/1.3 var(--pet-serif); color: var(--pet-ink); }
+.erii-house__intro { margin: 0 0 14px; color: var(--pet-muted); font: 13.5px/1.8 var(--pet-hand); }
+.erii-house__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.erii-house .erii-house__choose, .erii-house .erii-house__action {
+  display: inline-flex; align-items: center; gap: 5px; min-height: 36px; padding: 6px 13px; border-radius: 99px; font-size: 12.5px;
+  border: 1px solid var(--pet-line) !important; background: var(--pet-card) !important; color: var(--pet-accent-ink) !important; transition: transform .15s var(--pet-ease), background .15s;
+}
+.erii-house .erii-house__action:hover:not(:disabled) { background: var(--pet-soft) !important; transform: translateY(-1px); }
+.erii-house .erii-house__choose { flex: 1 1 100%; justify-content: center; min-height: 42px; font: 700 14px/1 var(--pet-hand); letter-spacing: 2px; color: #fffaf4 !important; border-color: var(--pet-accent-ink) !important;
+  background: linear-gradient(180deg, var(--pet-accent-2), var(--pet-accent) 55%, var(--pet-accent-ink)) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pet-gold-hi) 65%, transparent), 0 8px 18px -10px var(--pet-shadow); }
+.erii-house .erii-house__choose:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.05); }
+.erii-house .erii-house__choose:disabled { opacity: 1; cursor: default; color: var(--pet-good) !important; background: color-mix(in srgb, var(--pet-good) 10%, var(--pet-card)) !important; border-color: color-mix(in srgb, var(--pet-good) 45%, var(--pet-line)) !important; box-shadow: none; }
+.erii-house .erii-house__choose[data-state="unavailable"]:disabled { color: var(--pet-muted) !important; background: var(--pet-paper) !important; border-color: var(--pet-line) !important; }
+.erii-house button:disabled { cursor: default; opacity: .5; }
+.erii-house__diary-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.erii-house__diary-head h3 { margin: 0; font: 700 22px/1.3 var(--pet-hand); color: var(--pet-accent-ink); letter-spacing: 2px; }
+.erii-house__entries { list-style: none; margin: 0 0 14px; padding: 0 0 0 14px; border-left: 2px solid color-mix(in srgb, var(--pet-gold) 60%, transparent); }
+.erii-house__entries li { position: relative; display: grid; grid-template-columns: 48px 1fr; gap: 6px; padding: 5px 0; font-size: 12.5px; }
+.erii-house__entries li::before { content: ""; position: absolute; left: -20px; top: 11px; width: 9px; height: 9px; border-radius: 50%; background: var(--pet-paper); border: 2px solid var(--pet-accent); }
+.erii-house__entries li[data-kind="tier"]::before { background: var(--pet-gold); border-color: var(--pet-gold-lo); }
+.erii-house__entries time { font: italic 11px/1.7 var(--pet-serif); color: var(--pet-muted); }
+.erii-house__subhead { margin: 0 0 8px; font: 600 14px/1.4 var(--pet-hand); color: var(--pet-accent-ink); letter-spacing: 2px; }
+.erii-house__stories { display: grid; gap: 8px; }
+.erii-house__story { border: 1px solid var(--pet-line); border-radius: 12px; background: var(--pet-card); overflow: hidden; }
+.erii-house__story[data-locked="true"] { background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--pet-line) 50%, transparent) 6px 7px), var(--pet-paper); }
+.erii-house .erii-house__story-title { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 12px; border: 0 !important; background: transparent !important; color: var(--pet-accent-ink) !important; font: 600 14px/1.3 var(--pet-hand); text-align: left; }
+.erii-house__story-title small { font: 11px/1 var(--pet-body); color: var(--pet-muted); }
+.erii-house__story p { margin: 0; padding: 0 14px 12px; font: 14px/1.9 var(--pet-hand); color: var(--pet-ink); animation: pet-pop .3s var(--pet-ease); }
+.erii-house__empty { color: var(--pet-muted); }
+.erii-house__status { flex: 0 0 auto; margin: 8px 6px 0; min-height: 1.4em; color: var(--pet-gold-hi); font: 13px/1.4 var(--pet-hand); }
+.erii-house.pet-sheet { padding: 0 10px calc(10px + env(safe-area-inset-bottom, 0px)); overflow: auto; }
+.erii-house.pet-sheet > .pet-grip::before { background: rgba(255,255,255,.4); }
+.erii-house.pet-sheet .erii-house__header { cursor: default; padding: 2px 4px 6px; }
+.erii-house.pet-sheet h2 { font-size: 21px; }
+.erii-house.pet-sheet .erii-house__ribbons { padding: 0 6px; margin-bottom: -8px; overflow-x: auto; scrollbar-width: none; }
+.erii-house.pet-sheet .erii-house__ribbon { flex: 0 0 auto; height: 42px; padding-right: 12px; }
+.erii-house.pet-sheet .erii-house__ribbon[aria-selected="true"] { height: 46px; }
+.erii-house.pet-sheet .erii-house__book { flex: 0 0 auto; grid-template-columns: 1fr; }
+.erii-house.pet-sheet .erii-house__book::after { display: none; }
+.erii-house.pet-sheet .erii-house__plate { height: 236px; margin: 14px 12px 0; }
+.erii-house.pet-sheet .erii-house__portrait { width: auto; height: 188px; max-width: 100%; }
+.erii-house.pet-sheet .erii-house__plate[data-character="naidan"] .erii-house__portrait { height: 150px; }
+.erii-house.pet-sheet .erii-house__frame { padding: 18px 26px 34px; }
+.erii-house.pet-sheet .erii-house__page { overflow: visible; padding: 14px 16px 16px; }
+.erii-house.pet-sheet .erii-house__name { font-size: 24px; }
+
+/* ---------- 特效画布 ---------- */
+.erii-fx { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 9470; pointer-events: none; }
+
+/* ---------- 扩展设置 ---------- */
+.erii-companion-settings { padding: 8px 0; color: inherit; }
+.erii-companion-settings summary { cursor: pointer; padding: 6px 0; font-weight: 700; }
+.erii-companion-settings label { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
+.erii-companion-settings .pet-settings__range input { max-width: 150px; }
+.erii-companion-settings .pet-settings__select { flex-wrap: wrap; }
+.erii-companion-settings select { max-width: 230px; border-radius: 8px; padding: 5px 8px; }
+.pet-settings__group { margin: 10px 0 0; padding: 4px 12px 6px; border: 1px solid rgba(127,127,127,.35); border-radius: 12px; }
+.pet-settings__group legend { padding: 0 6px; font-size: .92em; opacity: .85; }
+.pet-settings__roster { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 4px; }
+.pet-settings__buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.erii-companion-settings button {
+  appearance: none; border: 1px solid rgba(255, 255, 255, .28) !important; border-radius: 99px;
+  background: rgba(112, 39, 52, .9) !important; color: #fff8f8 !important;
+  text-shadow: none !important; box-shadow: 0 1px 3px rgba(30, 0, 8, .28) !important;
+  padding: 5px 12px; font-weight: 700; line-height: 1.3; cursor: pointer;
+}
+.erii-companion-settings button:hover { filter: brightness(1.15); }
+.erii-companion-settings .pet-settings__pick { position: relative; padding-left: 26px; background: rgba(40, 40, 52, .75) !important; }
+.erii-companion-settings .pet-settings__pick::before { content: ""; position: absolute; left: 9px; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: #c4434e; box-shadow: 0 0 0 2px rgba(255,255,255,.35); }
+.erii-companion-settings .pet-settings__pick[data-character="zero"]::before { background: #6b97c9; }
+.erii-companion-settings .pet-settings__pick[data-character="naidan"]::before { background: #f6a93b; }
+.erii-companion-settings .pet-settings__pick[aria-pressed="true"] { background: rgba(140, 52, 66, .95) !important; outline: 2px solid rgba(255, 220, 160, .7); }
+.erii-companion-settings .pet-settings__house { background: rgba(160, 120, 40, .9) !important; }
+
+body[data-erii-replace-database-pet] .acu-desk-pet,
+body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !important; pointer-events: none !important; }
+
+/* ---------- 减少动态效果 / 特效关闭 ---------- */
+.erii-companion[data-fx="off"] .erii-companion__message, .erii-companion[data-fx="off"] .erii-companion__life-bubble,
+.erii-companion[data-fx="off"] .erii-companion__story, .erii-companion[data-fx="off"] .erii-companion__notebook,
+.erii-house[data-fx="off"], .erii-house[data-fx="off"] h2, .erii-house[data-fx="off"] .erii-house__stamp { animation: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .erii-companion, .erii-companion__sprite, .erii-companion__sway, .erii-companion__edge-frame { transition: none !important; }
   .erii-companion__breath { animation: none !important; }
-  .erii-chat__pending i { animation: none !important; }
-}
-
-/* A small, local life journal; namespaced to avoid host theme button styles. */
-.erii-life { position: fixed; z-index: 9440; display: flex; flex-direction: column; background: #fffaf3; border: 1px solid #dcbcaf; border-radius: 16px; color: #633d36; font: 13px/1.65 "Microsoft YaHei", "PingFang SC", sans-serif; text-shadow: none; box-shadow: none; overflow: hidden; }
-.erii-life *, .erii-life *::before, .erii-life *::after { box-sizing: border-box; }
-.erii-life[hidden], .erii-life [hidden] { display: none !important; }
-.erii-life button { font: inherit; color: #913f42; background: #fffdf8; border: 1px solid #dcbcaf; border-radius: 7px; padding: 7px 12px; min-height: 36px; cursor: pointer; text-shadow: none; box-shadow: none; line-height: 1.4; margin: 0; }
-.erii-life button:hover:not(:disabled) { background: #f6e3d8; }
-.erii-life button:disabled { opacity: .45; cursor: default; }
-.erii-life button:focus-visible, .erii-life [role="tab"]:focus-visible { outline: 2px solid #a94446; outline-offset: 2px; }
-.erii-life .erii-life__primary { color: #fffaf3; background: #a94446; border-color: #a94446; }
-.erii-life .erii-life__primary:hover:not(:disabled) { background: #903b3e; }
-.erii-life__header { flex: 0 0 auto; position: relative; background: #f9ece2; padding: 17px 60px 13px 22px; border-bottom: 1px solid #e9d4c5; }
-.erii-life__eyebrow { color: #9e7066; font-size: 11px; letter-spacing: 2px; }
-.erii-life h2 { font: 700 25px/1.5 "KaiTi", "STKaiti", serif; margin: 3px 0 0; color: #923d3f; }
-.erii-life .erii-life__close { position: absolute; right: 7px; top: 7px; width: 40px; height: 40px; border: 0; background: transparent; padding: 0; font-size: 26px; }
-.erii-life__wallet { flex: 0 0 auto; display: flex; align-items: baseline; flex-wrap: wrap; gap: 7px; padding: 12px 22px; border-bottom: 1px dashed #e5cdbd; color: #94665b; }
-.erii-life__wallet strong { color: #a16b24; font: 700 29px/1.1 Georgia, serif; margin-left: auto; }
-.erii-life__wallet > span:last-child { flex-basis: 100%; color: #a38375; font-size: 11px; }
-.erii-life__scroll { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 16px 22px 12px; scrollbar-width: thin; }
-.erii-life__scene { display: flex; align-items: center; gap: 15px; min-height: 155px; margin-bottom: 13px; }
-.erii-life__scene > img { flex: 0 0 138px; width: 138px; height: 155px; object-fit: contain; filter: none; }
-.erii-life__scene-text { flex: 1; min-width: 0; }
-.erii-life h3 { font-size: 16px; color: #923d3f; margin: 0 0 6px; }
-.erii-life p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 4px 0; }
-.erii-life__scene-text p { color: #9b766b; font-size: 12px; line-height: 1.8; }
-.erii-life progress { display: block; width: 100%; height: 7px; margin: 12px 0 5px; border: 0; border-radius: 5px; accent-color: #b76a61; background: #eddbcc; overflow: hidden; }
-.erii-life progress::-webkit-progress-bar { background: #eddbcc; border-radius: 5px; }
-.erii-life progress::-webkit-progress-value { background: #b76a61; border-radius: 5px; }
-.erii-life__countdown { display: block; color: #916f60; font-size: 12px; font-variant-numeric: tabular-nums; }
-.erii-life__activity-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
-.erii-life__activity-actions button { font-size: 11px; padding: 6px 9px; }
-.erii-life__tabs { display: flex; gap: 4px; border-bottom: 1px solid #e2caba; margin-bottom: 13px; }
-.erii-life__tabs button { flex: 1; background: transparent; border: 0; border-bottom: 3px solid transparent; border-radius: 0; color: #a17a6d; padding: 9px 3px; }
-.erii-life__tabs button[aria-selected="true"] { border-bottom-color: #a94446; color: #923d3f; font-weight: 700; }
-.erii-life__job { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #ead9ca; padding: 10px 0; }
-.erii-life__job > img { flex: 0 0 68px; width: 68px; height: 78px; object-fit: contain; }
-.erii-life__job > div { flex: 1; min-width: 0; }
-.erii-life h4 { margin: 0; font-size: 14px; color: #79453f; }
-.erii-life__job p { color: #a17c6f; font-size: 11px; }
-.erii-life__job-reward { color: #a27035; font-size: 11px; }
-.erii-life__job > button { flex: 0 0 auto; padding: 7px 10px; font-size: 12px; }
-.erii-life .erii-life__note { font-size: 11px; color: #a48577; margin-top: 12px; line-height: 1.8; }
-.erii-life__menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.erii-life__food { padding: 14px 10px 12px; text-align: center; border: 1px solid #e7cebf; border-radius: 10px; background: #fffdf8; }
-.erii-life__food-image { display: block; width: 104px; height: 96px; object-fit: contain; margin: 0 auto 7px; filter: none; }
-.erii-life__food p { color: #a27035; font-size: 12px; }
-.erii-life__food button { margin-top: 7px; width: 100%; font-size: 12px; }
-.erii-life__totals { color: #a27035; padding-bottom: 12px; font-size: 12px; }
-.erii-life__records { list-style: none; margin: 0; padding: 0; font-size: 12px; }
-.erii-life__records li { padding: 9px 0; border-bottom: 1px dashed #e8d4c4; }
-.erii-life__records time { display: block; color: #aa8b7b; font-size: 10px; }
-.erii-life__records [data-kind="earned"] span { color: #68825a; }
-.erii-life__records [data-kind="spent"] span { color: #a27035; }
-.erii-life__task { flex: 0 0 auto; display: flex; align-items: flex-start; gap: 10px; padding: 9px 16px; background: #f6e7dc; font-size: 11px; border-bottom: 1px solid #e5cdbd; }
-.erii-life__task > span { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 72px; overflow: auto; }
-.erii-life__task button { flex: 0 0 auto; min-height: 30px; font-size: 11px; padding: 5px 9px; }
-.erii-life__status { flex: 0 0 auto; min-height: 0; padding: 10px 22px; margin: 0 !important; font-size: 11px; color: #916d60; border-top: 1px solid #e9d4c5; background: #f9f0e6; }
-.erii-life__status:empty { display: none; }
-.erii-companion__life-bubble { border-color: #dcc6a3; color: #8b653d; }
-@media (max-width: 480px) {
-  .erii-life__header { padding: 12px 55px 10px 16px; }
-  .erii-life h2 { font-size: 23px; }
-  .erii-life__wallet { padding: 10px 16px; }
-  .erii-life__scroll { padding: 12px 14px; }
-  .erii-life__scene { gap: 11px; min-height: 128px; }
-  .erii-life__scene > img { width: 94px; height: 124px; flex-basis: 94px; }
-  .erii-life h3 { font-size: 14px; }
-  .erii-life__job { gap: 8px; }
-  .erii-life__job > img { width: 53px; height: 67px; flex-basis: 53px; }
-  .erii-life__job > button { font-size: 11px; padding: 7px 8px; }
+  .erii-companion *, .erii-chat, .erii-chat *, .erii-life, .erii-life *, .erii-house, .erii-house *, .pet-sheet { animation: none !important; transition: none !important; }
 }

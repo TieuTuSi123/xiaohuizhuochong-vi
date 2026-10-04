@@ -2,10 +2,11 @@
 // Each request owns its AbortSignal. No global generation/stop events or setting edits.
 export const CHAT_DEFAULTS = { mode: 'current', url: '', model: '', nickname: '', relationship: '恋人', maxTokens: 768, rememberKey: false, replyStyle: 'natural', memory: '' };
 
-export function normalizeChatConfig(value = {}) {
+export function normalizeChatConfig(value = {}, defaults = {}) {
+  const relationship = defaults.relationship || CHAT_DEFAULTS.relationship;
   return { ...CHAT_DEFAULTS, mode: value.mode === 'custom' ? 'custom' : 'current',
     url: String(value.url || '').trim().slice(0, 1000), model: String(value.model || '').trim().slice(0, 200),
-    nickname: String(value.nickname || '').trim().slice(0, 40), relationship: String(value.relationship || '恋人').trim().slice(0, 80),
+    nickname: String(value.nickname || '').trim().slice(0, 40), relationship: String(value.relationship || relationship).trim().slice(0, 80),
     maxTokens: Math.min(4096, Math.max(128, Number(value.maxTokens) || 768)), rememberKey: value.rememberKey === true,
     replyStyle: ['natural', 'short', 'detailed'].includes(value.replyStyle) ? value.replyStyle : 'natural',
     memory: String(value.memory || '').trim().slice(0, 2000) };

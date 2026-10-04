@@ -51,6 +51,24 @@ export function readDatabaseView(doc) {
   };
 }
 
+// 奶蛋的图：读数据库桌宠组件自己用的那份图片表（运行时内存里的地址），只读、不复制进仓库。
+// 读不到（数据库没运行、关了桌宠或结构变了）返回 null，调用方退回让数据库原桌宠出来。
+export function readDeskPetImages(doc) {
+  try {
+    const tree = doc.getElementById('acu-app-v2')?._vnode;
+    const layer = tree && findComponent(tree, 'DeskPetLayer');
+    const pet = layer?.subTree && findComponent(layer.subTree, 'DeskPet');
+    const table = pet?.setupState?.POSE_IMAGES;
+    if (!table || typeof table !== 'object') return null;
+    const images = {};
+    const usable = url => typeof url === 'string' && /^(data:image\/|blob:|https?:|\/)/.test(url);
+    for (const [name, url] of Object.entries(table)) if (usable(url)) images[name] = url;
+    // 探头图不在姿势表里，由组件按当前样式算出（peekSrc）。
+    if (usable(pet.setupState.peekSrc)) images.peek = pet.setupState.peekSrc;
+    return images.idle ? images : null;
+  } catch { return null; }
+}
+
 export function createDatabaseObserver(host, { now = () => Date.now(), interval = 250 } = {}) {
   const subscribers = new Set();
   let snapshot = { protocol: PROTOCOL, connected: false, source: 'waiting', busy: false, activityKnown: false, activeTaskId: '', tasks: [], notices: [], silent: false, version: 0 };
