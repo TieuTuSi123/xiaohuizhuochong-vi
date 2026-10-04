@@ -15,11 +15,15 @@ import { createEffects, resolveTier } from './effects.js';
 import { openDatabasePage, pageForNotice } from './database-shortcuts.js';
 import { createSheet } from './sheet.js';
 import { icon } from './icons.js';
+import { createBackupStore } from './backup-store.js';
+import { createRepairService } from './database-repair.js';
+import { createTicket, describeErrors, describeFloors, describeTables, recentFloors, repairMessages, sheetsOf, REPAIR_LIMITS } from './repair.js';
+import { WATCH, clampEvery, createFloorCounter, decideWatch, shouldAsk, watchMessages } from './watch.js';
 
 const ID = 'erii-database-pet';
-const VERSION = '0.8.0';
+const VERSION = '0.9.0';
 const defaults = { enabled: true, idleActions: true, edgePeeks: true, healingStories: true, hideOriginal: true, taskDetails: false, size: 88, side: 'right', position: null,
-  character: DEFAULT_CHARACTER, taskTalk: true, needs: true, effects: 'auto' };
+  character: DEFAULT_CHARACTER, taskTalk: true, needs: true, effects: 'auto', watch: false, watchEvery: WATCH.every, repairFloors: 3 };
 const CHAT_CONNECTION = ['mode', 'url', 'model', 'maxTokens', 'rememberKey', 'replyStyle', 'nickname'];
 let active = null;
 let bootTimer = null;
@@ -42,6 +46,11 @@ export function createCompanion(host, context) {
   if (!CHARACTER_IDS.includes(settings.character)) settings.character = DEFAULT_CHARACTER;
   if (!['auto', 'off', 'simple', 'fancy'].includes(settings.effects)) settings.effects = 'auto';
   if (!settings.chats || typeof settings.chats !== 'object') settings.chats = {};
+  settings.watch = settings.watch === true;
+  settings.watchEvery = clampEvery(settings.watchEvery);
+  const floorSetting = Number(settings.repairFloors);
+  settings.repairFloors = Number.isFinite(floorSetting) ? Math.min(REPAIR_LIMITS.floors, Math.max(0, Math.round(floorSetting))) : 3;
+  if (!settings.watchState || typeof settings.watchState !== 'object') settings.watchState = {};
   let character = resolveCharacter(settings.character);
   let databaseArt = null;
   let artCheckedAt = 0;
@@ -66,6 +75,15 @@ export function createCompanion(host, context) {
   const timers = new Set();
   const fxTier = () => resolveTier(settings.effects, host);
   const effects = createEffects(host, { tier: fxTier });
+  // 检修：写入前的备份存在浏览器本地；写入只走数据库公开接口。旁观陪聊：只数开启后新出现的楼层。
+  const backups = createBackupStore(host);
+  const repairService = createRepairService(host, { backups });
+  const floorCounter = createFloorCounter();
+  let watchDue = 0;
+  let watchWait = 0;
+  let watchRunning = false;
+  let lastCommentAt = 0;
+  let unbindChatEvents = null;
   let dataSource = null;
   let unsubscribe = null;
   let lastPose = '';
@@ -180,7 +198,11 @@ export function createCompanion(host, context) {
   const messageLook = el(doc, 'button', undefined, 'erii-companion__message-action erii-bubble__look');
   messageLook.type = 'button'; messageLook.hidden = true;
   messageLook.append(icon(doc, 'look'), el(doc, 'span', '去看看'));
-  messageActions.append(messageStop, messageLook);
+  const messageReply = el(doc, 'button', undefined, 'erii-companion__message-action erii-bubble__reply');
+  messageReply.type = 'button'; messageReply.hidden = true;
+  const messageReplyText = el(doc, 'span', '回她');
+  messageReply.append(icon(doc, 'chat'), messageReplyText);
+  messageActions.append(messageStop, messageLook, messageReply);
   message.append(messageName, messageLine, messageText, messageActions);
   const notebook = createNotebook(doc, { id: ID, actions: {
     close: () => setNotebook(false), shortcut: page => openPage(page), leisure: pose => { if (model.leisure(pose)) { setNotebook(false); update(); } },
@@ -228,7 +250,18 @@ export function createCompanion(host, context) {
     save();
   }
   const nameOf = item => care.state(item.id).nickname || item.name;
-  const moodExtra = id => ({ worriedUntil: id === character.id ? worriedUntil : 0 });
+  function watchOf(id) {
+    const state = settings.watchState[id] && typeof settings.watchState[id] === 'object' ? settings.watchState[id] : (settings.watchState[id] = {});
+    state.unanswered = Math.max(0, Number(state.unanswered) || 0); state.askedAt = Number(state.askedAt) || 0;
+    return state;
+  }
+  // 回她的评论、摸摸、送礼都算“理她了”，委屈就消了。
+  function answered(id = character.id) {
+    const state = watchOf(id);
+    if (!state.unanswered) return;
+    state.unanswered = 0; persistStore(); settingsControls?.sync();
+  }
+  const moodExtra = id => ({ worriedUntil: id === character.id ? worriedUntil : 0, unanswered: watchOf(id).unanswered });
   function userName() {
     const saved = character.id === DEFAULT_CHARACTER ? settings.chat : settings.chats[character.id];
     const name = String(saved?.nickname || host.SillyTavern?.getContext?.()?.name1 || context.name1 || '').trim();
@@ -463,6 +496,97 @@ export function createCompanion(host, context) {
     sparkle(null, 10);
     if (result.tierUp) host.setTimeout(() => celebrate(result.tierUp), 1800);
   }
+  const recentErrors = () => model.history.filter(item => item.kind === 'error' || item.kind === 'warning').slice(0, REPAIR_LIMITS.errors);
+  // 聊天窗检修模式用的桥：读资料、出修改单、写入和撤销都在这里转给 database-repair.js。
+  function repairBridge(who) {
+    const persona = { prompt: who.persona, relationship: who.relationship };
+    return {
+      available: () => repairService.available(),
+      busy: () => Boolean(model.snapshot.busy),
+      get durable() { return backups.durable; },
+      scope() {
+        const available = repairService.available();
+        let tables = 0;
+        try { if (available) tables = sheetsOf(host.AutoCardUpdaterAPI.exportTableAsJson()).length; } catch { /* 读不到时显示 0 张 */ }
+        return { available, tables, floors: settings.repairFloors, errors: recentErrors().length };
+      },
+      setFloors(count) { settings.repairFloors = Math.min(REPAIR_LIMITS.floors, Math.max(0, Math.round(Number(count) || 0))); save(); },
+      messages(config, ctx, list) {
+        const snapshot = repairService.snapshot();
+        return repairMessages(config, ctx, list, { persona, name: who.name, material: {
+          tables: describeTables(snapshot.data).text, errors: describeErrors(recentErrors()),
+          floors: describeFloors(recentFloors(ctx.chat, settings.repairFloors)), presets: snapshot.presets, current: snapshot.current } });
+      },
+      review: text => createTicket(text, repairService.snapshot()),
+      apply: (ticket, options) => repairService.apply(ticket, { ...options, character: who.id }),
+      undo: (ticket, force) => repairService.undo(ticket, { force }),
+      backup: id => backups.get(id),
+    };
+  }
+  // ---- 旁观陪聊：楼层事件只用来数数；评论在 update 里按时机决定 ----
+  function chatKeyOf(ctx) {
+    try { return String(ctx?.getCurrentChatId?.() ?? ctx?.chatId ?? ''); } catch { return ''; }
+  }
+  function observeChat(kind) {
+    const ctx = host.SillyTavern?.getContext?.();
+    if (!ctx) return;
+    floorCounter.observe(chatKeyOf(ctx), ctx.chat);
+    if (kind === 'changed') watchDue = 0;
+    // 只在角色回复写完后考虑评论，用户刚发出消息时正文还不完整。
+    if (kind === 'received' && settings.watch && floorCounter.pending >= settings.watchEvery) watchDue ||= Date.now() + WATCH.settle;
+  }
+  function bindChatEvents() {
+    if (unbindChatEvents) return;
+    const ctx = host.SillyTavern?.getContext?.();
+    const source = ctx?.eventSource;
+    const types = ctx?.eventTypes || ctx?.event_types;
+    if (typeof source?.on !== 'function' || !types) return;
+    const pairs = [[types.MESSAGE_SENT, () => observeChat('sent')], [types.MESSAGE_RECEIVED, () => observeChat('received')],
+      [types.MESSAGE_DELETED, () => observeChat('deleted')], [types.CHAT_CHANGED, () => observeChat('changed')]].filter(([type]) => type);
+    for (const [type, handler] of pairs) source.on(type, handler);
+    unbindChatEvents = () => { for (const [type, handler] of pairs) source.removeListener?.(type, handler); };
+    observeChat('bind');
+  }
+  function watchTick(now) {
+    const decision = decideWatch({ enabled: settings.watch && settings.enabled !== false && !yielded, due: watchDue, now,
+      pending: floorCounter.pending, every: settings.watchEvery, lastAt: lastCommentAt, waitStart: watchWait, running: watchRunning,
+      busy: Boolean(model.snapshot.busy) || Boolean(chat?.busy) || switching });
+    watchWait = decision.waitStart;
+    if (decision.action === 'skip') watchDue = 0;
+    else if (decision.action === 'fire') { watchDue = 0; runWatch(); }
+  }
+  async function runWatch() {
+    const ctx = host.SillyTavern?.getContext?.();
+    const who = character;
+    const current = chat;
+    if (!ctx || !current) return;
+    const count = Math.min(floorCounter.take(), WATCH.floors);
+    const floors = recentFloors(ctx.chat, count);
+    if (!floors.length) return;
+    const state = watchOf(who.id);
+    const startedAt = Date.now();
+    const ask = shouldAsk(state, startedAt);
+    watchRunning = true;
+    let result;
+    try {
+      result = await current.comment((config, context) => watchMessages(config, context, floors,
+        { persona: { prompt: who.persona, relationship: who.relationship }, name: who.name, unanswered: state.unanswered, ask }));
+    } catch (error) { result = { ok: false, reason: String(error?.message || error) }; }
+    finally { watchRunning = false; }
+    if (destroyed) return;
+    if (result.reason === 'busy') { floorCounter.restore(count); watchDue = Date.now() + 5000; return; }
+    if (result.reason === 'closed') return;
+    lastCommentAt = Date.now();
+    if (!result.ok) { state.error = String(result.reason || '').slice(0, 160); state.errorAt = lastCommentAt; persistStore(); settingsControls?.sync(); return; }
+    state.unanswered += 1; state.lastAt = lastCommentAt; state.error = '';
+    if (ask) state.askedAt = startedAt;
+    persistStore(); settingsControls?.sync();
+    if (who.id === character.id && !switching && settings.enabled !== false) {
+      storyteller.dismiss();
+      speech = { text: result.text, until: Date.now() + 9000, reply: true };
+      update();
+    }
+  }
   function update() {
     if (destroyed) return;
     if (settings.enabled === false && dragging) cancelDrag();
@@ -512,6 +636,7 @@ export function createCompanion(host, context) {
     const activeTask = currentTask();
     followTask(snapshot, activeTask, now);
     greetIfDue(now);
+    watchTick(now);
     const hasTaskMessage = snapshot.busy;
     const hasNoticeMessage = Boolean(model.history.length && Date.now() < terminalUntil);
     const newest = model.history[0];
@@ -544,7 +669,9 @@ export function createCompanion(host, context) {
       messageStop.textContent = taskStopBusy ? '停止中…' : (activeTask?.action?.label || '停止');
       messageLook.hidden = !(showTask && failureNotice && !feedback);
       messageLook.dataset.page = failureNotice ? pageForNotice(newest.text) : '';
-      messageActions.hidden = messageStop.hidden && messageLook.hidden;
+      messageReply.hidden = !(showSpeech && speech?.reply);
+      messageReplyText.textContent = `回${character.pronoun}`;
+      messageActions.hidden = messageStop.hidden && messageLook.hidden && messageReply.hidden;
     }
     const panelTask = showTask ? {
       text: feedback ? feedback.text : failureNotice ? newest.text : hasTaskMessage ? taskDisplay : newest.text,
@@ -613,6 +740,9 @@ export function createCompanion(host, context) {
       onStopTask: stopDatabaseTask,
       onOpenDatabase: () => openPage('form-fill'),
       returnFocus: () => (settings.enabled === false || yielded ? settingsMount?.querySelector('button[aria-controls]') : portrait)?.focus({ preventScroll: true }),
+      repair: repairBridge(character),
+      onUserMessage: () => answered(id),
+      onRepairDone: kind => { if (id !== character.id) return; say(`repair.${kind}`, 4600, true); if (kind === 'applied') sparkle(null, 12); },
     });
   }
   function switchCharacter(id) {
@@ -648,6 +778,7 @@ export function createCompanion(host, context) {
   }
   function giveGift() {
     if (!model.gift()) return;
+    answered();
     const result = care.gift(character.id);
     say(result.capped ? 'care.giftLimit' : 'care.gift', 4200, true);
     sparkle('hearts', 12);
@@ -733,6 +864,25 @@ export function createCompanion(host, context) {
     fxMode.value = settings.effects;
     fxRow.append(el(doc, 'span', '特效'), fxMode); nurture.append(fxRow);
     listen(fxMode, 'change', () => { settings.effects = fxMode.value; save(); house?.refreshEffects(); });
+    const companion = group('陪聊与检修');
+    // 开启时重新起算：只评论开启之后新出现的楼层。
+    toggle(companion, 'watch', '旁观陪聊：隔几层看看正文，说说感想', () => { watchDue = 0; observeChat('toggle'); floorCounter.reset(); });
+    const select = (box, label, options, value, change) => {
+      const row = el(doc, 'label', undefined, 'pet-settings__select');
+      const control = el(doc, 'select'); control.setAttribute('aria-label', label);
+      for (const [optionValue, caption] of options) { const option = el(doc, 'option', caption); option.value = String(optionValue); control.append(option); }
+      control.value = String(value);
+      row.append(el(doc, 'span', label), control); box.append(row);
+      listen(control, 'change', () => { change(control.value); save(); });
+      return control;
+    };
+    const everySelect = select(companion, '评论频率', Array.from({ length: WATCH.max }, (_, i) => [i + 1, `每 ${i + 1} 层`]), settings.watchEvery,
+      value => { settings.watchEvery = clampEvery(value); });
+    const floorsSelect = select(companion, '检修时附上的正文', Array.from({ length: REPAIR_LIMITS.floors + 1 }, (_, i) => [i, i ? `最近 ${i} 层` : '不附正文']), settings.repairFloors,
+      value => { settings.repairFloors = Math.min(REPAIR_LIMITS.floors, Math.max(0, Number(value) || 0)); });
+    const companionNote = el(doc, 'p', '', 'pet-settings__note');
+    const watchStatus = el(doc, 'p', '', 'pet-settings__note');
+    companion.append(companionNote, watchStatus);
     const buttons = el(doc, 'div', undefined, 'pet-settings__buttons');
     const resetSetting = el(doc, 'button', '重置桌宠位置'); resetSetting.type = 'button';
     listen(resetSetting, 'click', resetPosition);
@@ -750,6 +900,11 @@ export function createCompanion(host, context) {
     settingsControls = { sync() {
       for (const [key, input] of fields) input.checked = settings[key] === true;
       range.value = String(settings.size); taskMode.value = settings.taskDetails ? 'full' : 'brief'; fxMode.value = settings.effects;
+      everySelect.value = String(settings.watchEvery); floorsSelect.value = String(settings.repairFloors);
+      companionNote.textContent = `旁观陪聊和检修都会把正文（检修还会带上表格）发给${character.name}聊天用的接口（聊天窗“连接设置”里那个），会产生调用费用。旁观陪聊默认关闭；检修写入前都会先问你。`;
+      const watchState = watchOf(character.id);
+      watchStatus.textContent = !settings.watch ? '' : watchState.error && watchState.errorAt >= (watchState.lastAt || 0) ? `上次评论没成功：${watchState.error}`
+        : watchState.lastAt ? `上次评论：${new Date(watchState.lastAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false })}${watchState.unanswered ? ` · 已经 ${watchState.unanswered} 条没回了` : ''}` : '开启后，从新出现的楼层开始数。';
       summary.textContent = `${character.fullName} · 数据库桌宠`;
       chatSetting.textContent = `和${character.name}聊天`;
       hint.textContent = `轻点或连点${character.name}可互动；普通长按让${character.pronoun}放松，手机长按约 1.4 秒打开小本子。电脑可右键打开，或使用这里的按钮。`;
@@ -785,6 +940,10 @@ export function createCompanion(host, context) {
   listen(messageLook, 'click', event => {
     event.stopPropagation();
     if (messageLook.dataset.page) openPage(messageLook.dataset.page);
+  });
+  listen(messageReply, 'click', event => {
+    event.stopPropagation();
+    speech = null; chat?.open({ reply: true }); update();
   });
   // The hot path writes only the pet transform and sway. No panel rendering or layout reads.
   function flushDrag() {
@@ -840,6 +999,7 @@ export function createCompanion(host, context) {
     const resting = lastPose === 'rest';
     const action = model.tap();
     if (action) {
+      answered();
       const result = care.touch(character.id);
       const now = Date.now();
       const path = resting ? 'touch.wake' : { greet: 'touch.tap', duck: 'touch.double', bashful: 'touch.bashful', playful: 'touch.playful' }[action];
@@ -954,7 +1114,7 @@ export function createCompanion(host, context) {
   }
   const frame = host.setInterval(() => { if (!doc.hidden) update(); }, 250);
   timers.add(frame);
-  const detection = host.setInterval(() => { connect(); mountSettings(); watchInput(); }, 1500);
+  const detection = host.setInterval(() => { connect(); mountSettings(); watchInput(); bindChatEvents(); }, 1500);
   timers.add(detection);
   function scheduleLeisure() {
     const timer = host.setTimeout(() => {
@@ -1026,7 +1186,7 @@ export function createCompanion(host, context) {
   });
   applyCharacterTexts();
   for (const pose of Object.keys(images)) loadAsset(pose);
-  connect(); mountSettings(); watchInput(); position(); scheduleLeisure();
+  connect(); mountSettings(); watchInput(); bindChatEvents(); position(); scheduleLeisure();
   // Establish the saved location before enabling movement easing (no fly-in from 0,0).
   root.getBoundingClientRect();
   root.style.transition = '';
@@ -1054,6 +1214,7 @@ export function createCompanion(host, context) {
       geometryObserver?.disconnect(); panelObserver?.disconnect();
       unsubscribe?.();
       dataSource?.destroy();
+      unbindChatEvents?.(); backups.close();
       for (const remove of subscriptions) remove();
       for (const timer of timers) { host.clearInterval(timer); host.clearTimeout(timer); }
       timers.clear();

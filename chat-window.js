@@ -1,21 +1,37 @@
 import { chatMessages } from './chat-prompt.js';
 import { normalizeChatConfig, requestChat, requestModelList, safeChatError } from './chat-transport.js';
 import { createSheet, leave } from './sheet.js';
+import { pickable, settleTicket, ticketNote } from './repair.js';
+import { renderTicket, syncTicketActions } from './repair-ticket.js';
+import { tidyComment } from './watch.js';
 
 // 密钥按设备保存一份，所有角色共用；聊天记录、人设和称呼按角色分开保存。
+// 检修记录和闲聊记录分开存（saved.repair），检修的资料不会混进日常聊天。
 const KEY_ID = 'erii-database-pet-chat-key';
-export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getContext, saved = {}, persist, onState, onOpen, onReply, onStopTask, onOpenDatabase, returnFocus }) {
+function keepHistory(list, max, tickets = false) {
+  return Array.isArray(list) ? list.filter(m => ['user', 'assistant'].includes(m?.role) && typeof m.content === 'string').slice(-max)
+    .map(m => {
+      const ticket = tickets ? settleTicket(m.ticket) : null;
+      return { role: m.role, content: m.content.slice(0, 16000), ...(typeof m.at === 'string' && Number.isFinite(Date.parse(m.at)) ? {at:m.at} : {}),
+        ...(m.kind === 'watch' ? {kind:'watch'} : {}), ...(ticket ? {ticket} : {}) };
+    }) : [];
+}
+export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getContext, saved = {}, persist, onState, onOpen, onReply, onStopTask, onOpenDatabase, returnFocus,
+  repair = null, onUserMessage, onRepairDone }) {
   const doc = host.document;
   const listeners = [];
   const { name, fullName } = character;
   const persona = { prompt: character.persona, relationship: character.relationship };
   let config = normalizeChatConfig(saved, persona);
-  let history = Array.isArray(saved.history) ? saved.history.filter(m => ['user', 'assistant'].includes(m?.role)
-    && typeof m.content === 'string').slice(-100).map(m => ({ role: m.role, content: m.content.slice(0, 16000),
-      ...(typeof m.at === 'string' && Number.isFinite(Date.parse(m.at)) ? {at:m.at} : {}) })) : [];
+  const lists = { chat: keepHistory(saved.history, 100), repair: keepHistory(saved.repair, 40, true) };
+  let view = 'chat';
+  let history = lists.chat;
   let apiKey = '';
   let operation = null;
   let modelOperation = null;
+  let commentOperation = null;
+  let ticketBusy = false;
+  let databaseBusy = false;
   let serial = 0;
   let destroyed = false;
   let confirmClear = false;
@@ -56,6 +72,16 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
   const clear = button('清空记录');
   const exportButton = button('导出'); exportButton.setAttribute('aria-label', '导出聊天记录');
   toolbar.append(connection, settingsButton, exportButton, clear);
+  const modeBar = node('div', undefined, 'erii-chat__mode'); modeBar.hidden = !repair;
+  modeBar.setAttribute('role', 'group'); modeBar.setAttribute('aria-label', '聊天模式');
+  const chatTab = button('闲聊'); chatTab.dataset.mode = 'chat';
+  const repairTab = button('检修数据库'); repairTab.dataset.mode = 'repair';
+  modeBar.append(chatTab, repairTab);
+  const scope = node('div', undefined, 'erii-repair__scope'); scope.hidden = true;
+  const scopeLead = node('span'); const scopeTail = node('span');
+  const floorsSelect = node('select', undefined, 'erii-repair__floors'); floorsSelect.setAttribute('aria-label', '检修时附上最近几层正文');
+  for (let count = 0; count <= 10; count++) { const option = node('option', String(count)); option.value = String(count); floorsSelect.append(option); }
+  scope.append(scopeLead, floorsSelect, scopeTail);
   const environment = node('p', '', 'erii-chat__environment');
   const previewMode = getContext().eriiPreviewMode;
   environment.hidden = !previewMode;
@@ -127,19 +153,29 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
   const test = button('测试连接'); const apply = button('保存设置', 'erii-chat__send');
   settingsActions.append(test, apply); settingsPanel.append(settingsActions);
   settingsPanel.append(node('small', '测试会发送一次简短请求，不加入聊天记录。单独配置的接口由运行酒馆的设备连接。'));
-  root.append(grip, header, toolbar, environment, taskBar, log, latest, settingsPanel, status, composer); doc.body.append(root);
+  root.append(grip, header, toolbar, modeBar, scope, environment, taskBar, log, latest, settingsPanel, status, composer); doc.body.append(root);
   const sheet = createSheet(host, root, { grip, drag: [header], onDismiss: () => hide(),
     desktop: () => ({ width: expanded ? 600 : 440, height: expanded ? 760 : 660, align: 'right' }) });
 
   function notify() { onState?.({ open: !root.hidden, busy: Boolean(operation) }); }
+  function trim(which, max, budget) {
+    let list = lists[which];
+    let removed = Math.max(0, list.length - max);
+    list = list.slice(-max);
+    // 修改单也算进大小，避免检修记录把扩展设置撑得太大。
+    const size = m => m.content.length + (m.ticket ? JSON.stringify(m.ticket).length : 0);
+    let characters = list.reduce((sum, m) => sum + size(m), 0);
+    while (list.length > 1 && characters > budget) { characters -= size(list.shift()); removed++; }
+    lists[which] = list;
+    if (view === which) history = list;
+    return removed;
+  }
   function save() {
-    const removed = Math.max(0, history.length - 100);
-    if (editingIndex !== null) editingIndex -= removed;
-    history = history.slice(-100);
-    let characters = history.reduce((sum, m) => sum + m.content.length, 0);
-    while (history.length > 1 && characters > 128000) { characters -= history.shift().content.length; if (editingIndex !== null) editingIndex--; }
-    if (editingIndex !== null && editingIndex < 0) editingIndex = null;
-    persist({ ...config, history: history.map(m => ({ ...m })), draft: input.value.slice(0, 4000), editIndex: editingIndex,
+    const removed = trim('chat', 100, 128000);
+    trim('repair', 40, 64000);
+    // 只有闲聊能“修改重发”，所以编辑位置只跟着闲聊记录移动。
+    if (editingIndex !== null) { editingIndex -= removed; if (editingIndex < 0) editingIndex = null; }
+    persist({ ...config, history: lists.chat.map(m => ({ ...m })), repair: lists.repair.map(m => ({ ...m })), draft: input.value.slice(0, 4000), editIndex: editingIndex,
       draftBeforeEdit: editingIndex === null ? '' : draftBeforeEdit });
   }
   function say(text, kind = '') { status.textContent = text; status.dataset.kind = kind; }
@@ -160,8 +196,33 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
     editBar.hidden = editingIndex === null;
     root.classList.toggle('erii-chat--expanded', expanded);
     root.dataset.busy = String(pending);
+    root.dataset.mode = view;
     connection.textContent = config.mode === 'custom' ? `单独连接 · ${config.model || '尚未设置'}` : '酒馆当前 API';
+    const repairing = view === 'repair';
+    for (const tab of [chatTab, repairTab]) { tab.setAttribute('aria-pressed', String(tab.dataset.mode === view)); tab.disabled = pending || ticketBusy; }
+    if (repairing && !repair?.available()) send.disabled = true;
+    input.placeholder = repairing ? '说说哪里不对，或者直接说「帮我检查一下」…' : `和${name}说句话…`;
+    tip.textContent = tipText();
     notify();
+  }
+  function tipText() {
+    return view === 'repair' ? '检修模式：每次写入都要你确认' : sheet.isSheet() ? '点发送聊天 · 回车换行' : 'Enter 发送 · Shift+Enter 换行';
+  }
+  function renderScope() {
+    scope.hidden = view !== 'repair' || !repair;
+    if (scope.hidden) return;
+    const info = repair.scope();
+    floorsSelect.hidden = !info.available; scopeTail.hidden = !info.available;
+    if (!info.available) { scopeLead.textContent = '没有检测到数据库。启用龙血玄黄·数据库后再来检修。'; return; }
+    scopeLead.textContent = `${character.pronoun}能看到：全部表格（${info.tables} 张）· 最近`;
+    floorsSelect.value = String(info.floors);
+    scopeTail.textContent = `层正文 · 错误 ${info.errors} 条`;
+  }
+  function setMode(next) {
+    if (next === view || (next === 'repair' && !repair) || operation || ticketBusy) return;
+    cancelEdit(); confirmClear = false; clear.textContent = '清空记录';
+    view = next; history = lists[view]; unreadReply = false; say('');
+    renderScope(); renderHistory(true); syncControls();
   }
   function fillSettings() {
     resetModels();
@@ -198,13 +259,17 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
     const follow = forceBottom || nearBottom();
     const previousTop = log.scrollTop;
     const shown = operation?.candidate || history;
+    const repairing = view === 'repair';
     log.replaceChildren();
     if (!shown.length) {
       const welcome = node('div', undefined, 'erii-chat__welcome');
       const illustration = node('img'); illustration.src = welcomeUrl() || avatar.src; illustration.alt = '';
-      welcome.append(illustration, node('span', character.chatWelcome[0]), node('p', character.chatWelcome[1]));
+      const words = repairing ? [`${name}来帮你检修数据库`, '说说哪里不对，或者直接说「帮我检查一下」。要改什么都会先列成修改单，等你勾选确认。'] : character.chatWelcome;
+      welcome.append(illustration, node('span', words[0]), node('p', words[1]));
       const starters = node('div', undefined, 'erii-chat__starters');
-      for (const [text,prompt] of character.starters) {
+      const choices = repairing ? [['帮我检查一下', '帮我检查一下表格，有没有和正文对不上的地方。'], ['刚才报错了', '刚才数据库报错了，帮我看看是怎么回事。'],
+        ['有没有漏记', '最近几层里，有没有表格漏记的东西？']] : character.starters;
+      for (const [text,prompt] of choices) {
         const b = button(text); b.dataset.action = 'starter'; b.dataset.prompt = prompt; starters.append(b);
       }
       welcome.append(starters);
@@ -221,18 +286,25 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
       if (item.role === 'assistant') { identity.src = avatar.src; identity.alt = ''; }
       const bubble = node('article', undefined, `erii-chat__bubble erii-chat__bubble--${item.role}`);
       const meta = node('small', undefined, 'erii-chat__message-meta');
-      meta.append(node('span', item.role === 'user' ? (config.nickname || '你') : fullName));
+      const who = node('span', item.role === 'user' ? (config.nickname || '你') : fullName);
+      if (item.kind === 'watch') who.append(node('em', '旁观', 'erii-chat__tag'));
+      meta.append(who);
       if (date) { const time = node('time', date.toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false})); time.dateTime = item.at; meta.append(time); }
       const tools = node('div', undefined, 'erii-chat__message-tools');
       const copy = button('复制'); copy.dataset.action = 'copy'; copy.dataset.index = String(index); tools.append(copy);
-      if (index === lastUserIndex(shown) && item.role === 'user') {
+      if (!repairing && index === lastUserIndex(shown) && item.role === 'user') {
         const edit = button('修改重发'); edit.dataset.action = 'edit'; edit.dataset.index = String(index); tools.append(edit);
       }
-      if (item.role === 'assistant' && index === shown.length - 1 && lastUserIndex(shown) >= 0) {
+      if (!repairing && item.role === 'assistant' && item.kind !== 'watch' && index === shown.length - 1 && lastUserIndex(shown) >= 0) {
         const regenerate = button('重新回答'); regenerate.dataset.action = 'regenerate'; tools.append(regenerate);
       }
-      for (const control of tools.children) if (control.dataset.action !== 'copy') control.disabled = Boolean(operation) || Boolean(modelOperation);
-      bubble.append(meta, node('p', item.content), tools); row.append(identity, bubble); log.append(row);
+      if (item.kind === 'watch' && index === shown.length - 1) {
+        const answer = button(`回${character.pronoun}`); answer.dataset.action = 'reply'; tools.append(answer);
+      }
+      for (const control of tools.children) if (!['copy', 'reply'].includes(control.dataset.action)) control.disabled = Boolean(operation) || Boolean(modelOperation);
+      bubble.append(meta, node('p', item.content));
+      if (item.ticket) bubble.append(renderTicket(doc, item.ticket, { index, dbBusy: databaseBusy, pending: Boolean(operation) || ticketBusy, durable: repair?.durable !== false }));
+      bubble.append(tools); row.append(identity, bubble); log.append(row);
     }
     if (operation && !operation.isTest) {
       const waiting = node('div', undefined, 'erii-chat__pending');
@@ -277,22 +349,25 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
   }
   function exportHistory() {
     if (!history.length) return;
-    const text = `${fullName}的聊天记录\n\n` + history.map(item => {
-      const who = item.role === 'user' ? (config.nickname || '你') : fullName;
+    const title = view === 'repair' ? '检修记录' : '聊天记录';
+    const text = `${fullName}的${title}\n\n` + history.map(item => {
+      const who = item.role === 'user' ? (config.nickname || '你') : `${fullName}${item.kind === 'watch' ? '（旁观）' : ''}`;
       const time = item.at ? ' · ' + new Date(item.at).toLocaleString('zh-CN',{hour12:false}) : '';
-      return `${who}${time}\n${item.content}`;
+      return `${who}${time}\n${item.content}${item.ticket ? `\n${ticketNote(item.ticket)}` : ''}`;
     }).join('\n\n');
-    const file = new host.Blob(['\uFEFF'+text],{type:'text/plain;charset=utf-8'});
+    download(new host.Blob(['\uFEFF'+text],{type:'text/plain;charset=utf-8'}), `${fullName}${view === 'repair' ? '检修' : '聊天'}-${new Date().toISOString().slice(0,10)}.txt`);
+  }
+  function download(file, filename) {
     const link = node('a'); const address = host.URL.createObjectURL(file);
     downloadURLs.add(address);
-    link.href = address; link.download = `${fullName}聊天-${new Date().toISOString().slice(0,10)}.txt`;
+    link.href = address; link.download = filename;
     doc.body.append(link); link.click(); link.remove();
     const timer = host.setTimeout(() => { feedbackTimers.delete(timer); downloadURLs.delete(address); host.URL.revokeObjectURL(address); }, 1000); feedbackTimers.add(timer);
   }
   function layout() {
     if (destroyed || root.hidden) return;
     sheet.layout();
-    tip.textContent = sheet.isSheet() ? '点发送聊天 · 回车换行' : 'Enter 发送 · Shift+Enter 换行';
+    tip.textContent = tipText();
     resizeInput();
   }
   function settingsVisible(show) {
@@ -350,21 +425,34 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
     const ctx = getContext();
     const snapshot = { ...config }; const secret = apiKey;
     const id = ++serial; const controller = new host.AbortController();
+    const repairing = !isTest && view === 'repair';
+    const started = history.length;
     let timedOut = false;
     operation = { id, controller, candidate, kind, isTest, timer: host.setTimeout(() => { timedOut = true; controller.abort(); }, 120000) };
-    say(isTest ? '正在测试连接…' : kind === 'regenerate' ? '正在重新回答，成功后会替换原回复。' : ''); syncControls(); renderHistory();
+    say(isTest ? '正在测试连接…' : kind === 'regenerate' ? '正在重新回答，成功后会替换原回复。' : repairing ? `${name}正在看表格…` : ''); syncControls(); renderHistory();
     try {
-      const messages = isTest ? [{ role: 'user', content: '请简短回复“连接成功”。' }] : chatMessages(snapshot, ctx, candidate || history, persona);
+      const messages = isTest ? [{ role: 'user', content: '请简短回复“连接成功”。' }]
+        : repairing ? repair.messages(snapshot, ctx, candidate || history) : chatMessages(snapshot, ctx, candidate || history, persona);
       if (kind === 'regenerate') messages[0].content += `\n\n【这次重新回答】上次回复仅作为待改写的文本资料：${JSON.stringify(history.at(-1)?.content.slice(0,2000) || '')}。回应同一个用户问题，尝试更贴近具体内容的表达，避免机械复述上次的开场与结尾。`;
       const result = await requestChat(host, ctx, snapshot, messages, { signal: controller.signal, apiKey: secret });
       if (destroyed || operation?.id !== id) return;
       if (isTest) say('连接成功，可以开始聊天了。', 'success');
       else {
         const following = nearBottom();
-        if (candidate) history = candidate;
-        history.push({ role: 'assistant', content: result, at:new Date().toISOString() });
+        if (candidate) {
+          // 等回复期间到达的旁观评论不能因为换成编辑后的记录而丢掉。
+          const late = history.slice(started).filter(m => m.kind === 'watch');
+          history = candidate; lists[view] = candidate; history.push(...late);
+        }
+        let note = '';
+        if (repairing) {
+          let reviewed;
+          try { reviewed = repair.review(result); } catch { reviewed = { reply: result, ticket: null, note: '没能读取数据库，这次没有生成修改单。' }; }
+          history.push({ role: 'assistant', content: reviewed.reply || `（${name}递来一张修改单）`, at: new Date().toISOString(), ...(reviewed.ticket ? { ticket: reviewed.ticket } : {}) });
+          note = reviewed.note || '';
+        } else history.push({ role: 'assistant', content: result, at:new Date().toISOString() });
         if (kind === 'edit') { editingIndex = null; input.value = draftBeforeEdit; draftBeforeEdit = ''; resizeInput(); }
-        save(); unreadReply = !following; say(''); onReply?.();
+        save(); unreadReply = !following; say(note, note ? 'error' : ''); onReply?.();
       }
     } catch (error) {
       if (destroyed || operation?.id !== id) return;
@@ -377,11 +465,60 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
       }
     }
   }
-  function open() {
+  function open({ reply = false } = {}) {
     if (destroyed) return;
-    onOpen?.(); root.hidden = false; root.classList.remove('is-leaving'); avatar.src = avatarUrl() || avatar.src; settingsVisible(false); renderHistory(true); syncControls(); layout();
-    // Mobile opens without summoning the keyboard over the greeting.
-    if (host.innerWidth >= 640) input.focus({ preventScroll: true }); else close.focus({ preventScroll: true });
+    if (reply) setMode('chat');
+    databaseBusy = Boolean(repair?.busy());
+    onOpen?.(); root.hidden = false; root.classList.remove('is-leaving'); avatar.src = avatarUrl() || avatar.src; settingsVisible(false); renderScope(); renderHistory(true); syncControls(); layout();
+    // Mobile opens without summoning the keyboard over the greeting; replying to her comment is a deliberate request to type.
+    if (reply || host.innerWidth >= 640) input.focus({ preventScroll: true }); else close.focus({ preventScroll: true });
+  }
+  async function downloadBackup(ticket) {
+    const record = await repair?.backup(ticket.backupId);
+    if (destroyed) return;
+    if (!record?.tables) { say('找不到这次的备份了（页面刷新过，而且浏览器没能把备份存下来）。', 'error'); return; }
+    const stamp = new Date(record.at || Date.now()).toLocaleString('sv-SE', { hour12: false }).replace(/[: ]/g, '-').slice(0, 16);
+    download(new host.Blob([record.tables], { type: 'application/json' }), `${fullName}检修备份-${stamp}.json`);
+  }
+  async function ticketAction(control) {
+    const ticket = history[Number(control.dataset.index)]?.ticket;
+    if (!ticket || !repair || ticketBusy) return;
+    const action = control.dataset.action;
+    if (action === 'ticket-download') { downloadBackup(ticket); return; }
+    if (action === 'ticket-all' && ticket.state === 'open') {
+      const valid = ticket.items.filter(pickable); const all = valid.every(item => item.picked);
+      for (const item of valid) item.picked = !all;
+    } else if (action === 'ticket-dismiss' && ticket.state === 'open') ticket.state = 'dismissed';
+    else if (action === 'ticket-keep') ticket.undoConfirm = '';
+    else if (action === 'ticket-apply' && ticket.state === 'open') {
+      if (repair.busy()) { say('数据库正在处理任务，等它忙完再应用。', 'error'); return; }
+      ticketBusy = true; ticket.state = 'applying'; ticket.note = ''; save(); renderHistory(); syncControls();
+      let result;
+      try { result = await repair.apply(ticket, { onBackup: id => { ticket.backupId = id; ticket.durable = repair.durable; save(); } }); }
+      catch (error) { result = { ok: false, text: safeChatError(error) }; }
+      ticketBusy = false;
+      if (result.results) ticket.results = result.results;
+      if (result.ok) Object.assign(ticket, { state: 'applied', backupId: result.backupId, digest: result.digest, presetChanged: result.presetChanged,
+        durable: result.durable, note: result.text, appliedAt: Date.now() });
+      else Object.assign(ticket, { state: 'open', note: result.text, ...(result.backupId ? { backupId: result.backupId } : {}) });
+      if (destroyed) return;
+      save(); renderHistory(); syncControls(); say(result.text, result.ok ? 'success' : 'error');
+      if (result.ok) onRepairDone?.('applied');
+      return;
+    } else if ((action === 'ticket-undo' || action === 'ticket-undo-force') && ['applied', 'interrupted'].includes(ticket.state) && ticket.backupId) {
+      const previous = ticket.state;
+      ticketBusy = true; ticket.state = 'undoing'; save(); renderHistory(); syncControls();
+      let result;
+      try { result = await repair.undo(ticket, action === 'ticket-undo-force'); } catch (error) { result = { ok: false, text: safeChatError(error) }; }
+      ticketBusy = false;
+      if (result.ok) Object.assign(ticket, { state: 'undone', undoConfirm: '', note: result.text });
+      else Object.assign(ticket, { state: previous, undoConfirm: result.confirm ? result.text : '', ...(result.confirm ? {} : { note: result.text }) });
+      if (destroyed) return;
+      save(); renderHistory(); syncControls(); say(result.text, result.ok ? 'success' : result.confirm ? '' : 'error');
+      if (result.ok) onRepairDone?.('undone');
+      return;
+    } else return;
+    save(); renderHistory();
   }
   function hide() {
     if (root.hidden) return;
@@ -400,13 +537,26 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
   listen(log, 'click', event => {
     const control = event.target.closest?.('button[data-action]'); if (!control || !log.contains(control)) return;
     if (control.dataset.action === 'copy') { copyMessage(Number(control.dataset.index), control); return; }
+    if (control.dataset.action === 'reply') { input.focus({ preventScroll: true }); say(`写下想对${name}说的话，发送就好。`); return; }
     if (operation || modelOperation) return;
+    if (control.dataset.action.startsWith('ticket-')) { ticketAction(control); return; }
     if (control.dataset.action === 'starter') { input.value = control.dataset.prompt; resizeInput(); flushDraft(); input.focus({preventScroll:true}); }
     if (control.dataset.action === 'edit') beginEdit(Number(control.dataset.index));
     if (control.dataset.action === 'regenerate' && history.at(-1)?.role === 'assistant') {
       const last = lastUserIndex(); if (last >= 0) run(false, history.slice(0,last+1).map(m=>({...m})), 'regenerate');
     }
   });
+  listen(log, 'change', event => {
+    const box = event.target.closest?.('input[data-action="ticket-pick"]'); if (!box || !log.contains(box)) return;
+    const ticket = history[Number(box.dataset.index)]?.ticket;
+    const item = ticket?.items.find(entry => entry.id === box.dataset.item);
+    if (!item || ticket.state !== 'open' || !pickable(item) || ticketBusy) { box.checked = Boolean(item?.picked); return; }
+    item.picked = box.checked; save();
+    const card = box.closest('.erii-repair__ticket');
+    if (card) syncTicketActions(card, ticket, { dbBusy: databaseBusy, pending: Boolean(operation) || ticketBusy });
+  });
+  listen(modeBar, 'click', event => { const tab = event.target.closest?.('button[data-mode]'); if (tab) setMode(tab.dataset.mode); });
+  listen(floorsSelect, 'change', () => { repair?.setFloors(Number(floorsSelect.value)); renderScope(); });
   listen(settingsButton, 'click', () => settingsVisible(settingsPanel.hidden));
   listen(mode, 'change', () => { resetModels(); custom.hidden = mode.value !== 'custom'; });
   listen(url, 'input', resetModels); listen(key, 'input', resetModels);
@@ -427,6 +577,7 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
     } else {
       history.push(message); input.value = ''; resizeInput(); flushDraft(); renderHistory(true); run();
     }
+    onUserMessage?.(view);
   });
   listen(input, 'keydown', event => {
     if (host.innerWidth >= 640 && event.key === 'Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229) {
@@ -442,15 +593,49 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
   listen(taskStop, 'click', () => onStopTask?.(taskStop.dataset.taskId));
   listen(taskOpen, 'click', () => onOpenDatabase?.());
   listen(clear, 'click', () => {
-    if (!confirmClear && history.length) { confirmClear = true; clear.textContent = '确认清空'; say('再次点击“确认清空”删除这份聊天记录。'); return; }
-    cancelEdit(); history = []; unreadReply = false; confirmClear = false; clear.textContent = '清空记录'; save(); renderHistory(true); say(''); syncControls();
+    if (ticketBusy) return;
+    if (!confirmClear && history.length) {
+      confirmClear = true; clear.textContent = '确认清空';
+      say(view === 'repair' ? '再次点击“确认清空”删除检修记录。已经写入的表格和备份不受影响。' : '再次点击“确认清空”删除这份聊天记录。'); return;
+    }
+    cancelEdit(); history = []; lists[view] = history; unreadReply = false; confirmClear = false; clear.textContent = '清空记录'; save(); renderHistory(true); say(''); syncControls();
   });
   listen(root, 'keydown', event => { if (event.key === 'Escape') { event.stopPropagation(); hide(); } });
   listen(host, 'resize', layout);
   if (host.visualViewport) { listen(host.visualViewport, 'resize', layout); listen(host.visualViewport, 'scroll', layout); }
+  // 旁观陪聊的评论：用这个角色的聊天连接发一次请求，结果作为一条“旁观”消息放进闲聊记录。
+  // 用户正在等回复或在获取模型时不发，交给调用方稍后再试。
+  async function comment(build) {
+    if (destroyed) return { ok: false, reason: 'closed' };
+    if (operation || modelOperation || commentOperation) return { ok: false, reason: 'busy' };
+    const ctx = getContext(); const snapshot = { ...config }; const secret = apiKey;
+    const controller = new host.AbortController();
+    const current = { controller, timer: host.setTimeout(() => controller.abort(), 90000) };
+    commentOperation = current;
+    try {
+      const text = tidyComment(await requestChat(host, ctx, snapshot, build(snapshot, ctx), { signal: controller.signal, apiKey: secret }), name);
+      if (destroyed || commentOperation !== current) return { ok: false, reason: 'closed' };
+      if (!text) return { ok: false, reason: '接口返回了空回复。' };
+      const following = nearBottom();
+      lists.chat.push({ role: 'assistant', content: text, at: new Date().toISOString(), kind: 'watch' });
+      save();
+      if (!root.hidden && view === 'chat' && !operation) { unreadReply = !following; renderHistory(); syncControls(); }
+      return { ok: true, text };
+    } catch (error) {
+      // 换角色或关闭扩展时会中止请求，这不算接口出错。
+      if (destroyed || commentOperation !== current) return { ok: false, reason: 'closed' };
+      return { ok: false, reason: error?.name === 'AbortError' ? '等待评论超时了。' : safeChatError(error, secret) };
+    } finally {
+      host.clearTimeout(current.timer);
+      if (commentOperation === current) commentOperation = null;
+    }
+  }
   fillSettings(); renderHistory(); syncControls();
-  return { open, close: hide, get visible() { return !root.hidden; }, get busy() { return Boolean(operation); },
+  return { open, close: hide, comment, setMode, get view() { return view; }, get visible() { return !root.hidden; }, get busy() { return Boolean(operation); },
     setTask(task) {
+      // 数据库忙闲变化时重画检修记录，让修改单的“应用”按钮跟着可用或停用。
+      const busyNow = Boolean(repair?.busy());
+      if (busyNow !== databaseBusy) { databaseBusy = busyNow; if (!root.hidden && view === 'repair' && !operation) renderHistory(); }
       taskBar.hidden = !task;
       if (!task) return;
       taskText.textContent = task.text; taskBar.dataset.kind = task.kind || '';
@@ -463,6 +648,7 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
       destroyed = true;
       if (operation) { host.clearTimeout(operation.timer); operation.controller.abort(); operation = null; }
       if (modelOperation) { host.clearTimeout(modelOperation.timer); modelOperation.controller.abort(); modelOperation = null; }
+      if (commentOperation) { host.clearTimeout(commentOperation.timer); commentOperation.controller.abort(); commentOperation = null; }
       serial++; apiKey = ''; sheet.destroy();
       for (const timer of feedbackTimers) host.clearTimeout(timer); feedbackTimers.clear();
       for (const address of downloadURLs) host.URL.revokeObjectURL(address); downloadURLs.clear();
