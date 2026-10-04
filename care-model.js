@@ -1,5 +1,5 @@
 // 养成：亲密度、需求值、心情、成长日记、昵称、每日见面。纯逻辑，时间可注入，保存交给调用方。
-// 约定：亲密度只涨不降；需求值只影响心情和台词，没有任何惩罚，可整体关闭（见 docs/adr/0003）。
+// 约定：亲密度只涨不降；需求值只影响心情和台词，没有任何惩罚，可整体关闭。
 const MINUTE = 60000, HOUR = 60 * MINUTE, DAY = 24 * HOUR;
 export const TIERS = Object.freeze([0, 100, 300, 700, 1500]);
 export const TIER_NAMES = Object.freeze(['初识', '熟悉', '亲近', '信赖', '挚爱']);
