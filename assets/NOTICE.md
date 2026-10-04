@@ -19,3 +19,6 @@ v0.7.0 新增 assets/life/work-bookshop.webp、work-bakery.webp、work-florist.w
 
 
 v0.7.1 新增 assets/life/eat-pudding.webp、eat-riceball.webp、eat-omurice.webp、eat-ramen.webp 四张独立吃饭图。内置 ImageGen 根据本项目 idle.webp 的角色画风及原 eating.webp 的自然坐姿参考分别生成；各自呈现布丁、海苔饭团、蛋包饭、筷子夹拉面，不戴手套，头顶小黄鸭保留。发布版只等比例缩小并压缩为 768×768 透明 WebP。原图与完整提示词保存在工作区 outputs/Erii-Food-Art-v0.7.1 和“小绘-v0.7.1-四种吃饭配图提示词.md”，不进入安装包；署名及非商业条件沿用上文。
+
+
+v0.8.0 新增的零的动作图在 assets/zero/，署名与许可见 assets/zero/NOTICE.md。奶蛋的图属于龙血玄黄·数据库，本扩展只在运行时读取数据库已经加载的图片，不在本包内。
