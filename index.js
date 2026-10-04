@@ -3,9 +3,12 @@ import { createDatabaseObserver } from './database-observer.js';
 import { readBounds, fromRatio, toRatio, constrain, dockEdge } from './position.js';
 import { createMotion } from './motion.js';
 import { StoryCarousel } from './stories.js';
+import { createChatWindow } from './chat-window.js';
+import { LifeModel } from './life-model.js';
+import { createLifeWindow } from './life-window.js';
 
 const ID = 'erii-database-pet';
-const defaults = { enabled: true, idleActions: true, edgePeeks: true, healingStories: true, hideOriginal: true, size: 88, side: 'right', position: null };
+const defaults = { enabled: true, idleActions: true, edgePeeks: true, healingStories: true, hideOriginal: true, taskDetails: false, size: 88, side: 'right', position: null };
 const poses = ['idle', 'received', 'writing', 'complete', 'error', 'tea', 'reading', 'origami', 'duck', 'stretch', 'rest', 'gift', 'lifted', 'land', 'wave', 'peek'];
 const labels = { idle: '等你下一条记录', received: '收到新任务', writing: '认真整理记录', complete: '完成啦',
   error: '这条记录需要检查', tea: '喝一口茶', reading: '翻翻小书', origami: '折一只纸鹤', duck: '陪小黄鸭玩',
@@ -15,6 +18,10 @@ const imageUrls = Object.fromEntries(poses.map(pose => [pose, new URL(`assets/${
 const edgeAssets = { left: 'edge-left-v2', right: 'edge-right-v2', bottom: 'edge-bottom', top: 'edge-bottom' };
 for (const [edge, asset] of Object.entries(edgeAssets))
   imageUrls[`edge-${edge}`] = new URL(`assets/${asset}.webp`, import.meta.url).href;
+for (const name of ['work-bookshop','work-bakery','work-florist','eat-pudding','eat-riceball','eat-omurice','eat-ramen']) {
+  imageUrls[name] = new URL(`assets/life/${name}.webp`, import.meta.url).href;
+  labels[name] = name.startsWith('eat-') ? '慢慢吃一顿饭' : '认真做好今天的小工作';
+}
 let active = null;
 let bootTimer = null;
 let stopped = true;
@@ -34,6 +41,12 @@ export function createCompanion(host, context) {
   settings.side = settings.side === 'left' ? 'left' : 'right';
   const model = new CompanionModel();
   const storyteller = new StoryCarousel();
+  let chat = null;
+  let life = null;
+  let lifeNotice = null;
+  const lifeModel = new LifeModel(settings.life, {persist:value => {
+    settings.life = value; store[ID] = { ...(store[ID] || {}), ...settings }; context.saveSettingsDebounced?.();
+  }});
   const subscriptions = [];
   const timers = new Set();
   let dataSource = null;
@@ -70,7 +83,7 @@ export function createCompanion(host, context) {
   const localActions = [];
   const root = el(doc, 'div', undefined, 'erii-companion');
   root.id = `${ID}-root`;
-  root.dataset.version = '0.5.14';
+  root.dataset.version = '0.7.1';
   root.dataset.pose = 'idle';
   root.style.transition = 'none';
   // Panels are siblings: a transformed ancestor would change their fixed coordinates.
@@ -165,7 +178,16 @@ export function createCompanion(host, context) {
   databaseOpen.setAttribute('aria-label', '打开数据库本体');
   const storyOpen = el(doc, 'button', '听一个小故事', 'erii-companion__story-open');
   storyOpen.type = 'button';
-  notebook.append(header, databaseOpen, connection, taskList, historyTitle, historyList, help, leisureControls, storyOpen);
+  const chatOpen = el(doc, 'button', '和小绘聊天', 'erii-companion__story-open');
+  chatOpen.type = 'button'; chatOpen.setAttribute('aria-controls', `${ID}-chat`);
+  const lifeOpen = el(doc, 'button', '生活手帐', 'erii-companion__story-open');
+  lifeOpen.type = 'button'; lifeOpen.setAttribute('aria-controls', `${ID}-life`);
+  notebook.append(header, databaseOpen, chatOpen, lifeOpen, connection, taskList, historyTitle, historyList, help, leisureControls, storyOpen);
+  const lifeBubble = el(doc, 'div', undefined, 'erii-companion__life-bubble');
+  lifeBubble.hidden = true; lifeBubble.setAttribute('aria-label', '小绘的生活进度');
+  const lifeText = el(doc, 'span', undefined, 'erii-companion__life-text');
+  const lifeClaim = el(doc, 'button', '领工资', 'erii-companion__life-claim'); lifeClaim.type = 'button';
+  lifeClaim.setAttribute('aria-label', '领取工资（桌宠气泡）'); lifeBubble.append(lifeText, lifeClaim);
   const storyBubble = el(doc, 'section', undefined, 'erii-companion__story');
   storyBubble.hidden = true;
   storyBubble.setAttribute('aria-label', '小绘的治愈小故事');
@@ -183,7 +205,7 @@ export function createCompanion(host, context) {
   storyFoot.append(el(doc, 'span', '每 30 秒换一篇'), storyNext);
   storyBubble.append(storyHeading, storyText, storyFoot);
   root.append(portrait);
-  overlay.append(message, notebook, storyBubble);
+  overlay.append(message, notebook, storyBubble, lifeBubble);
   doc.body.append(root, overlay);
 
   function listen(target, name, handler, options) {
@@ -201,7 +223,7 @@ export function createCompanion(host, context) {
     save();
   }
   function setNotebook(open) {
-    if (open) storyteller.dismiss();
+    if (open) { chat?.close(); life?.close(); storyteller.dismiss(); }
     notebook.hidden = !open;
     if (open) overlay.hidden = false;
     portrait.setAttribute('aria-expanded', String(open));
@@ -299,7 +321,7 @@ export function createCompanion(host, context) {
     ? new host.ResizeObserver(() => scheduleLayout(true)) : null;
   const panelObserver = typeof host.ResizeObserver === 'function'
     ? new host.ResizeObserver(() => scheduleLayout()) : null;
-  panelObserver?.observe(notebook); panelObserver?.observe(message); panelObserver?.observe(storyBubble);
+  panelObserver?.observe(notebook); panelObserver?.observe(message); panelObserver?.observe(storyBubble); panelObserver?.observe(lifeBubble);
   function position() {
     if (destroyed) return;
     bounds = readBounds(host, doc, settings.size);
@@ -340,10 +362,12 @@ export function createCompanion(host, context) {
     if (!notebook.hidden) placePanel(notebook, 420);
     if (!message.hidden) placePanel(message, 130);
     if (!storyBubble.hidden) placePanel(storyBubble, 300);
+    if (!lifeBubble.hidden) placePanel(lifeBubble, 130);
   }
   function storyBlocked() {
     return settings.enabled === false || doc.hidden || model.snapshot.silent || model.snapshot.busy
-      || Date.now() < terminalUntil || !model.canInteract() || !notebook.hidden || Boolean(dragging);
+      || Date.now() < terminalUntil || !model.canInteract() || !notebook.hidden || chat?.visible || life?.visible
+      || Boolean(lifeModel.state.active) || lifeNotice?.until > Date.now() || Boolean(dragging);
   }
   function tellStory() {
     // Close the notebook first, so the bubble has room to sit beside her.
@@ -363,13 +387,17 @@ export function createCompanion(host, context) {
     overlay.hidden = root.hidden && notebook.hidden;
     const snapshot = model.snapshot;
     const now = Date.now();
+    if (lifeModel.tick()) lifeNotice = {text:'吃完啦。今天也好好照顾自己了。',until:now+6000};
+    const activity = lifeModel.view();
     const localPose = model.pose();
     const canPeek = settings.enabled && settings.edgePeeks && !dragging
-      && notebook.hidden && localPose === 'idle' && !snapshot.busy && !doc.hidden;
+      && notebook.hidden && !chat?.busy && !activity.active && !life?.visible && localPose === 'idle' && !snapshot.busy && !doc.hidden;
     const edge = canPeek ? dockEdge(point, bounds) : null;
     const edgePose = edge && `edge-${edge}`;
     const pose = dragging?.moved ? 'lifted' : edgePose && edgePose !== failedEdge ? edgePose
-      : now < landingUntil ? 'land' : localPose;
+      : now < landingUntil ? 'land' : chat?.busy && localPose === 'idle' && model.canInteract() ? 'writing'
+      : localPose !== 'idle' ? localPose : activity.active && !snapshot.busy && !snapshot.silent
+        ? activity.ready ? 'complete' : activity.item.image : localPose;
     if (pose !== lastPose) {
       lastPose = pose;
       showPose(pose);
@@ -386,12 +414,15 @@ export function createCompanion(host, context) {
     const failureNotice = hasNoticeMessage && ['error', 'warning'].includes(newest.kind);
     const feedback = stopFeedback?.until > now && snapshot.busy
       && (!snapshot.activeTaskId || stopFeedback.taskId === snapshot.activeTaskId) ? stopFeedback : null;
+    const taskDisplay = activeTask ? settings.taskDetails
+      ? [activeTask.feature || '数据库任务', activeTask.detail].filter(Boolean).join('\n')
+      : `正在${activeTask.feature || '处理任务'}…` : '数据库正在处理任务，等待进度同步…';
     const wasHidden = message.hidden;
     message.hidden = Boolean(dragging?.moved) || notebook.hidden === false || snapshot.silent || !snapshot.connected || (!hasTaskMessage && !hasNoticeMessage) || !settings.enabled;
     let changed = wasHidden !== message.hidden;
     if (!message.hidden) {
       const text = feedback ? feedback.text : failureNotice ? newest.text : hasTaskMessage
-        ? activeTask ? `正在${activeTask.feature || '处理任务'}…` : '数据库正在处理任务，等待进度同步…' : newest.text;
+        ? taskDisplay : newest.text;
       message.dataset.kind = feedback ? feedback.kind : failureNotice ? newest.kind : hasTaskMessage ? activeTask?.kind || 'info' : newest.kind;
       if (messageText.textContent !== text) { messageText.textContent = text; changed = true; }
       const canStop = Boolean(hasTaskMessage && activeTask?.action?.run);
@@ -400,6 +431,25 @@ export function createCompanion(host, context) {
       messageStop.disabled = taskStopBusy;
       messageStop.textContent = taskStopBusy ? '停止中…' : (activeTask?.action?.label || '停止');
     }
+    const panelTask = snapshot.connected && !snapshot.silent && (hasTaskMessage || hasNoticeMessage) ? {
+      text: feedback ? feedback.text : failureNotice ? newest.text : hasTaskMessage
+        ? taskDisplay : newest.text,
+      id: activeTask?.id, kind: feedback ? feedback.kind : failureNotice ? newest.kind : '',
+      canStop: Boolean(hasTaskMessage && activeTask?.action?.run), pending: taskStopBusy,
+    } : null;
+    chat?.setTask(panelTask); life?.setTask(panelTask); life?.render();
+    const hadLifeBubble = !lifeBubble.hidden;
+    lifeBubble.hidden = !settings.enabled || snapshot.silent || hasTaskMessage || hasNoticeMessage || Boolean(dragging)
+      || !notebook.hidden || chat?.visible || life?.visible || (!activity.active && !(lifeNotice?.until > now));
+    if (!lifeBubble.hidden) {
+      const seconds = Math.ceil(activity.remaining / 1000);
+      const text = activity.ready ? `下班啦，${activity.item.reward} 金币等你来领。`
+        : activity.active?.kind === 'job' ? `小绘在${activity.item.name}帮忙 · ${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')} 后下班`
+        : activity.active ? `小绘在吃${activity.item.name} · 还有 ${seconds} 秒` : lifeNotice.text;
+      if (lifeText.textContent !== text) {lifeText.textContent = text; changed = true;}
+      lifeClaim.hidden = !activity.ready;
+    }
+    changed ||= hadLifeBubble !== !lifeBubble.hidden;
     updateNotebook();
     const beforeStory = storyBubble.hidden;
     storyteller.tick({ blocked: storyBlocked(), automatic: settings.healingStories === true && localPose === 'idle' });
@@ -431,6 +481,14 @@ export function createCompanion(host, context) {
       fields.push([key, input]);
     }
     const sizeRow = el(doc, 'label', '桌宠大小');
+    const taskRow = el(doc, 'label');
+    const taskMode = el(doc, 'select'); taskMode.setAttribute('aria-label', '任务内容显示');
+    for (const [value, caption] of [['brief', '简略版'], ['full', '完整版（真实工作内容）']]) {
+      const option = el(doc, 'option', caption); option.value = value; taskMode.append(option);
+    }
+    taskMode.value = settings.taskDetails ? 'full' : 'brief';
+    taskRow.append(el(doc, 'span', '任务内容显示'), taskMode); settingsMount.append(taskRow);
+    listen(taskMode, 'change', () => { settings.taskDetails = taskMode.value === 'full'; save(); });
     const range = el(doc, 'input');
     range.type = 'range'; range.min = '56'; range.max = '112'; range.step = '4'; range.value = String(settings.size);
     sizeRow.append(range);
@@ -442,8 +500,13 @@ export function createCompanion(host, context) {
     openBook.setAttribute('aria-controls', notebook.id);
     settingsMount.append(openBook);
     listen(openBook, 'click', () => setNotebook(true));
+    const chatSetting = el(doc, 'button', '和小绘聊天'); chatSetting.type = 'button';
+    chatSetting.setAttribute('aria-controls', `${ID}-chat`);
+    settingsMount.append(chatSetting); listen(chatSetting, 'click', () => chat?.open());
+    const lifeSetting = el(doc, 'button', '生活手帐'); lifeSetting.type = 'button';
+    lifeSetting.setAttribute('aria-controls', `${ID}-life`); settingsMount.append(lifeSetting); listen(lifeSetting, 'click', () => life?.open());
     settingsMount.append(el(doc, 'p', '轻点或连点小绘可互动；普通长按让她放松，手机长按约 1.4 秒打开小本子。电脑可右键打开，或使用这里的按钮。'));
-    settingsControls = { sync() { for (const [key, input] of fields) input.checked = settings[key] === true; range.value = String(settings.size); } };
+    settingsControls = { sync() { for (const [key, input] of fields) input.checked = settings[key] === true; range.value = String(settings.size); taskMode.value = settings.taskDetails ? 'full' : 'brief'; } };
     target.append(settingsMount);
   }
 
@@ -453,10 +516,8 @@ export function createCompanion(host, context) {
     if (mobileBookTimer !== null) host.clearTimeout(mobileBookTimer);
     holdTimer = null; mobileBookTimer = null;
   }
-  listen(messageStop, 'click', async event => {
-    event.stopPropagation();
-    if (taskStopBusy || message.hidden || messageStop.hidden) return;
-    const displayedId = messageStop.dataset.taskId;
+  async function stopDatabaseTask(displayedId) {
+    if (taskStopBusy) return;
     dataSource?.refresh();
     const task = currentTask();
     if (!task?.action?.run || task.id !== displayedId) {
@@ -467,6 +528,10 @@ export function createCompanion(host, context) {
     try { await task.action.run(); }
     catch { stopFeedback = { taskId: task.id, text: '停止任务失败，请重试或打开数据库面板。', kind: 'error', until: Date.now() + 8000 }; }
     finally { taskStopBusy = false; dataSource?.refresh(); update(); }
+  }
+  listen(messageStop, 'click', event => {
+    event.stopPropagation();
+    if (!message.hidden && !messageStop.hidden) stopDatabaseTask(messageStop.dataset.taskId);
   });
   // The hot path writes only the pet transform and sway. No panel rendering or layout reads.
   function flushDrag() {
@@ -613,6 +678,8 @@ export function createCompanion(host, context) {
   });
   listen(doc, 'keydown', event => {
     if (event.key !== 'Escape') return;
+    if (life?.visible) { life.close(); return; }
+    if (chat?.visible) { chat.close(); return; }
     if (dragging) finishDrag(null, true);
     if (!notebook.hidden) setNotebook(false);
     if (!storyBubble.hidden) { storyteller.dismiss(); update(); }
@@ -630,7 +697,7 @@ export function createCompanion(host, context) {
     const timer = host.setTimeout(() => {
       timers.delete(timer);
       if (destroyed) return;
-      if (!doc.hidden && settings.enabled && settings.idleActions && !dragging && notebook.hidden && !storyteller.current && model.pose() === 'idle' && !root.dataset.edge) {
+      if (!doc.hidden && settings.enabled && settings.idleActions && !dragging && notebook.hidden && !chat?.visible && !life?.visible && !lifeModel.state.active && !storyteller.current && model.pose() === 'idle' && !root.dataset.edge) {
         if (Math.random() < 0.28) { model.tap(); }
         else {
           const choices = ['tea', 'reading', 'origami', 'duck', 'stretch', 'rest', 'peek', 'wave'];
@@ -642,6 +709,27 @@ export function createCompanion(host, context) {
     }, 12000 + Math.random() * 8000);
     timers.add(timer);
   }
+  chat = createChatWindow(host, {
+    getContext: () => host.SillyTavern?.getContext?.() || context,
+    saved: settings.chat || {},
+    persist: value => { settings.chat = value; store[ID] = { ...(store[ID] || {}), ...settings }; context.saveSettingsDebounced?.(); },
+    onOpen: () => { life?.close(); setNotebook(false); storyteller.dismiss(); },
+    onState: () => { if (point) update(); },
+    onReply: () => { if (model.canInteract()) model.leisure('wave'); },
+    onStopTask: stopDatabaseTask,
+    returnFocus: () => (settings.enabled === false ? settingsMount?.querySelector('button[aria-controls]') : portrait)?.focus({ preventScroll: true }),
+  });
+  listen(chatOpen, 'click', () => chat.open());
+  life = createLifeWindow(host, {
+    model:lifeModel,
+    onOpen:() => {chat?.close(); setNotebook(false); storyteller.dismiss();},
+    onChange:() => {if (point) update();},
+    blocked:() => model.snapshot.busy || chat?.busy,
+    onStopTask:stopDatabaseTask,
+    returnFocus:() => (settings.enabled === false ? settingsMount?.querySelector('button[aria-controls]') : portrait)?.focus({preventScroll:true}),
+  });
+  listen(lifeOpen, 'click', () => life.open());
+  listen(lifeClaim, 'click', () => {if (lifeModel.claim()) {lifeNotice = {text:'工资收好啦，去挑点喜欢的饭吧。',until:Date.now()+6000}; update();}});
   for (const pose of Object.keys(imageUrls)) loadAsset(pose);
   connect(); mountSettings(); watchInput(); position(); scheduleLeisure();
   // Establish the saved location before enabling movement easing (no fly-in from 0,0).
@@ -649,10 +737,15 @@ export function createCompanion(host, context) {
   root.style.transition = '';
   return {
     model,
+    chat,
+    life,
+    lifeModel,
     refresh: update,
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      chat.destroy();
+      life.destroy();
       storyteller.dismiss();
       swapVersion++; cancelDrag(); motion.destroy(); loaded.clear();
       if (layoutFrame !== null) host.cancelAnimationFrame(layoutFrame);

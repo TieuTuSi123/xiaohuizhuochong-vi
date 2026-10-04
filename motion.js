@@ -49,6 +49,10 @@ const tracks = {
   'edge-bottom': { duration: 5200, bridge: 280, frames: [neutral(0), poseFrame(.45, 0, -1.8, .6), neutral(1)] },
   'edge-top': { duration: 5200, bridge: 280, frames: [neutral(0), poseFrame(.45, 0, -1.8, -.6), neutral(1)] },
 };
+tracks['work-bookshop'] = {...tracks.reading,duration:5200};
+tracks['work-bakery'] = {...tracks.origami,duration:3800};
+tracks['work-florist'] = {...tracks.reading,duration:4400};
+for (const pose of ['eat-pudding','eat-riceball','eat-omurice','eat-ramen']) tracks[pose] = {...tracks.tea,duration:4600};
 
 // Browser frames are independent of the 250ms database sampling. Only a pose
 // change reads the rendered transform; dragging still has no layout reads.

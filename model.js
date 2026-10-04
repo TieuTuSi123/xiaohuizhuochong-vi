@@ -10,7 +10,7 @@ export function normalizeSnapshot(value) {
     silent: value.silent === true, activityKnown: value.activityKnown !== false, version: Number(value.version) || 0,
     activeTaskId: value.activeTaskId === undefined ? text(value.tasks.find(task => task.busy)?.id) : text(value.activeTaskId),
     tasks: value.tasks.slice(0, 100).map(item => ({ id: text(item.id), feature: text(item.feature),
-      detail: text(item.detail), kind: KINDS.has(item.kind) ? item.kind : 'info', busy: item.busy === true,
+      detail: typeof item.detail === 'string' ? item.detail : '', kind: KINDS.has(item.kind) ? item.kind : 'info', busy: item.busy === true,
       dismissible: item.dismissible === true,
       action: item.action && typeof item.action.run === 'function' ? {
         label: text(item.action.label || '停止'),

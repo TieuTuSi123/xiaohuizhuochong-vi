@@ -83,20 +83,21 @@
 .erii-companion__controls button { border: 1px solid #dec2b8; border-radius: 6px; background: #fffdf8; color: #8f4144; padding: 6px 10px; }
 .erii-companion__controls button:hover:not(:disabled) { background: #f9e6dc; }
 .erii-companion__controls button:disabled { opacity: .45; cursor: default; }
-.erii-companion__message {
+.erii-companion__message, .erii-companion__life-bubble {
   position: fixed; width: max-content; max-width: var(--erii-page-width, 310px); max-height: 130px;
   overflow: auto; padding: 8px 12px; border: 1px solid #d7b9af; border-radius: 8px;
   background: #fff9f0; white-space: pre-wrap; overflow-wrap: anywhere;
   pointer-events: auto; box-shadow: none; backdrop-filter: none;
   display: flex; align-items: center; gap: 8px;
 }
-.erii-companion__message-text { flex: 1 1 auto; min-width: 0; }
-.erii-companion__message-action {
+.erii-companion__message-text, .erii-companion__life-text { flex: 1 1 auto; min-width: 0; max-height: 108px; overflow: auto; }
+.erii-companion__message-action, .erii-companion__life-claim {
   flex: 0 0 auto; border: 1px solid #c88982; border-radius: 5px; background: #fffdf8;
   color: #a4483b; padding: 3px 8px; cursor: pointer;
+  align-self: flex-start;
 }
-.erii-companion__message-action:hover:not(:disabled) { background: #f9e6dc; }
-.erii-companion__message-action:disabled { opacity: .55; cursor: default; }
+.erii-companion__message-action:hover:not(:disabled), .erii-companion__life-claim:hover:not(:disabled) { background: #f9e6dc; }
+.erii-companion__message-action:disabled, .erii-companion__life-claim:disabled { opacity: .55; cursor: default; }
 .erii-companion__story {
   position: fixed; width: var(--erii-page-width, 310px); max-height: 300px;
   overflow: auto; overscroll-behavior: contain; pointer-events: auto;
@@ -116,6 +117,7 @@
 .erii-companion-settings summary { cursor: pointer; padding: 6px 0; color: #fff7f7 !important; font-weight: 700; }
 .erii-companion-settings label { display: flex; gap: 8px; align-items: center; margin: 10px 0; }
 .erii-companion-settings input[type="range"] { max-width: 150px; }
+.erii-companion-settings select { max-width: 210px; border-radius: 6px; padding: 5px 8px; background: #fff9f0 !important; color: #613531 !important; text-shadow: none; }
 .erii-companion-settings button {
   appearance: none; border: 1px solid rgba(255, 214, 221, .9) !important; border-radius: 6px;
   background: rgba(112, 39, 52, .92) !important; color: #fff8f8 !important;
@@ -125,7 +127,189 @@
 .erii-companion-settings button:hover { background: rgba(150, 55, 70, .96) !important; color: #fff !important; }
 body[data-erii-replace-database-pet] .acu-desk-pet,
 body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !important; pointer-events: none !important; }
+.erii-chat {
+  position: fixed; z-index: 9460; display: flex; flex-direction: column;
+  width: 440px; height: 660px; overflow: hidden; pointer-events: auto;
+  border: 1px solid #dab6aa; border-radius: 16px; background: #fffaf3; color: #613531;
+  font: 13px/1.6 "Microsoft YaHei", "PingFang SC", sans-serif;
+  text-align: left; text-shadow: none !important; backdrop-filter: none; box-shadow: none;
+}
+.erii-chat *, .erii-chat *::before, .erii-chat *::after { box-sizing: border-box; }
+.erii-chat[hidden], .erii-chat [hidden] { display: none !important; }
+.erii-chat button, .erii-chat input, .erii-chat textarea, .erii-chat select {
+  font: inherit; text-shadow: none !important; box-shadow: none !important; margin: 0;
+}
+.erii-chat button {
+  appearance: none; cursor: pointer; padding: 6px 10px; min-height: 34px;
+  border: 1px solid #dec2b8; border-radius: 7px; background: #fffdf8; color: #8f4144 !important;
+  line-height: 1.4; white-space: nowrap; flex-shrink: 0;
+}
+.erii-chat button:hover:not(:disabled) { background: #f9e6dc; }
+.erii-chat button:disabled { opacity: .55; cursor: default; }
+.erii-chat button:focus-visible, .erii-chat input:focus-visible, .erii-chat textarea:focus-visible, .erii-chat select:focus-visible {
+  outline: 2px solid #b86b68; outline-offset: 2px;
+}
+.erii-chat__header {
+  position: relative; display: flex; gap: 10px; align-items: center; flex: 0 0 auto;
+  padding: 12px 96px 12px 14px; min-height: 74px; border-bottom: 1px solid #ecd8cc;
+  background: #f9ede3; cursor: move; touch-action: none;
+}
+.erii-chat__header img { display: block; width: 46px; height: 46px; object-fit: contain; }
+.erii-chat__header strong { display: block; font: 600 21px/1.35 "KaiTi", "STKaiti", "Microsoft YaHei", serif; color: #923d3f; letter-spacing: 2px; }
+.erii-chat__header span { display: block; color: #9c7770; font-size: 11px; }
+.erii-chat .erii-chat__close {
+  position: absolute; top: 5px; right: 5px; width: 38px; height: 38px;
+  border: 0; background: transparent; font-size: 24px; padding: 0;
+}
+.erii-chat .erii-chat__expand { position: absolute; right: 49px; top: 8px; width: 32px; min-height: 32px; padding: 0; border: 0; background: transparent; font-size: 21px; }
+.erii-chat__toolbar { display: flex; gap: 6px; align-items: center; padding: 8px 12px; flex: 0 0 auto; }
+.erii-chat__connection { flex: 1 1 auto; min-width: 0; color: #9c7770; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.erii-chat__toolbar button { font-size: 11px; padding: 5px 8px; }
+.erii-chat__environment { margin: 0; padding: 6px 12px; color: #855348; background: #f8eddf; font-size: 11px; flex: 0 0 auto; }
+.erii-chat__log { flex: 1 1 auto; min-height: 0; overflow: auto; overflow-anchor: none; overscroll-behavior: contain; padding: 12px 16px; }
+.erii-chat__welcome { padding: 22px 6px; text-align: center; color: #9c7770; }
+.erii-chat__welcome img { display: block; width: 92px; height: 92px; object-fit: contain; margin: 0 auto 12px; }
+.erii-chat__welcome span { display: block; color: #923d3f; font-size: 16px; letter-spacing: 1px; }
+.erii-chat__welcome p { margin: 10px 0; font-size: 12px; }
+.erii-chat__starters { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-top: 18px; }
+.erii-chat__starters button { font-size: 12px; }
+.erii-chat__day { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 5px 0 18px; font-size: 10px; color: #9c7770; }
+.erii-chat__day::before, .erii-chat__day::after { content: ""; width: 32px; height: 1px; background: #e6d3c5; }
+.erii-chat__row { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 17px; }
+.erii-chat__row--user { flex-direction: row-reverse; }
+.erii-chat__avatar { width: 30px; height: 34px; object-fit: contain; flex: 0 0 auto; margin-top: 4px; }
+.erii-chat__avatar--user { display: grid; place-items: center; height: 29px; border-radius: 50%; color: #a94446; background: #f2ddd1; font-size: 11px; }
+.erii-chat__bubble { max-width: 91%; width: fit-content; margin: 0 0 14px; padding: 9px 12px; border: 1px solid #ecd8cc; border-radius: 12px 12px 12px 3px; background: #fffef9; }
+.erii-chat__row .erii-chat__bubble { max-width: calc(100% - 38px); margin: 0; min-width: 78px; }
+.erii-chat__bubble--user { margin-left: auto; border-color: #e5c4b6; border-radius: 12px 12px 3px 12px; background: #f8e4db; }
+.erii-chat__bubble small { display: block; font-size: 10px; color: #9c7770; margin-bottom: 3px; }
+.erii-chat__bubble p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: #613531; line-height: 1.85; }
+.erii-chat__bubble .erii-chat__message-meta { display: flex; justify-content: space-between; gap: 18px; align-items: baseline; }
+.erii-chat__message-meta time { opacity: .85; font-size: 9px; white-space: nowrap; }
+.erii-chat__message-tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 7px 0 -2px; }
+.erii-chat__message-tools button { border: 0; background: transparent; padding: 2px 0; min-height: 24px; font-size: 10px; color: #9c7770 !important; }
+.erii-chat__message-tools button:hover:not(:disabled) { color: #a94446 !important; background: transparent; text-decoration: underline; }
+.erii-chat__pending { display: flex; align-items: center; gap: 6px; color: #9c7770; font-size: 11px; padding: 1px 0 9px 38px; }
+.erii-chat__pending i { font-size: 20px; font-style: normal; animation: erii-chat-thinking 1.4s ease-in-out infinite; }
+.erii-chat__pending i:nth-of-type(2) { animation-delay: .2s; }
+.erii-chat__pending i:nth-of-type(3) { animation-delay: .4s; }
+@keyframes erii-chat-thinking { 0%, 70%, 100% { opacity: .35; } 35% { opacity: 1; } }
+.erii-chat .erii-chat__latest { align-self: center; margin: 0 0 5px; min-height: 28px; padding: 4px 12px; border-radius: 20px; font-size: 11px; background: #f9e6dc; }
+.erii-chat__status { flex: 0 0 auto; margin: 0; padding: 6px 14px; font-size: 11px; color: #9c7770; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 76px; overflow: auto; }
+.erii-chat__status:empty { display: none; }
+.erii-chat [data-kind="error"], .erii-chat [data-kind="warning"] { color: #a4483b; }
+.erii-chat [data-kind="success"] { color: #4c7856; }
+.erii-chat__composer { flex: 0 0 auto; padding: 10px 12px 12px; border-top: 1px solid #ecd8cc; background: #f9f0e8; }
+.erii-chat__edit-bar { display: flex; gap: 8px; align-items: center; font-size: 10px; color: #9c7770; padding: 0 0 7px; }
+.erii-chat__edit-bar span { flex: 1; }
+.erii-chat__edit-bar button { min-height: 27px; font-size: 10px; padding: 3px 7px; }
+.erii-chat textarea, .erii-chat input:not([type="checkbox"]), .erii-chat select {
+  display: block; width: 100%; max-width: 100%; border: 1px solid #dab6aa; border-radius: 7px;
+  background: #fffef9 !important; color: #613531 !important; padding: 8px 10px;
+  min-height: 38px; outline: none;
+}
+.erii-chat textarea { resize: none; min-height: 48px; max-height: 110px; line-height: 1.5; }
+.erii-chat textarea::placeholder, .erii-chat input::placeholder { color: #a2867d; opacity: 1; }
+.erii-chat__actions { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
+.erii-chat__actions span { flex: 1 1 auto; font-size: 10px; color: #9c7770; }
+.erii-chat .erii-chat__send { background: #a94446; border-color: #a94446; color: #fffaf6 !important; padding-right: 18px; padding-left: 18px; }
+.erii-chat .erii-chat__send:hover:not(:disabled) { background: #913a3d; }
+.erii-chat__settings { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 4px 16px 16px; }
+.erii-chat__settings label { display: block; margin: 10px 0; font-size: 12px; color: #8f4144; }
+.erii-chat__section-title { font-size: 13px; font-weight: 600; color: #8f4144; margin: 16px 0 4px; padding-bottom: 7px; border-bottom: 1px solid #ead7ca; }
+.erii-chat__settings textarea { min-height: 106px; max-height: 160px; }
+.erii-chat__settings label input, .erii-chat__settings label select { margin-top: 5px; }
+.erii-chat__settings small { display: block; font-size: 11px; color: #9c7770; margin: 7px 0; line-height: 1.7; }
+.erii-chat__settings .erii-chat__remember { display: flex; align-items: center; gap: 8px; }
+.erii-chat__remember input { width: 16px; height: 16px; margin: 0 !important; accent-color: #a94446; }
+.erii-chat__settings-actions { display: flex; gap: 8px; margin-top: 16px; padding: 10px 0 6px; position: sticky; bottom: 0; background: #fffaf3; border-top: 1px solid #ead7ca; }
+.erii-chat__fetch-models { margin-top: 4px; }
+.erii-chat__model-status:empty { display: none; }
+.erii-chat__task { display: flex; align-items: center; gap: 8px; background: #f6e7dc; border-block: 1px solid #e8cfc3; padding: 7px 12px; font-size: 11px; flex: 0 0 auto; }
+.erii-chat__task span { flex: 1 1 auto; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 90px; overflow: auto; }
+.erii-chat__task button { font-size: 11px; min-height: 30px; align-self: flex-start; }
+@media (max-width: 640px) {
+  .erii-chat__header { cursor: default; min-height: 66px; padding: 8px 52px 8px 12px; }
+  .erii-chat .erii-chat__expand { display: none; }
+  .erii-chat input, .erii-chat textarea, .erii-chat select { font-size: 16px; }
+  .erii-chat__composer { padding: 8px 10px; }
+  .erii-chat__log { padding: 10px 12px; }
+  .erii-chat__actions span { max-width: 110px; }
+  .erii-chat__message-tools button { min-height: 30px; padding: 4px 1px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .erii-companion, .erii-companion__sprite, .erii-companion__sway, .erii-companion__edge-frame { transition: none !important; }
   .erii-companion__breath { animation: none !important; }
+  .erii-chat__pending i { animation: none !important; }
+}
+
+/* A small, local life journal; namespaced to avoid host theme button styles. */
+.erii-life { position: fixed; z-index: 9440; display: flex; flex-direction: column; background: #fffaf3; border: 1px solid #dcbcaf; border-radius: 16px; color: #633d36; font: 13px/1.65 "Microsoft YaHei", "PingFang SC", sans-serif; text-shadow: none; box-shadow: none; overflow: hidden; }
+.erii-life *, .erii-life *::before, .erii-life *::after { box-sizing: border-box; }
+.erii-life[hidden], .erii-life [hidden] { display: none !important; }
+.erii-life button { font: inherit; color: #913f42; background: #fffdf8; border: 1px solid #dcbcaf; border-radius: 7px; padding: 7px 12px; min-height: 36px; cursor: pointer; text-shadow: none; box-shadow: none; line-height: 1.4; margin: 0; }
+.erii-life button:hover:not(:disabled) { background: #f6e3d8; }
+.erii-life button:disabled { opacity: .45; cursor: default; }
+.erii-life button:focus-visible, .erii-life [role="tab"]:focus-visible { outline: 2px solid #a94446; outline-offset: 2px; }
+.erii-life .erii-life__primary { color: #fffaf3; background: #a94446; border-color: #a94446; }
+.erii-life .erii-life__primary:hover:not(:disabled) { background: #903b3e; }
+.erii-life__header { flex: 0 0 auto; position: relative; background: #f9ece2; padding: 17px 60px 13px 22px; border-bottom: 1px solid #e9d4c5; }
+.erii-life__eyebrow { color: #9e7066; font-size: 11px; letter-spacing: 2px; }
+.erii-life h2 { font: 700 25px/1.5 "KaiTi", "STKaiti", serif; margin: 3px 0 0; color: #923d3f; }
+.erii-life .erii-life__close { position: absolute; right: 7px; top: 7px; width: 40px; height: 40px; border: 0; background: transparent; padding: 0; font-size: 26px; }
+.erii-life__wallet { flex: 0 0 auto; display: flex; align-items: baseline; flex-wrap: wrap; gap: 7px; padding: 12px 22px; border-bottom: 1px dashed #e5cdbd; color: #94665b; }
+.erii-life__wallet strong { color: #a16b24; font: 700 29px/1.1 Georgia, serif; margin-left: auto; }
+.erii-life__wallet > span:last-child { flex-basis: 100%; color: #a38375; font-size: 11px; }
+.erii-life__scroll { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 16px 22px 12px; scrollbar-width: thin; }
+.erii-life__scene { display: flex; align-items: center; gap: 15px; min-height: 155px; margin-bottom: 13px; }
+.erii-life__scene > img { flex: 0 0 138px; width: 138px; height: 155px; object-fit: contain; filter: none; }
+.erii-life__scene-text { flex: 1; min-width: 0; }
+.erii-life h3 { font-size: 16px; color: #923d3f; margin: 0 0 6px; }
+.erii-life p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 4px 0; }
+.erii-life__scene-text p { color: #9b766b; font-size: 12px; line-height: 1.8; }
+.erii-life progress { display: block; width: 100%; height: 7px; margin: 12px 0 5px; border: 0; border-radius: 5px; accent-color: #b76a61; background: #eddbcc; overflow: hidden; }
+.erii-life progress::-webkit-progress-bar { background: #eddbcc; border-radius: 5px; }
+.erii-life progress::-webkit-progress-value { background: #b76a61; border-radius: 5px; }
+.erii-life__countdown { display: block; color: #916f60; font-size: 12px; font-variant-numeric: tabular-nums; }
+.erii-life__activity-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.erii-life__activity-actions button { font-size: 11px; padding: 6px 9px; }
+.erii-life__tabs { display: flex; gap: 4px; border-bottom: 1px solid #e2caba; margin-bottom: 13px; }
+.erii-life__tabs button { flex: 1; background: transparent; border: 0; border-bottom: 3px solid transparent; border-radius: 0; color: #a17a6d; padding: 9px 3px; }
+.erii-life__tabs button[aria-selected="true"] { border-bottom-color: #a94446; color: #923d3f; font-weight: 700; }
+.erii-life__job { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #ead9ca; padding: 10px 0; }
+.erii-life__job > img { flex: 0 0 68px; width: 68px; height: 78px; object-fit: contain; }
+.erii-life__job > div { flex: 1; min-width: 0; }
+.erii-life h4 { margin: 0; font-size: 14px; color: #79453f; }
+.erii-life__job p { color: #a17c6f; font-size: 11px; }
+.erii-life__job-reward { color: #a27035; font-size: 11px; }
+.erii-life__job > button { flex: 0 0 auto; padding: 7px 10px; font-size: 12px; }
+.erii-life .erii-life__note { font-size: 11px; color: #a48577; margin-top: 12px; line-height: 1.8; }
+.erii-life__menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.erii-life__food { padding: 14px 10px 12px; text-align: center; border: 1px solid #e7cebf; border-radius: 10px; background: #fffdf8; }
+.erii-life__food-image { display: block; width: 104px; height: 96px; object-fit: contain; margin: 0 auto 7px; filter: none; }
+.erii-life__food p { color: #a27035; font-size: 12px; }
+.erii-life__food button { margin-top: 7px; width: 100%; font-size: 12px; }
+.erii-life__totals { color: #a27035; padding-bottom: 12px; font-size: 12px; }
+.erii-life__records { list-style: none; margin: 0; padding: 0; font-size: 12px; }
+.erii-life__records li { padding: 9px 0; border-bottom: 1px dashed #e8d4c4; }
+.erii-life__records time { display: block; color: #aa8b7b; font-size: 10px; }
+.erii-life__records [data-kind="earned"] span { color: #68825a; }
+.erii-life__records [data-kind="spent"] span { color: #a27035; }
+.erii-life__task { flex: 0 0 auto; display: flex; align-items: flex-start; gap: 10px; padding: 9px 16px; background: #f6e7dc; font-size: 11px; border-bottom: 1px solid #e5cdbd; }
+.erii-life__task > span { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 72px; overflow: auto; }
+.erii-life__task button { flex: 0 0 auto; min-height: 30px; font-size: 11px; padding: 5px 9px; }
+.erii-life__status { flex: 0 0 auto; min-height: 0; padding: 10px 22px; margin: 0 !important; font-size: 11px; color: #916d60; border-top: 1px solid #e9d4c5; background: #f9f0e6; }
+.erii-life__status:empty { display: none; }
+.erii-companion__life-bubble { border-color: #dcc6a3; color: #8b653d; }
+@media (max-width: 480px) {
+  .erii-life__header { padding: 12px 55px 10px 16px; }
+  .erii-life h2 { font-size: 23px; }
+  .erii-life__wallet { padding: 10px 16px; }
+  .erii-life__scroll { padding: 12px 14px; }
+  .erii-life__scene { gap: 11px; min-height: 128px; }
+  .erii-life__scene > img { width: 94px; height: 124px; flex-basis: 94px; }
+  .erii-life h3 { font-size: 14px; }
+  .erii-life__job { gap: 8px; }
+  .erii-life__job > img { width: 53px; height: 67px; flex-basis: 53px; }
+  .erii-life__job > button { font-size: 11px; padding: 7px 8px; }
 }
