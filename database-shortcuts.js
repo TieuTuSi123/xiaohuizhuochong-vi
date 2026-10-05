@@ -1,6 +1,6 @@
 // 一键打开数据库的某个版面。打开数据库走它公开的 AutoCardUpdaterAPI；
 // 跳到指定版面要调用它界面里的切页动作（等同于点它的侧边栏），只换页面，不读写表格、不碰任务。
-// 找不到切页动作时退回点侧边栏，再不行就只打开数据库（见 docs/adr/0002）。
+// 找不到切页动作时退回点侧边栏，再不行就只打开数据库。
 export const DATABASE_PAGES = Object.freeze([
   { id: 'dashboard', label: '仪表盘', icon: 'gauge' },
   { id: 'form-fill', label: '填表工作台', icon: 'table' },
