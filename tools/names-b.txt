@@ -1,0 +1,9 @@
+# B 表：4 列 × 2 行；第 8 格是通用吃饭图，代码不使用，跳过
+work-bookshop
+work-bakery
+work-florist
+eat-pudding
+eat-riceball
+eat-omurice
+eat-ramen
+-

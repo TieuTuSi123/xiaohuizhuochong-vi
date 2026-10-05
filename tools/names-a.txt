@@ -1,0 +1,21 @@
+# A 表：4 列 × 5 行，从左到右、从上到下；- 表示跳过
+idle
+received
+writing
+complete
+error
+cocoa
+reading
+paper-swan
+swan
+stretch
+rest
+gift
+lifted
+land
+wave
+peek
+edge-left
+edge-right
+edge-bottom
+-
