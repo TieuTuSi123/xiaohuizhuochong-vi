@@ -152,7 +152,7 @@
 /* ---------- Cuốn sổ nhỏ ---------- */
 .erii-companion__notebook {
   position: fixed; width: var(--erii-page-width, 330px); max-height: var(--erii-page-height, 460px);
-  overflow-y: scroll; overscroll-behavior: contain; pointer-events: auto; scrollbar-width: thin;
+  overflow-y: scroll; overscroll-behavior: contain; pointer-events: auto;
   padding: 14px 14px 12px 24px; color: var(--pet-ink);
   background:
     linear-gradient(90deg, var(--pet-accent-ink) 0 9px, color-mix(in srgb, var(--pet-accent-ink) 30%, transparent) 9px 11px, transparent 11px),
@@ -549,7 +549,7 @@
 .erii-life__wallet strong { color: var(--pet-gold-lo); font: italic 700 30px/1.05 var(--pet-serif); margin-left: auto; }
 .erii-life__wallet > span:last-child { flex-basis: 100%; color: var(--pet-muted); font-size: 11px; }
 .erii-life .erii-life__welfare { min-height: 28px; padding: 3px 10px; font-size: 11px; color: #4a3204 !important; background: linear-gradient(180deg, var(--pet-gold-hi), var(--pet-gold)) !important; border-color: var(--pet-gold-lo) !important; font-weight: 700; }
-.erii-life__scroll { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 14px 20px 12px; scrollbar-width: thin; }
+.erii-life__scroll { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 14px 20px 12px; }
 .erii-life__scene { display: flex; align-items: center; gap: 16px; min-height: 160px; margin-bottom: 14px; }
 .erii-life__scene > img { flex: 0 0 140px; width: 140px; height: 160px; object-fit: contain; padding: 6px 6px 18px; background: #fff; border: 1px solid var(--pet-line); border-radius: 4px;
   transform: rotate(-3deg); box-shadow: 0 10px 20px -12px var(--pet-shadow); }
@@ -676,7 +676,7 @@
   font: 600 12px/1.4 var(--pet-hand); color: var(--pet-accent); border: 1.5px solid currentColor; background: color-mix(in srgb, var(--pet-paper) 80%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .erii-house__stamp[data-current="true"] { color: var(--pet-good); animation: pet-stamp .5s var(--pet-spring); }
 @keyframes pet-stamp { from { opacity: 0; transform: rotate(-6deg) scale(1.8); } 60% { opacity: 1; transform: rotate(-6deg) scale(.94); } to { transform: rotate(-6deg) scale(1); } }
-.erii-house__page { position: relative; min-height: 0; overflow: auto; padding: 22px 26px 18px 30px; scrollbar-width: thin; transform-origin: 0 50%; backface-visibility: hidden; }
+.erii-house__page { position: relative; min-height: 0; overflow: auto; padding: 22px 26px 18px 30px; transform-origin: 0 50%; backface-visibility: hidden; }
 .erii-house__page.is-turning { animation: pet-turn .55s var(--pet-ease); }
 .erii-house__plate.is-turning .erii-house__frame { animation: pet-fade .45s var(--pet-ease); }
 @keyframes pet-turn { from { transform: rotateY(-92deg); opacity: .2; } 60% { opacity: 1; } to { transform: none; } }
