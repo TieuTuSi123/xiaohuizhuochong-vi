@@ -54,6 +54,7 @@
 .erii-companion[hidden], .erii-companion [hidden] { display: none !important; }
 .erii-companion button { font: inherit; cursor: pointer; text-shadow: none !important; box-shadow: none; margin: 0; }
 .erii-companion__portrait {
+  position: absolute; inset: 0; z-index: 2;
   display: block; width: 100%; height: 100%; margin: 0; padding: 0;
   border: 0; outline-offset: 3px; background: transparent !important;
   pointer-events: auto; -webkit-tap-highlight-color: transparent;
@@ -62,7 +63,8 @@
 .erii-companion[data-dragging="true"] .erii-companion__portrait { cursor: grabbing !important; }
 .erii-companion__portrait:hover { background: transparent !important; opacity: 1; }
 .erii-companion__portrait:focus-visible { outline: 2px dashed color-mix(in srgb, var(--pet-accent) 55%, transparent); outline-offset: 2px; border-radius: 40%; }
-.erii-companion__edge-frame, .erii-companion__sway, .erii-companion__breath, .erii-companion__stage { position: relative; display: block; width: 100%; height: 100%; pointer-events: none; }
+.erii-companion__edge-frame { position: absolute; inset: 0; z-index: 1; display: block; width: 100%; height: 100%; pointer-events: none; }
+.erii-companion__sway, .erii-companion__breath, .erii-companion__stage { position: relative; display: block; width: 100%; height: 100%; pointer-events: none; }
 .erii-companion__edge-frame { transition: transform .16s ease; }
 .erii-companion[data-edge="left"] .erii-companion__edge-frame { transform: translateX(-16px); }
 .erii-companion[data-edge="right"] .erii-companion__edge-frame { transform: translateX(16px); }
