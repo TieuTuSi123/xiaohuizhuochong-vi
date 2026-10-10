@@ -152,7 +152,7 @@
 /* ---------- Cuốn sổ nhỏ ---------- */
 .erii-companion__notebook {
   position: fixed; width: var(--erii-page-width, 330px); max-height: var(--erii-page-height, 460px);
-  overflow: auto; overscroll-behavior: contain; pointer-events: auto; scrollbar-width: thin;
+  overflow-y: scroll; overscroll-behavior: contain; pointer-events: auto; scrollbar-width: thin;
   padding: 14px 14px 12px 24px; color: var(--pet-ink);
   background:
     linear-gradient(90deg, var(--pet-accent-ink) 0 9px, color-mix(in srgb, var(--pet-accent-ink) 30%, transparent) 9px 11px, transparent 11px),
