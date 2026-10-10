@@ -1,6 +1,6 @@
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
-// Positions are ratios within the usable viewport, so rotation/keyboard changes stay safe.
+// Các vị trí được tính toán dưới dạng tỷ lệ bên trong khung nhìn (viewport) khả dụng, nhờ đó chúng vẫn an toàn khi xoay màn hình hoặc bật bàn phím ảo.
 export function readBounds(host, doc, preferredSize) {
   const view = host.visualViewport;
   const width = view?.width || host.innerWidth;
@@ -42,7 +42,7 @@ export function toRatio(point, bounds) {
     y: clamp((point.y - bounds.minY) / Math.max(1, bounds.maxY - bounds.minY), 0, 1) };
 }
 
-// Only classifies a position. It never moves the pet or saves a new coordinate.
+// Chỉ thực hiện phân loại vị trí. Hàm này không bao giờ di chuyển pet hay lưu tọa độ mới.
 export function dockEdge(point, bounds) {
   if (!point || !bounds) return null;
   const distances = [

@@ -1,150 +1,150 @@
-# 酒馆版本兼容说明
+# Hướng dẫn tương thích phiên bản SillyTavern
 
-当前扩展版本：**v0.9.0**
+Phiên bản tiện ích mở rộng hiện tại: **v0.9.0**
 
-本文件说明的是 v0.9.0 的宿主兼容范围。它不代表早期 v0.1.x 实验包仍然兼容，也不代表未来数据库界面改动后无需适配。
+Tệp này giải thích phạm vi tương thích với host của v0.9.0. Điều này không có nghĩa là các gói thử nghiệm v0.1.x cũ vẫn tương thích, cũng không có nghĩa là sẽ không cần tinh chỉnh lại nếu giao diện cơ sở dữ liệu thay đổi trong tương lai.
 
-本扩展目标兼容 SillyTavern 1.14.0–1.19.0。
+Tiện ích mở rộng này nhắm đến việc tương thích với SillyTavern 1.14.0–1.19.0.
 
-- 1.14.0–1.16.0 加载 ES 模块但不调用 `activate`，入口会自行等待 `SillyTavern.getContext()` 和设置接口。
-- 1.17.0–1.19.0 会调用 `activate`、`enable`、`disable`，入口有单实例保护，重复回调不会生成第二只桌宠。
-- 桌宠生命周期与设置使用 `SillyTavern.getContext()`、`extensionSettings` 和 `saveSettingsDebounced`。v0.6.0 聊天在用户请求时导入对应版本的原生 `openai.js` 参数生成器；文本补全另使用 `script.js` 与 `textgen-settings.js`，均先检查可用接口。
-- 浏览器返回缓存时保留桌宠；普通离开、停用和清理会移除桌宠、观察器、定时器和设置面板。
-- 图片成功解码前不会隐藏原数据库桌宠。图片加载失败时保留原桌宠，并允许后续动作重新尝试加载。
+- 1.14.0–1.16.0 tải module ES nhưng không gọi `activate`, điểm đầu vào sẽ tự động đợi `SillyTavern.getContext()` và giao diện thiết lập.
+- 1.17.0–1.19.0 sẽ gọi `activate`, `enable`, `disable`, điểm đầu vào có bảo vệ đơn bản thể (single-instance), việc gọi lại nhiều lần sẽ không tạo ra pet màn hình thứ hai.
+- Vòng đời và thiết lập của pet màn hình sử dụng `SillyTavern.getContext()`, `extensionSettings` và `saveSettingsDebounced`. Tính năng trò chuyện của v0.6.0 sẽ nhập trình tạo tham số `openai.js` native của phiên bản tương ứng khi người dùng yêu cầu; tính năng hoàn thiện văn bản sử dụng riêng `script.js` và `textgen-settings.js`, cả hai đều kiểm tra API khả dụng trước.
+- Giữ lại pet màn hình khi trình duyệt trả về bộ nhớ cache; các thao tác rời đi thông thường, vô hiệu hóa và dọn dẹp sẽ gỡ bỏ pet màn hình, observer, bộ đếm thời gian và bảng thiết lập.
+- Không ẩn pet màn hình gốc của cơ sở dữ liệu trước khi hình ảnh được giải mã thành công. Khi tải ảnh thất bại, giữ lại pet màn hình gốc và cho phép các hành động tiếp theo thử tải lại.
 
-## 官方版本核对
+## Đối chiếu phiên bản chính thức
 
-已核对官方 Git 标签 1.14.0、1.15.0、1.16.0、1.17.0、1.18.0、1.19.0 的扩展加载器、上下文接口、设置容器和版本信息。固定提交与文件哈希记录在工作区 `work/erii-host-contracts/sources.json`，不放进发布包。
+Đã đối chiếu trình tải tiện ích mở rộng, giao diện ngữ cảnh, vùng chứa thiết lập và thông tin phiên bản của các thẻ Git chính thức 1.14.0, 1.15.0, 1.16.0, 1.17.0, 1.18.0, 1.19.0. Các commit cố định và mã băm (hash) của tệp được ghi lại trong không gian làm việc `work/erii-host-contracts/sources.json`, không đưa vào gói phát hành.
 
-## v0.5.8 历史宿主检查
+## Kiểm tra host lịch sử v0.5.8
 
-以下为历史版本的实测范围。最新版本的本次检查见文末。
+Dưới đây là phạm vi kiểm tra thực tế của các phiên bản lịch sử. Kiểm tra hiện tại của phiên bản mới nhất xem ở cuối văn bản.
 
-1.14.0 和 1.19.0 使用官方 Docker 镜像加载本扩展，桌宠、设置面板、拖动保存、刷新恢复、点击、右键、本子、手机尺寸和模拟数据库任务通过。
+1.14.0 và 1.19.0 sử dụng image Docker chính thức để tải tiện ích này; pet màn hình, bảng thiết lập, kéo thả để lưu, làm mới để khôi phục, click, click chuột phải, sổ tay, kích thước điện thoại và mô phỏng nhiệm vụ cơ sở dữ liệu đều vượt qua.
 
-1.15.0–1.18.0 使用官方镜像启动并确认扩展、设置面板和 0.5.8 版本号出现，入口兼容性通过；完整停用、再启用和交互回归以 1.14.0 / 1.19.0 为代表执行。
+1.15.0–1.18.0 khởi động bằng image chính thức và xác nhận tiện ích mở rộng, bảng thiết lập cùng số phiên bản 0.5.8 xuất hiện, tính tương thích của điểm đầu vào đã vượt qua; việc vô hiệu hóa hoàn toàn, kích hoạt lại và kiểm tra hồi quy tương tác được thực hiện lấy 1.14.0 / 1.19.0 làm đại diện.
 
-这些是干净的隔离酒馆实例，不是你的 `D:\Jiuguan` 实例；数据库任务使用只读模拟的原 Vue 数据结构。真实安装更新、真实数据库任务和真实手机硬件仍需在你的环境中确认。
+Đây là các bản (instance) SillyTavern cách ly sạch sẽ, không phải bản `D:\Jiuguan` của bạn; nhiệm vụ cơ sở dữ liệu sử dụng cấu trúc dữ liệu Vue gốc được mô phỏng dưới dạng chỉ đọc. Việc cài đặt cập nhật thực tế, nhiệm vụ cơ sở dữ liệu thực tế và phần cứng điện thoại thật vẫn cần được xác nhận trên môi trường của bạn.
 
-如果数据库插件未来改动 `DeskPetLayer`、`DeskPet` 或 `NoticeBubble` 的界面结构，小绘会提示当前数据库界面不兼容，并保留原数据库桌宠。
+Nếu plugin cơ sở dữ liệu thay đổi cấu trúc giao diện của `DeskPetLayer`, `DeskPet` hoặc `NoticeBubble` trong tương lai, Tiểu Hội sẽ báo rằng giao diện cơ sở dữ liệu hiện tại không tương thích, đồng thời giữ lại pet màn hình gốc của cơ sở dữ liệu.
 
-## v0.5.11 历史检查
+## Kiểm tra lịch sử v0.5.11
 
-新功能使用原有浏览器接口，没有新增酒馆内部模块依赖。新版的探头、故事、叉号间距、模拟任务停止和桌面 / 手机宽度在独立页面检查；此前的官方版本实测记录保留为历史证据。v0.5.11 在你的真实酒馆、真实数据库与手机硬件上的最终表现仍待确认。
+Tính năng mới sử dụng các API trình duyệt hiện có, không thêm phụ thuộc vào các module nội bộ của SillyTavern. Tính năng ló đầu, câu chuyện, khoảng cách dấu chữ X, dừng nhiệm vụ mô phỏng và chiều rộng màn hình máy tính / điện thoại được kiểm tra ở trang độc lập; hồ sơ kiểm tra thực tế ở các phiên bản chính thức trước đó được giữ lại làm bằng chứng lịch sử. Biểu hiện cuối cùng của v0.5.11 trên SillyTavern thực tế, cơ sở dữ liệu thực tế và phần cứng điện thoại thật của bạn vẫn chờ được xác nhận.
 
-## v0.5.12 历史检查
+## Kiểm tra lịch sử v0.5.12
 
-本次仅调整边缘显示的触发时机与局部过渡，没有新增酒馆接口依赖。电脑与手机宽度下检查贴边立即探头、鼠标悬停保持、拖动与任务优先。真实酒馆与实体手机仍需更新后确认。
+Lần này chỉ điều chỉnh thời điểm kích hoạt hiển thị sát rìa và chuyển cảnh cục bộ, không thêm phụ thuộc API SillyTavern nào mới. Ở chiều rộng máy tính và điện thoại đã kiểm tra việc bám sát rìa lập tức ló đầu, giữ nguyên khi di chuột, kéo thả và ưu tiên nhiệm vụ. Bản SillyTavern thực tế và điện thoại thật vẫn cần được xác nhận sau khi cập nhật.
 
-## v0.5.13 历史检查
+## Kiểm tra lịch sử v0.5.13
 
-本次修复当前任务与停止操作同步、停止失败提示及隐藏桌宠后的独立小本子。没有新增酒馆内部接口依赖；仍读取原数据库界面提供的任务，并在用户点击时调用原停止操作。近期观察到的任务仅用于小本子记录，不作为停止目标。
+Lần này khắc phục việc đồng bộ nhiệm vụ hiện tại với thao tác dừng, thông báo lỗi khi dừng thất bại và sổ tay độc lập sau khi ẩn pet màn hình. Không thêm phụ thuộc API nội bộ SillyTavern nào mới; vẫn đọc các nhiệm vụ do giao diện cơ sở dữ liệu gốc cung cấp và gọi thao tác dừng gốc khi người dùng nhấp chuột. Nhiệm vụ quan sát được gần đây chỉ dùng để ghi vào sổ tay, không lấy làm mục tiêu dừng.
 
-桌面和手机尺寸的模拟任务故障、任务切换、停止操作更新、来源断开、隐藏后打开小本子与交互回归在独立预览检查。此前官方酒馆版本的检查保留为历史证据，不代表 v0.5.13 已在所有版本重新实测。真实 D:\Jiuguan、真实数据库和实体手机仍需更新后确认。
+Các lỗi nhiệm vụ mô phỏng ở kích thước máy tính và điện thoại, chuyển đổi nhiệm vụ, cập nhật thao tác dừng, ngắt kết nối nguồn, mở sổ tay sau khi ẩn và kiểm tra hồi quy tương tác được tiến hành trong trang xem trước độc lập. Các kiểm tra trên các phiên bản SillyTavern chính thức trước đây được giữ làm bằng chứng lịch sử, không có nghĩa là v0.5.13 đã được kiểm tra thực tế lại trên tất cả các phiên bản. Bản `D:\Jiuguan` thực tế, cơ sở dữ liệu thực tế và điện thoại thật vẫn chờ xác nhận sau khi cập nhật.
 
-## v0.5.14 历史检查
+## Kiểm tra lịch sử v0.5.14
 
-本次仅修改本地故事气泡到时后的行为：从收起改为每 30 秒换一篇，并保留手动换篇、阅读暂停、关闭和数据库任务优先。没有新增酒馆接口或依赖。
+Lần này chỉ sửa đổi hành vi khi bong bóng câu chuyện cục bộ hết giờ: từ việc thu gọn đổi thành đổi bài mỗi 30 giây, đồng thời giữ lại thao tác đổi bài thủ công, tạm dừng đọc, đóng và ưu tiên nhiệm vụ cơ sở dữ liệu. Không thêm API hoặc phụ thuộc SillyTavern nào mới.
 
-故事规则测试及桌面 / 手机宽度的连续换篇、悬停 / 聚焦 / 触摸暂停、关闭、自动故事开关和任务停止检查在独立预览进行；另使用浏览器真实计时检查一次 30 秒换篇。历史酒馆版本测试不等于 v0.5.14 已在真实 D:\Jiuguan 或实体手机重新实测，最终仍待更新后确认。
+Việc kiểm tra quy tắc câu chuyện, đổi bài liên tục ở chiều rộng máy tính / điện thoại, tạm dừng khi di chuột / focus / chạm, đóng, công tắc tự động đổi câu chuyện và dừng nhiệm vụ được thực hiện ở trang xem trước độc lập; ngoài ra, sử dụng đồng hồ bấm giờ thực của trình duyệt để kiểm tra thao tác đổi bài 30 giây một lần. Kiểm tra các phiên bản SillyTavern lịch sử không có nghĩa là v0.5.14 đã được thử nghiệm thực tế lại trong `D:\Jiuguan` thực tế hoặc điện thoại thật, kết quả cuối cùng vẫn chờ xác nhận sau khi cập nhật.
 
-## v0.6.0 历史检查
+## Kiểm tra lịch sử v0.6.0
 
-新增独立聊天及任务详情开关。核对官方 1.14.0–1.19.0 `openai.js`：1.14.0 使用 `sendOpenAIRequest('quiet', messages, signal)`；1.15.0–1.19.0 使用 `createGenerationParameters` 的设置副本，然后向原生聊天后端发送请求。单独配置使用这些版本的 `custom_url` / `custom_include_headers`；空密钥也显式覆盖宿主 CUSTOM 密钥，避免误用其他连接的密钥。
+Bổ sung tính năng trò chuyện độc lập và công tắc chi tiết nhiệm vụ. Đối chiếu `openai.js` chính thức từ 1.14.0–1.19.0: 1.14.0 dùng `sendOpenAIRequest('quiet', messages, signal)`; 1.15.0–1.19.0 dùng bản sao thiết lập của `createGenerationParameters`, sau đó gửi yêu cầu đến backend trò chuyện native. Cấu hình riêng sử dụng `custom_url` / `custom_include_headers` của các phiên bản này; khóa trống cũng ghi đè rõ ràng khóa CUSTOM của máy chủ, tránh sử dụng nhầm khóa của các kết nối khác.
 
-每次请求有独立 AbortController，不发送全局生成或停止事件。请求使用自己整理的消息，不执行当前预设的故事装配，不创建酒馆正文楼层。1.14.0 使用该版原生 quiet 调用时会经过其原有的 CHAT_COMPLETION_SETTINGS_READY 事件；文本补全使用原生 TEXT_COMPLETION_SETTINGS_READY 事件。装有其他修改请求参数的扩展时仍需实机确认。
+Mỗi yêu cầu có AbortController độc lập, không gửi sự kiện tạo hoặc dừng toàn cục. Yêu cầu sử dụng tin nhắn tự tổ chức, không thực thi việc lắp ráp câu chuyện của preset hiện tại, không tạo các tầng chính văn của SillyTavern. Khi 1.14.0 sử dụng lời gọi `quiet` native của nó thì sẽ đi qua sự kiện `CHAT_COMPLETION_SETTINGS_READY` sẵn có; tính năng hoàn thiện văn bản sử dụng sự kiện `TEXT_COMPLETION_SETTINGS_READY` native. Khi cài đặt các tiện ích mở rộng khác có sửa đổi tham số yêu cầu, vẫn cần kiểm tra xác nhận trên máy thực.
 
-独立浏览器检查覆盖 1280 / 375 / 320 宽度、缩小可见屏幕、历史保存、停止 / 重试、密钥保存开关、接口错误、文本安全和清理；任务简略 / 完整切换、超过 600 字的详情、原任务停止和既有手势 / 探头已回归。
+Kiểm tra trình duyệt độc lập bao phủ các chiều rộng 1280 / 375 / 320, thu nhỏ màn hình hiển thị, lưu lịch sử, dừng / thử lại, công tắc lưu khóa, lỗi API, an toàn văn bản và dọn dẹp; chuyển đổi chế độ xem nhiệm vụ tóm tắt / đầy đủ, chi tiết vượt quá 600 chữ, dừng nhiệm vụ gốc, và các cử chỉ / ló đầu hiện có đã được kiểm tra hồi quy thành công.
 
-官方 1.14.0、1.15.0、1.16.0、1.17.0、1.18.0、1.19.0 的隔离酒馆均通过本次聊天检查：真实原生模块构造请求、当前连接 / 单独连接切换、独立停止、扩展设置保存和刷新恢复；酒馆全局连接设置与正文聊天保持一致。另在这六版真实酒馆后端上，用本地模拟接口检查单独 API 的地址、模型、消息与有密钥 / 无密钥转发。没有连接真实 AI 提供商。文本补全本次核对接口并做独立逻辑测试，未在这六个实例中逐一发送实际文本补全请求。
+Các bản SillyTavern cách ly chính thức 1.14.0, 1.15.0, 1.16.0, 1.17.0, 1.18.0, 1.19.0 đều vượt qua bài kiểm tra trò chuyện lần này: cấu trúc yêu cầu module native thực tế, chuyển đổi giữa kết nối hiện tại / kết nối riêng, dừng độc lập, lưu thiết lập tiện ích mở rộng và khôi phục sau khi làm mới; thiết lập kết nối toàn cục của SillyTavern và trò chuyện chính văn được giữ nguyên. Ngoài ra, trên các backend SillyTavern thực tế của 6 phiên bản này, sử dụng API mô phỏng cục bộ để kiểm tra địa chỉ API riêng, model, tin nhắn và chuyển tiếp có khóa / không khóa. Không kết nối với nhà cung cấp AI thật. Hoàn thiện văn bản lần này chỉ đối chiếu API và thực hiện kiểm tra logic độc lập, chưa gửi yêu cầu hoàn thiện văn bản thực tế từng cái một trong 6 phiên bản này.
 
-工作区报告：`小绘-v0.6.0-聊天-酒馆兼容检查.json`、`小绘-v0.6.0-本地接口转发检查.json`、`小绘-v0.6.0-聊天检查.json`。这些报告与测试脚本不进入安装包。
+Báo cáo trong không gian làm việc: `小绘-v0.6.0-聊天-酒馆兼容检查.json`, `小绘-v0.6.0-本地接口转发检查.json`, `小绘-v0.6.0-聊天检查.json`. Các báo cáo và kịch bản thử nghiệm này không đưa vào gói cài đặt.
 
-实际 AI 提供商请求在测试中拦截为模拟回复，未发送付费请求。真实用户 API、数据库 v1.2 的实际任务、D:\Jiuguan 安装更新及实体手机键盘仍待用户确认。没有安装或推送到用户仓库。
+Yêu cầu đến nhà cung cấp AI thực tế được chặn lại trong quá trình thử nghiệm dưới dạng phản hồi mô phỏng, chưa gửi yêu cầu trả phí. API người dùng thật, nhiệm vụ thực tế của cơ sở dữ liệu v1.2, cập nhật cài đặt `D:\Jiuguan` và bàn phím điện thoại thật vẫn chờ người dùng xác nhận. Chưa cài đặt hay đẩy lên kho lưu trữ của người dùng.
 
 
-## v0.6.1 历史检查
+## Kiểm tra lịch sử v0.6.1
 
-模型列表使用 `POST /api/backends/chat-completions/status`，传入 `chat_completion_source: custom`、`custom_url` 和 `custom_include_headers`。后端向所填基础地址请求 `/models`。保留手动模型名称，失败不改全局连接，显式空密钥覆盖宿主 CUSTOM 密钥。
+Danh sách model sử dụng `POST /api/backends/chat-completions/status`, truyền vào `chat_completion_source: custom`, `custom_url` và `custom_include_headers`. Backend sẽ gọi tới `/models` theo địa chỉ cơ sở đã điền. Giữ lại việc điền thủ công tên model, nếu thất bại không làm thay đổi kết nối toàn cục, khóa trống cũng ghi đè rõ ràng khóa CUSTOM của máy chủ.
 
-1280 / 375 / 320 宽度检查列表选择、手动回退、密钥遮去、取消、地址变化、关闭 / 清理、选择保存和布局。新版默认预览通过真实 HTTP 转发到本地测试接口，检查两条不同消息得到对应的不同上游结果、携带最近历史、未配置或出错时没有固定回复和假成功。测试未调用真实 AI 提供商。
+Tại chiều rộng 1280 / 375 / 320, đã kiểm tra việc chọn từ danh sách, dự phòng thao tác thủ công, che giấu khóa, hủy bỏ, thay đổi địa chỉ, đóng / dọn dẹp, chọn rồi lưu và bố cục giao diện. Bản xem trước mặc định mới được truyền tải qua HTTP thực tế đến API mô phỏng cục bộ, kiểm tra hai tin nhắn khác nhau nhận được kết quả khác nhau từ phía upstream, mang theo lịch sử gần nhất, không có phản hồi cố định hoặc báo thành công giả khi chưa thiết lập hoặc xảy ra lỗi. Quá trình kiểm tra không gọi nhà cung cấp AI thật.
 
-官方 1.14.0–1.19.0 隔离酒馆的模型列表入口、真实后端转发、有密钥 / 无密钥和酒馆全局设置保持，结果见工作区 `小绘-v0.6.1-模型列表-酒馆兼容检查.json`。聊天发送 / 停止 / 重试及任务显示在独立页面回归。
+Các bản SillyTavern cách ly chính thức từ 1.14.0–1.19.0 giữ nguyên điểm đầu vào danh sách model, chuyển tiếp backend thực, chuyển tiếp có khóa / không khóa và cài đặt toàn cục của SillyTavern, kết quả xem tại không gian làm việc `小绘-v0.6.1-模型列表-酒馆兼容检查.json`. Việc gửi trò chuyện / dừng / thử lại và hiển thị nhiệm vụ được kiểm tra hồi quy trên trang độc lập.
 
-预览服务只用于本机开发，不进入安装包；正式扩展仍使用酒馆原有后端。真实账号的接口权限、模型实际可用性、回复质量和实体手机行为仍待用户试用。
+Dịch vụ xem trước chỉ dùng cho quá trình phát triển trên máy cá nhân, không đưa vào gói cài đặt; tiện ích chính thức vẫn dùng backend nguyên bản của SillyTavern. Quyền API của tài khoản thật, tính khả dụng thực tế của model, chất lượng phản hồi và hành vi trên điện thoại thật vẫn chờ người dùng dùng thử.
 
 
-## v0.6.2 历史检查
+## Kiểm tra lịch sử v0.6.2
 
-本次没有新增酒馆内部 API。聊天设置增加风格、手动记忆、草稿和已有消息时间，继续使用原有账号扩展设置保存；密钥继续保存在单独的设备存储中。复制和 TXT 导出使用浏览器原有能力，没有新增远程服务。
+Lần này không bổ sung API nội bộ nào của SillyTavern. Thiết lập trò chuyện thêm các mục phong cách, ghi nhớ thủ công, bản nháp và thời gian của tin nhắn cũ, tiếp tục sử dụng hệ thống lưu thiết lập của tiện ích tài khoản hiện tại; khóa tiếp tục được lưu riêng trên bộ nhớ thiết bị. Việc sao chép và xuất file TXT sử dụng tính năng mặc định của trình duyệt, không thêm dịch vụ từ xa mới nào.
 
-1280 / 375 / 320 宽度检查复制、真实文件导出、重新回答与修改重发的成功 / 取消 / 失败、草稿与修改恢复、风格和手动记忆传入请求、旧记录没有假时间、阅读位置和缩小可见屏幕。报告：工作区 `小绘-v0.6.2-聊天增强检查.json`。
+Ở kích thước 1280 / 375 / 320, kiểm tra tính năng sao chép, xuất file thật, trả lời lại và sửa rồi gửi lại với các kết quả thành công / hủy / thất bại, khôi phục bản nháp và sau khi sửa, truyền phong cách và ghi nhớ thủ công vào yêu cầu, lịch sử cũ không bị dán thời gian giả, vị trí đọc và thu hẹp màn hình hiển thị. Báo cáo: không gian làm việc `小绘-v0.6.2-聊天增强检查.json`.
 
-既有发送 / 停止 / 重试、任务简略 / 完整显示和数据库原停止按钮已回归。模型列表和默认预览真实 HTTP 转发继续连接本地测试接口，检查不同消息与历史传递，出错时没有固定回复。报告：`小绘-v0.6.2-聊天检查.json`、`小绘-v0.6.2-模型列表与真实转发检查.json`。
+Các tính năng gửi / dừng / thử lại hiện có, chế độ xem nhiệm vụ tóm tắt / đầy đủ và nút dừng gốc của cơ sở dữ liệu đã vượt qua kiểm tra hồi quy. Danh sách model và bản xem trước mặc định tiếp tục chuyển tiếp HTTP thật tới API mô phỏng cục bộ, kiểm tra việc truyền các tin nhắn và lịch sử khác nhau, không có phản hồi cố định khi xảy ra lỗi. Báo cáo: `小绘-v0.6.2-聊天检查.json`, `小绘-v0.6.2-模型列表与真实转发检查.json`.
 
-本轮未调用真实 AI 提供商。手动记忆和聊天风格已验证进入请求，实际回复质量、延迟和提供商限制仍待真实 API 试用；D:\Jiuguan 的安装更新、数据库真实任务和实体手机键盘未验证。测试结果不能代替用户验收。
+Vòng kiểm tra này chưa gọi tới nhà cung cấp AI thật. Ghi nhớ thủ công và phong cách trò chuyện đã được xác nhận đi vào yêu cầu, nhưng chất lượng phản hồi thực tế, độ trễ và giới hạn của nhà cung cấp vẫn chờ quá trình dùng thử API thật; cập nhật cài đặt trong `D:\Jiuguan`, nhiệm vụ thật của cơ sở dữ liệu và bàn phím điện thoại thật chưa được xác minh. Kết quả thử nghiệm không thể thay thế việc nghiệm thu của người dùng.
 
-官方 1.14.0、1.15.0、1.16.0、1.17.0、1.18.0、1.19.0 六个隔离酒馆本轮均加载 v0.6.2，检查当前 / 单独 API 的原生请求、独立停止、原聊天与全局 API 设置保持，以及草稿、风格、手动记忆、消息时间在原生设置保存和刷新后的恢复。报告：`小绘-v0.6.2-聊天-酒馆兼容检查.json`。AI 结果在浏览器端替换为测试回复；这是实际宿主运行证据，不是实际 AI 质量证明。
+Sáu bản SillyTavern cách ly chính thức 1.14.0, 1.15.0, 1.16.0, 1.17.0, 1.18.0, 1.19.0 vòng này đều tải v0.6.2, kiểm tra yêu cầu native của kết nối hiện tại / kết nối riêng, dừng độc lập, giữ nguyên cấu hình trò chuyện gốc và API toàn cục, cùng với việc lưu vào thiết lập native và khôi phục sau khi làm mới đối với bản nháp, phong cách, ghi nhớ thủ công, thời gian tin nhắn. Báo cáo: `小绘-v0.6.2-聊天-酒馆兼容检查.json`. Kết quả từ AI đã được thay bằng phản hồi thử nghiệm phía trình duyệt; đây là bằng chứng hoạt động thực tế trên host, không phải bằng chứng chất lượng AI thực tế.
 
 
-## v0.7.0 历史检查
+## Kiểm tra lịch sử v0.7.0
 
-生活玩法使用已有扩展设置保存和浏览器时间、DOM、图片、进度条能力，没有新增酒馆内部 API、外部依赖或后端服务。工作 / 吃饭按时间戳计算，页面轮询只刷新显示；下班工资手动领取，吃完记录只结算一次。
+Tính năng sinh hoạt (cuộc sống) sử dụng cơ chế lưu thiết lập tiện ích hiện có và năng lực về thời gian, DOM, hình ảnh, thanh tiến trình của trình duyệt, không thêm API nội bộ SillyTavern, phụ thuộc ngoại vi hoặc dịch vụ backend nào. Thời gian làm việc / ăn uống tính theo dấu thời gian (timestamp), trình duyệt chỉ hỏi vòng (polling) để làm mới giao diện; lương tan làm phải nhận thủ công, và hồ sơ sau khi ăn xong chỉ thanh toán một lần.
 
-独立模型检查三份工作的时间 / 工资、四种食物的价格 / 时长、一项活动限制、金币不足、重复领取 / 购买、提前下班、离线工作与吃饭恢复和小账本上限。报告：工作区 `小绘-v0.7.0-生活逻辑检查.json`。
+Việc kiểm tra model độc lập bao gồm thời gian / tiền lương của ba công việc, giá cả / thời lượng của bốn loại thức ăn, giới hạn một hoạt động diễn ra tại một thời điểm, báo không đủ tiền vàng, nhận / mua lại nhiều lần, tan làm sớm, khôi phục trạng thái làm việc và ăn uống khi ngoại tuyến, và giới hạn tối đa của sổ tay sinh hoạt. Báo cáo: không gian làm việc `小绘-v0.7.0-生活逻辑检查.json`.
 
-1280 / 375 / 320 的独立浏览器检查生活窗口边界、工作 / 吃饭插图、真实倒计时、保存 / 刷新 / 离线恢复、确认提前下班、数据库任务优先和原停止按钮、桌宠坐标保持、清理。电脑尺寸还实际等待了 8 秒吃完布丁；长工作用测试时间偏移检查，不改变生产时长。报告：`小绘-v0.7.0-生活界面检查.json`。生活玩法没有发出 API 请求。
+Bài kiểm tra trình duyệt độc lập với kích thước 1280 / 375 / 320 xác nhận đường viền cửa sổ sinh hoạt, minh họa làm việc / ăn uống, đếm ngược thời gian thực, khôi phục khi lưu / làm mới / ngoại tuyến, xác nhận tan làm sớm, ưu tiên nhiệm vụ cơ sở dữ liệu và nút dừng gốc, giữ nguyên tọa độ của pet màn hình, dọn dẹp. Đối với màn hình máy tính còn trực tiếp chờ hết 8 giây ăn xong bánh pudding; công việc dài được kiểm tra bằng cách hiệu chỉnh thời gian (offset), không làm thay đổi thời lượng sản xuất. Báo cáo: `小绘-v0.7.0-生活界面检查.json`. Tính năng sinh hoạt không gửi bất kỳ yêu cầu API nào.
 
-原有聊天增强与任务停止 / 小本子在电脑和手机尺寸回归，报告：`小绘-v0.7.0-聊天增强检查.json`、`小绘-v0.7.0-任务停止与小本子检查.json`。美术生成使用内置 ImageGen；四张新 WebP 的透明度、大小和体积见 `小绘-v0.7.0-生活插图检查.json`。
+Tính năng nâng cao trò chuyện vốn có, tính năng dừng nhiệm vụ / sổ tay đã vượt qua kiểm tra hồi quy trên màn hình máy tính và điện thoại, báo cáo: `小绘-v0.7.0-聊天增强检查.json`, `小绘-v0.7.0-任务停止与小本子检查.json`. Quá trình tạo hình ảnh mỹ thuật sử dụng ImageGen tích hợp; độ trong suốt, kích thước và dung lượng của 4 bức ảnh WebP mới xem tại `小绘-v0.7.0-生活插图检查.json`.
 
-目标仍是 1.14.0–1.19.0。此前六版聊天和入口的实际运行检查保留为历史证据，不应说成本轮生活功能已在六版全部重测。用户 D:\Jiuguan、真实数据库任务和实体手机仍待更新后确认。
+Mục tiêu vẫn là 1.14.0–1.19.0. Các kiểm tra chạy thực tế về phần trò chuyện và điểm đầu vào trên 6 phiên bản trước đây được giữ làm bằng chứng lịch sử, không nên coi là tính năng sinh hoạt vòng này đã được kiểm tra lại toàn bộ trên cả 6 phiên bản. `D:\Jiuguan` của người dùng, nhiệm vụ cơ sở dữ liệu thực tế và điện thoại thật vẫn chờ xác nhận sau khi cập nhật.
 
-本轮用官方 1.14.0 和 1.19.0 两个隔离实例，实际加载 v0.7.0，并检查原生设置保存、工作状态刷新恢复、领取工资、买饭扣款、吃完、正文 / 全局 API / 独立聊天设置保持。报告：`小绘-v0.7.0-生活-酒馆兼容检查.json`。工作与吃饭完成使用测试时间偏移；没有改生产时长或调用真实 AI 提供商。
+Vòng này dùng 2 bản (instance) cách ly chính thức là 1.14.0 và 1.19.0, tiến hành tải thực tế v0.7.0, và kiểm tra việc lưu cấu hình native, khôi phục làm mới trạng thái công việc, nhận lương, trừ tiền mua cơm, ăn xong, giữ nguyên các cấu hình API chính văn / toàn cục / trò chuyện độc lập. Báo cáo: `小绘-v0.7.0-生活-酒馆兼容检查.json`. Việc hoàn thành công việc và ăn cơm dùng hiệu chỉnh thời gian thử nghiệm; không sửa thời lượng sản xuất hay gọi tới nhà cung cấp AI thật.
 
 
-## v0.7.1 本次修改与检查范围
+## v0.7.1 Phạm vi sửa đổi và kiểm tra lần này
 
-本次只增加四种吃饭图片绑定、点餐缩略图和入口改名，没有新增酒馆 API。活动继续保存原 kind/id/startedAt/uid，旧版的食物记录从同一目录表取得对应配图，不需要重置金币或活动。
+Lần này chỉ gắn 4 loại ảnh ăn uống, ảnh thu nhỏ gọi món và đổi tên điểm đầu vào, không thêm API SillyTavern nào. Hoạt động tiếp tục được lưu theo kind/id/startedAt/uid gốc, hồ sơ món ăn của phiên bản cũ sẽ tự động lấy ảnh minh họa tương ứng từ cùng bảng danh mục, không cần phải đặt lại tiền vàng hay hoạt động.
 
-沿用 v0.7.0 的 1.14.0 / 1.19.0 实际宿主检查和此前六版入口 / 聊天证据；本轮图片切换和改名在独立浏览器检查，不把历史结果说成本轮全部宿主重测。用户真实酒馆、数据库和实体手机仍待安装更新后确认。
+Tiếp tục sử dụng bằng chứng kiểm tra host thực tế 1.14.0 / 1.19.0 và bằng chứng về điểm đầu vào / trò chuyện của 6 phiên bản trước đây từ v0.7.0; việc chuyển đổi ảnh và đổi tên ở vòng này được kiểm tra trên trình duyệt độc lập, không coi kết quả lịch sử là vòng này đã kiểm tra lại toàn bộ host. SillyTavern thật, cơ sở dữ liệu và điện thoại thật của người dùng vẫn chờ xác nhận sau khi cài đặt bản cập nhật.
 
-1280 / 375 / 320 的独立浏览器已逐一购买四种饭，确认菜单图、手帐图和浮动桌宠图对应且正常加载；检查旧版正在吃的饭保留 uid / 金币 / 累计支出，结束不再扣款；小本子与扩展设置的“生活手帐”入口均实际打开成功。报告：`小绘-v0.7.1-四种吃饭界面检查.json`。
+Trình duyệt độc lập ở các kích thước 1280 / 375 / 320 đã kiểm tra việc mua từng phần cơm trong 4 loại, xác nhận ảnh menu, ảnh sổ tay và ảnh pet màn hình nổi tương ứng và tải bình thường; kiểm tra bữa cơm đang ăn dở từ phiên bản cũ vẫn giữ lại uid / tiền vàng / tổng chi phí tích lũy, khi kết thúc không trừ tiền lần nữa; sổ tay nhỏ và điểm đầu vào "Sổ tay sinh hoạt" trong thiết lập tiện ích đều mở thành công trên thực tế. Báo cáo: `小绘-v0.7.1-四种吃饭界面检查.json`.
 
-原生活流程、真实 8 秒布丁、刷新 / 离线恢复、任务优先与原数据库停止也在三种宽度回归通过：`小绘-v0.7.1-生活界面检查.json`；模型规则见 `小绘-v0.7.1-生活逻辑检查.json`。没有发出聊天 API 请求。四张透明图已查看，768×768 的素材尺寸及体积见 `小绘-v0.7.1-四种吃饭插图检查.json`。
+Quy trình sinh hoạt ban đầu, bánh pudding 8 giây thực tế, khôi phục khi làm mới / ngoại tuyến, ưu tiên nhiệm vụ và dừng cơ sở dữ liệu gốc cũng vượt qua kiểm tra hồi quy trên 3 kích thước chiều rộng: `小绘-v0.7.1-生活界面检查.json`; quy tắc model xem tại `小绘-v0.7.1-生活逻辑检查.json`. Không phát ra yêu cầu API trò chuyện nào. Bốn hình ảnh trong suốt đã được xem qua, kích thước và dung lượng tài nguyên 768×768 xem tại `小绘-v0.7.1-四种吃饭插图检查.json`.
 
 
-## v0.8.0 本次修改与检查范围
+## v0.8.0 Phạm vi sửa đổi và kiểm tra lần này
 
-本次没有新增酒馆内部 API 依赖，仍使用 `SillyTavern.getContext()`、`extensionSettings`、`saveSettingsDebounced` 和原有的聊天请求方式。数据库方面新增三处读取或调用，全部有退路：
+Lần này không có thêm phụ thuộc API nội bộ nào của SillyTavern, vẫn sử dụng `SillyTavern.getContext()`, `extensionSettings`, `saveSettingsDebounced` và phương thức yêu cầu trò chuyện gốc. Về phía cơ sở dữ liệu, có thêm 3 chỗ đọc hoặc gọi, tất cả đều có phương án dự phòng (fallback):
 
-- 打开数据库：优先调用公开的 `AutoCardUpdaterAPI.openSettings()` / `openVisualizer()`，没有时退回点击扩展菜单里的数据库入口。
-- 跳到指定版面：调用数据库界面路由仓库 `acu-v2-router` 的切页动作，等同于点它的侧边栏，只换页面；找不到时退回点侧边栏按钮，再不行只打开数据库并提示。
-- 奶蛋的图：只读数据库桌宠组件当前已加载的图片表（`POSE_IMAGES` 和探头图 `peekSrc`），不复制、不分发；读不到时不能切换到奶蛋，已在奶蛋时让数据库原桌宠出来。
+- Mở cơ sở dữ liệu: Ưu tiên gọi các hàm public `AutoCardUpdaterAPI.openSettings()` / `openVisualizer()`, nếu không có thì lùi về thao tác nhấp vào điểm đầu vào cơ sở dữ liệu trong menu tiện ích mở rộng.
+- Nhảy đến bảng (panel) chỉ định: Gọi thao tác chuyển trang từ repository định tuyến giao diện cơ sở dữ liệu `acu-v2-router`, tương đương với việc nhấp vào thanh bên của nó, chỉ đổi trang; nếu không tìm thấy thì lùi về thao tác bấm nút thanh bên, nếu vẫn không được thì chỉ mở cơ sở dữ liệu và hiện thông báo.
+- Ảnh của Nai Dan: Chỉ đọc bảng hình ảnh hiện đã tải của thành phần (component) pet màn hình cơ sở dữ liệu (`POSE_IMAGES` và ảnh ló đầu `peekSrc`), không sao chép, không phân phối; khi không đọc được thì không thể chuyển sang Nai Dan, nếu đang ở Nai Dan rồi thì cho pet màn hình gốc của cơ sở dữ liệu hiện ra.
 
-检查：
+Kiểm tra:
 
-- 工作区单元测试 32 项：角色资料和图片地址（小绘的地址与 0.7.1 逐字相同）、台词挑选、养成规则（每日上限、升档、需求值衰减与冻结、心情优先级、老用户折算）、生活存档（0.7.1 存档原样读取、多角色同时活动、低保、只领一次工资）。
-- 独立预览页（模拟酒馆上下文和数据库界面结构，电脑与 375 宽度）：三个角色切换、桌宠小屋、小本子、任务台词气泡（接到 / 处理中 / 成功 / 出错 / 停止）、生活手帐、聊天（本地模拟接口）、扩展设置、没有数据库时的提示。
-- 真实宿主：在用户本机 SillyTavern 1.17.0 上另开隔离实例（单独数据目录、另一端口，没碰用户正在用的酒馆数据），用酒馆助手全局脚本加载数据库 naiv1.2.3。确认扩展加载 0.8.0、识别到数据库并收到真实通知、读到奶蛋的 24 张图和探头图、切换到奶蛋与贴边探头、快捷按钮打开“剧情推进”版面和可视化表格、聊天经酒馆后端转发到本地模拟接口并按奶蛋人设回复、手机宽度的小本子底部抽屉。
+- Thử nghiệm đơn vị (Unit test) ở không gian làm việc gồm 32 hạng mục: Dữ liệu nhân vật và địa chỉ hình ảnh (địa chỉ của Tiểu Hội giống y hệt từng chữ với bản 0.7.1), chọn lọc lời thoại, quy tắc nuôi dưỡng (giới hạn hàng ngày, thăng cấp, suy giảm và đóng băng giá trị nhu cầu, ưu tiên tâm trạng, quy đổi cho người dùng cũ), lưu trữ sinh hoạt (đọc nguyên bản lưu của 0.7.1, nhiều nhân vật hoạt động cùng lúc, trợ cấp cơ bản, chỉ nhận lương một lần).
+- Trang xem trước độc lập (mô phỏng ngữ cảnh SillyTavern và cấu trúc giao diện cơ sở dữ liệu, ở chiều rộng màn hình máy tính và 375): Chuyển đổi qua lại giữa 3 nhân vật, nhà của pet màn hình, sổ tay nhỏ, bong bóng lời thoại nhiệm vụ (nhận được / đang xử lý / thành công / lỗi / dừng), sổ tay sinh hoạt, trò chuyện (API mô phỏng cục bộ), thiết lập tiện ích, thông báo khi không có cơ sở dữ liệu.
+- Host thực tế: Trên chính máy người dùng chạy SillyTavern 1.17.0 mở thêm một bản (instance) cách ly (thư mục dữ liệu riêng, cổng riêng, không đụng đến dữ liệu SillyTavern người dùng đang dùng), dùng global script của trợ lý SillyTavern tải cơ sở dữ liệu naiv1.2.3. Xác nhận tiện ích tải v0.8.0, nhận diện được cơ sở dữ liệu và nhận thông báo thực, đọc được 24 ảnh và ảnh ló đầu của Nai Dan, chuyển sang Nai Dan và ló đầu sát viền màn hình, sử dụng nút tắt mở bảng "Thúc đẩy cốt truyện" và bảng biểu trực quan, chat qua backend SillyTavern chuyển tiếp đến API mô phỏng cục bộ và trả lời theo nhân thiết Nai Dan, hiển thị ngăn kéo phía dưới của sổ tay nhỏ ở chiều rộng điện thoại.
 
-没有验证：真实宿主里由 AI 驱动的填表 / 剧情推进任务（需要付费调用，任务台词与停止按钮在预览里按数据库原界面的数据结构模拟验证）；1.14.0、1.15.0、1.16.0、1.18.0、1.19.0 本轮没有重测；数据库仓库主分支的 1.2.4 没有测（用的是 1.2.3）；实体手机的触感和键盘弹起。
+Chưa xác minh: Nhiệm vụ điền bảng / thúc đẩy cốt truyện do AI điều khiển trong host thật (cần trả phí để gọi, lời thoại nhiệm vụ và nút dừng chỉ được mô phỏng kiểm tra theo cấu trúc dữ liệu của giao diện cơ sở dữ liệu gốc trong phần xem trước); 1.14.0, 1.15.0, 1.16.0, 1.18.0, 1.19.0 không được kiểm tra lại trong vòng này; nhánh chính 1.2.4 của kho cơ sở dữ liệu không được kiểm tra (vì đang dùng 1.2.3); phản hồi xúc giác và khả năng nảy bàn phím trên điện thoại thật.
 
-## v0.9.0 本次修改与检查范围
+## v0.9.0 Phạm vi sửa đổi và kiểm tra lần này
 
-本次新增两项会读正文的功能，其中一项会写数据库。酒馆方面新增使用 `getContext()` 的 `eventSource` / `eventTypes`（只监听 `MESSAGE_SENT`、`MESSAGE_RECEIVED`、`MESSAGE_DELETED`、`CHAT_CHANGED` 用来数楼层）、`chat`（读最近几层的 `mes`，跳过 `is_system` 的隐藏楼层）和 `getCurrentChatId()`；1.14.0–1.19.0 官方源码的 `st-context.js` 都提供这些名字（逐个版本核对过源码），本轮只在 1.17.0 实测。聊天请求仍走原来的方式。
+Lần này bổ sung hai tính năng sẽ đọc chính văn, một trong số đó sẽ ghi vào cơ sở dữ liệu. Phía SillyTavern bổ sung việc sử dụng `eventSource` / `eventTypes` của `getContext()` (chỉ lắng nghe `MESSAGE_SENT`, `MESSAGE_RECEIVED`, `MESSAGE_DELETED`, `CHAT_CHANGED` dùng để đếm số tầng), `chat` (đọc `mes` của vài tầng gần đây, bỏ qua các tầng ẩn của `is_system`) và `getCurrentChatId()`; mã nguồn chính thức 1.14.0–1.19.0 của `st-context.js` đều cung cấp các tên này (đã kiểm tra chéo mã nguồn của từng phiên bản), vòng này chỉ kiểm tra thực tế trên 1.17.0. Các yêu cầu trò chuyện vẫn đi theo cách cũ.
 
-数据库方面只调用公开的 `AutoCardUpdaterAPI`，均先检查方法是否存在：
+Phía cơ sở dữ liệu chỉ gọi các `AutoCardUpdaterAPI` public, tất cả đều phải kiểm tra xem phương thức có tồn tại hay không trước:
 
-- 读：`exportTableAsJson`、`getPlotPresetNames`、`getCurrentPlotPreset`。
-- 写（只在检修模式里、用户勾选并点“应用所选”之后）：`updateCell`、`updateRow`、`insertRow`、`deleteRow`、`switchPlotPreset`、`manualUpdate`。参数按 naiv1.2.3 的写法：表用名字，行用“第几行”（1 是第一行数据），列用表头里的名字；执行前按 `row_id` 重新定位，并核对原值没变。
-- 撤销：`importTableAsJson(备份)`。naiv1.2.3 中它默认持久化，会作为一次新的保存写进聊天（数据库的操作记录里旧值仍在，界面和之后的读取以恢复后的为准）。
-- 不使用 `importPlotPresetFromData`：naiv1.2.3 里它会顺带把当前聊天切到 LLM 召回模式，公开接口又没有删除预设或改回模式的方法，无法撤销。
+- Đọc: `exportTableAsJson`, `getPlotPresetNames`, `getCurrentPlotPreset`.
+- Ghi (chỉ trong chế độ kiểm tra, sau khi người dùng tick chọn và nhấn "Áp dụng mục đã chọn"): `updateCell`, `updateRow`, `insertRow`, `deleteRow`, `switchPlotPreset`, `manualUpdate`. Tham số điền theo cách viết của naiv1.2.3: bảng dùng tên, dòng dùng "dòng thứ mấy" (1 là dòng dữ liệu đầu tiên), cột dùng tên trong tiêu đề bảng; trước khi thực thi sẽ định vị lại dựa trên `row_id`, và kiểm tra đối chiếu đảm bảo giá trị gốc không thay đổi.
+- Hoàn tác: `importTableAsJson(bản_sao_lưu)`. Trong naiv1.2.3, hàm này mặc định lưu trữ vĩnh viễn (persist), sẽ ghi vào trò chuyện như một lần lưu mới (trong bản ghi thao tác của cơ sở dữ liệu, giá trị cũ vẫn còn, giao diện và những lần đọc sau đó sẽ dựa vào kết quả đã được khôi phục).
+- Không sử dụng `importPlotPresetFromData`: Trong naiv1.2.3, hàm này sẽ tiện tay chuyển luôn cuộc trò chuyện hiện tại về chế độ thu hồi LLM, mà API public lại không có phương thức để xóa preset hoặc chuyển lại chế độ, do đó không thể hoàn tác.
 
-检查：
+Kiểm tra:
 
-- 工作区单元测试 56 项（新增 24 项）：表格资料整理与省略、正文楼层清理、修改单解析（代码块、多余逗号、截断、超出 12 条）、逐条核对（表 / 行 / 列不存在、值没变、同一处冲突、删行与改行冲突、重新填表只一次）、执行顺序、按 `row_id` 定位、写前核对原值、锁定拒绝、换聊天拒绝、撤销与“之后又变过”的再确认、预设切回、备份编号先于写入交出、没有 IndexedDB 时的内存备份；旁观陪聊的楼层计数（换聊天、隐藏楼层、滑动、删楼层）、评论时机（4 秒、60 秒、数据库忙 30 秒）、委屈与一小时一次的询问、提示词内容。
-- 独立预览（模拟数据库公开接口和酒馆事件，电脑、375 和 320 宽度）：检修模式切换、资料范围栏、修改单勾选（焦点不跳）、全选只选有效条目、全部不要、应用、撤销、表格之后变过的再确认、刷新页面后从浏览器备份撤销、下载备份文件；旁观陪聊的开关和频率、两层新楼层后评论、气泡“回她”、聊天记录里的“旁观”标记、回复后清零、连续 3 条没人理后的“委屈”心情和询问。
-- 真实宿主：同一个 SillyTavern 1.17.0 隔离实例 + 数据库 naiv1.2.3，正文主接口和桌宠聊天都指向本机模拟接口（不发真实付费请求）。在有用户楼层和角色楼层的聊天里：检修提示词带上了真实表格、预设和最近 3 层正文；勾选 3 条后经公开接口写入（改格子、加一行、切换预设），刷新后仍在；撤销后表格和预设恢复，刷新后仍是恢复后的状态。旁观陪聊在 `/send`、`/sendas` 新增两层后约 5 秒评论，气泡显示“回它”。
-- 观察到的数据库自身行为（与本扩展无关，已在本扩展不写入的情况下复现）：在只有开场白的新聊天里，数据库重新打开聊天时会把开场白楼层上的表格字段清掉再保存，表格内容留在它自己的运行时里，下一次写入时再存回去。检修建议在已经有对话的聊天里使用。
+- Thử nghiệm đơn vị ở không gian làm việc gồm 56 hạng mục (thêm mới 24 hạng mục): Tổ chức lại và rút gọn dữ liệu bảng biểu, dọn dẹp các tầng chính văn, phân tích phiếu chỉnh sửa (khối mã block code, dấu phẩy thừa, bị cắt cụt, vượt quá 12 mục), đối chiếu từng mục (bảng / dòng / cột không tồn tại, giá trị không đổi, xung đột tại cùng một chỗ, xung đột giữa xóa dòng và sửa dòng, chỉ điền lại bảng một lần), thứ tự thực thi, định vị theo `row_id`, đối chiếu giá trị gốc trước khi ghi, từ chối khi bị khóa, từ chối khi đổi chat, xác nhận lại khi hoàn tác và "thay đổi sau đó", chuyển lại preset, trả mã số bản sao lưu trước khi ghi, dùng sao lưu trên bộ nhớ trong (RAM) khi không có IndexedDB; việc đếm tầng khi đứng xem trò chuyện (đổi trò chuyện, tầng ẩn, trượt, xóa tầng), thời điểm bình luận (4 giây, 60 giây, cơ sở dữ liệu bận 30 giây), tủi thân và hỏi thăm mỗi giờ một lần, nội dung prompt.
+- Trang xem trước độc lập (mô phỏng các giao diện API public của cơ sở dữ liệu và sự kiện SillyTavern, với chiều rộng màn hình máy tính, 375 và 320): Chuyển đổi chế độ kiểm tra, thanh phạm vi tài liệu, tick phiếu chỉnh sửa (tiêu điểm focus không bị nhảy), chọn tất cả chỉ chọn các mục hợp lệ, không chọn gì cả, áp dụng, hoàn tác, yêu cầu xác nhận lại đối với những thay đổi bảng sau đó, khôi phục từ bản sao lưu trình duyệt sau khi làm mới trang, tải xuống tệp sao lưu; công tắc và tần suất đứng xem trò chuyện, bình luận sau khi có thêm hai tầng mới, bong bóng "Trả lời cô ấy", đánh dấu "Đứng xem" trong lịch sử trò chuyện, xóa đếm về không sau khi phản hồi, tâm trạng "tủi thân" và hỏi thăm khi bị lơ 3 tin nhắn liên tiếp.
+- Host thực tế: Cùng một bản (instance) cách ly SillyTavern 1.17.0 + cơ sở dữ liệu naiv1.2.3, API chính văn chính và trò chuyện của pet màn hình đều trỏ đến API mô phỏng cục bộ (không phát sinh yêu cầu trả phí thực tế). Trong cuộc trò chuyện có chứa tầng người dùng và tầng nhân vật: Prompt kiểm tra đã mang theo các bảng biểu thật, preset thật và 3 tầng chính văn gần nhất; sau khi tick chọn 3 mục thì sẽ ghi qua API public (sửa ô, thêm dòng, chuyển preset), sau khi làm mới trang dữ liệu vẫn còn đó; sau khi hoàn tác thì bảng biểu và preset được khôi phục, sau khi làm mới thì vẫn là trạng thái đã khôi phục. Khi đứng xem trò chuyện, sau khi `/send` và `/sendas` có thêm 2 tầng mới, sẽ có bình luận trong khoảng 5 giây, bong bóng hiển thị "Trả lời nó".
+- Hành vi tự thân của cơ sở dữ liệu quan sát được (không liên quan đến tiện ích này, đã tái hiện khi tiện ích này không thực hiện thao tác ghi): Chỉ trong các cuộc trò chuyện mới có lời chào mở đầu, khi cơ sở dữ liệu mở lại trò chuyện sẽ xóa các trường dữ liệu bảng trên tầng lời chào mở đầu rồi mới lưu lại, nội dung bảng biểu nằm lại trong runtime riêng của nó, và sẽ lưu trở lại trong lần ghi tiếp theo. Khuyến nghị thao tác kiểm tra nên dùng trong các cuộc trò chuyện đã có đối thoại.
 
-没有验证：真实模型给出的修改单质量；`manualUpdate` 在真实宿主里的完整重新填表（需要付费调用，只在预览里模拟）；数据库不同存储模式（JSON / SQLite）下的写入，本轮没有区分测试；1.14.0、1.15.0、1.16.0、1.18.0、1.19.0 和数据库 1.2.4；实体手机。
+Chưa xác minh: Chất lượng của phiếu chỉnh sửa do model thật đưa ra; `manualUpdate` (điền lại toàn bộ bảng) trong host thật (cần yêu cầu trả phí, chỉ được mô phỏng trong xem trước); việc ghi đè lên các chế độ lưu trữ khác nhau của cơ sở dữ liệu (JSON / SQLite), vòng này không phân biệt để kiểm tra; 1.14.0, 1.15.0, 1.16.0, 1.18.0, 1.19.0 và cơ sở dữ liệu 1.2.4; điện thoại thật.

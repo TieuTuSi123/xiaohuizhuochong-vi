@@ -5,7 +5,7 @@ import { TIER_NAMES, MOOD_NAMES } from './care-model.js';
 
 const LATIN = { erii: 'ERII', zero: 'ZERO', naidan: 'NAIDAN' };
 
-// 桌宠小屋：一本翻开的图鉴。左页是立绘和流光，右页是养成档案；切换角色时翻页。
+// Nhà pet màn hình: Một cuốn bách khoa toàn thư mở. Trang trái là ảnh đứng và hiệu ứng luồng sáng, trang phải là hồ sơ nuôi dưỡng; lật trang khi chuyển đổi nhân vật.
 export function createPetHouse(host, { characters, currentId, care, portraits, available, moodExtra, nameOf, statusOf, fxTier, actions, returnFocus }) {
   const doc = host.document, listeners = [];
   let destroyed = false, focusId = currentId(), view = 'profile', aurora = null, ticker = null, editing = false, openedStory = '';
@@ -15,21 +15,21 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
   const byId = id => characters.find(item => item.id === id) || characters[0];
 
   const root = el('section', undefined, 'erii-house'); root.id = 'erii-database-pet-house'; root.hidden = true;
-  root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', '桌宠小屋');
+  root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', 'Nhà pet màn hình');
   const grip = el('div', undefined, 'pet-grip'); grip.setAttribute('aria-hidden', 'true');
   const header = el('header', undefined, 'erii-house__header');
   const heading = el('div', undefined, 'erii-house__heading');
-  heading.append(el('span', '桌宠小屋 · 图鉴', 'erii-house__eyebrow'), el('h2', '今天，谁来陪你'));
-  const close = el('button', '×', 'erii-house__close'); close.type = 'button'; close.setAttribute('aria-label', '关闭桌宠小屋');
+  heading.append(el('span', 'Nhà pet màn hình · Bách khoa toàn thư', 'erii-house__eyebrow'), el('h2', 'Hôm nay, ai sẽ ở bên bạn'));
+  const close = el('button', '×', 'erii-house__close'); close.type = 'button'; close.setAttribute('aria-label', 'Đóng nhà pet màn hình');
   header.append(heading, close);
-  const ribbons = el('div', undefined, 'erii-house__ribbons'); ribbons.setAttribute('role', 'tablist'); ribbons.setAttribute('aria-label', '角色');
+  const ribbons = el('div', undefined, 'erii-house__ribbons'); ribbons.setAttribute('role', 'tablist'); ribbons.setAttribute('aria-label', 'Nhân vật');
   const ribbonButtons = {};
   characters.forEach((character, index) => {
     const ribbon = el('button', undefined, 'erii-house__ribbon'); ribbon.type = 'button';
     ribbon.dataset.id = character.id; ribbon.dataset.character = character.id;
     ribbon.setAttribute('role', 'tab'); ribbon.id = `erii-house-tab-${character.id}`; ribbon.setAttribute('aria-controls', 'erii-house-book');
     const thumb = el('img'); thumb.alt = ''; thumb.draggable = false;
-    ribbon.append(el('span', `0${index + 1}`, 'erii-house__ribbon-no'), thumb, el('span', character.fullName, 'erii-house__ribbon-name'), el('span', '陪伴中', 'erii-house__ribbon-badge'));
+    ribbon.append(el('span', `0${index + 1}`, 'erii-house__ribbon-no'), thumb, el('span', character.fullName, 'erii-house__ribbon-name'), el('span', 'Đang ở bên', 'erii-house__ribbon-badge'));
     ribbons.append(ribbon); ribbonButtons[character.id] = ribbon;
   });
 
@@ -47,8 +47,8 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
   const profile = el('div', undefined, 'erii-house__profile');
   const nameRow = el('div', undefined, 'erii-house__name-row');
   const name = el('h3', '', 'erii-house__name');
-  const rename = el('button', undefined, 'erii-house__rename'); rename.type = 'button'; rename.append(icon(doc, 'pencil')); rename.setAttribute('aria-label', '改昵称'); rename.title = '改昵称';
-  const nameInput = el('input', undefined, 'erii-house__name-input'); nameInput.maxLength = 12; nameInput.hidden = true; nameInput.setAttribute('aria-label', '昵称（留空恢复默认）');
+  const rename = el('button', undefined, 'erii-house__rename'); rename.type = 'button'; rename.append(icon(doc, 'pencil')); rename.setAttribute('aria-label', 'Đổi biệt danh'); rename.title = 'Đổi biệt danh';
+  const nameInput = el('input', undefined, 'erii-house__name-input'); nameInput.maxLength = 12; nameInput.hidden = true; nameInput.setAttribute('aria-label', 'Biệt danh (Để trống để khôi phục mặc định)');
   nameRow.append(name, rename, nameInput);
   const honor = el('p', '', 'erii-house__honor');
   const affection = el('div', undefined, 'erii-house__affection');
@@ -59,10 +59,10 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
   affection.append(hearts, bar, points);
   const moodRow = el('div', undefined, 'erii-house__mood');
   const moodStamp = el('span', '', 'erii-house__mood-stamp');
-  moodRow.append(el('span', '心情', 'erii-house__key'), moodStamp);
+  moodRow.append(el('span', 'Tâm trạng', 'erii-house__key'), moodStamp);
   const needs = el('div', undefined, 'erii-house__needs');
   const meters = {};
-  for (const [key, label, iconName] of [['fullness', '饱腹', 'bowl'], ['cleanliness', '清洁', 'bubbles']]) {
+  for (const [key, label, iconName] of [['fullness', 'Độ no', 'bowl'], ['cleanliness', 'Độ sạch', 'bubbles']]) {
     const meter = el('div', undefined, 'pet-meter'); meter.dataset.need = key;
     const track = el('span', undefined, 'pet-meter__bar'); const level = el('i'); track.append(level);
     const value = el('span', '', 'pet-meter__value');
@@ -71,23 +71,23 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
   }
   const facts = el('dl', undefined, 'erii-house__facts');
   const fact = label => { const wrap = el('div'); const value = el('dd', ''); wrap.append(el('dt', label), value); facts.append(wrap); return value; };
-  const daysValue = fact('陪伴天数'), metValue = fact('认识的第一天'), taskValue = fact('陪你填表');
+  const daysValue = fact('Số ngày đồng hành'), metValue = fact('Ngày đầu gặp gỡ'), taskValue = fact('Cùng bạn điền bảng');
   const intro = el('p', '', 'erii-house__intro');
   const deck = el('div', undefined, 'erii-house__actions');
-  const choose = button('换她来陪我', 'erii-house__choose', 'sparkle');
-  const feed = button('喂她', 'erii-house__action', 'bowl');
-  const wash = button('梳洗', 'erii-house__action', 'bubbles');
-  const diaryOpen = button('成长日记', 'erii-house__action', 'book');
+  const choose = button('Để cô ấy ra ngoài', 'erii-house__choose', 'sparkle');
+  const feed = button('Cho ăn', 'erii-house__action', 'bowl');
+  const wash = button('Tắm rửa', 'erii-house__action', 'bubbles');
+  const diaryOpen = button('Nhật ký trưởng thành', 'erii-house__action', 'book');
   deck.append(choose, feed, wash, diaryOpen);
   profile.append(nameRow, honor, affection, moodRow, needs, facts, intro, deck);
 
   const diary = el('div', undefined, 'erii-house__diary'); diary.hidden = true;
   const diaryHead = el('div', undefined, 'erii-house__diary-head');
-  const diaryBack = button('回到档案', 'erii-house__action');
-  diaryHead.append(el('h3', '成长日记'), diaryBack);
+  const diaryBack = button('Quay lại hồ sơ', 'erii-house__action');
+  diaryHead.append(el('h3', 'Nhật ký trưởng thành'), diaryBack);
   const entries = el('ol', undefined, 'erii-house__entries');
   const storyList = el('div', undefined, 'erii-house__stories');
-  diary.append(diaryHead, entries, el('h4', '专属小故事', 'erii-house__subhead'), storyList);
+  diary.append(diaryHead, entries, el('h4', 'Câu chuyện nhỏ độc quyền', 'erii-house__subhead'), storyList);
   page.append(profile, diary);
   book.append(plate, page);
   const status = el('p', '', 'erii-house__status'); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
@@ -96,7 +96,7 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
 
   const sheet = createSheet(host, root, { grip, drag: [header], desktop: () => ({ width: 780, height: 600 }), onDismiss: () => hide() });
   const say = text => { status.textContent = text; };
-  const date = ms => ms ? new Date(ms).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
+  const date = ms => ms ? new Date(ms).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
 
   function syncAurora() {
     const fancy = fxTier() === 'fancy' && !root.hidden && !doc.hidden;
@@ -122,7 +122,7 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
     }
     portrait.hidden = !art?.idle; missing.hidden = Boolean(art?.idle);
     if (art?.idle && !portrait.matches(':hover') && portrait.src !== art.idle) portrait.src = art.idle;
-    portrait.alt = `${character.fullName}的立绘`;
+    portrait.alt = `Ảnh đứng của ${character.fullName}`;
     missing.textContent = ready.ok ? '' : ready.reason;
     number.textContent = `No.0${characters.indexOf(character) + 1}`; latin.textContent = LATIN[character.id] || character.id.toUpperCase();
     const state = care.view(character.id, moodExtra(character.id));
@@ -131,10 +131,10 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
     stamp.dataset.current = String(character.id === current);
     if (!editing) name.textContent = nameOf(character);
     honor.textContent = `「${character.titles[tier]}」 · ${TIER_NAMES[tier]}`;
-    hearts.setAttribute('aria-label', `亲密度 ${TIER_NAMES[tier]}（${tier + 1}/5）`);
+    hearts.setAttribute('aria-label', `Độ thân thiết ${TIER_NAMES[tier]} (${tier + 1}/5)`);
     [...hearts.children].forEach((heart, index) => heart.classList.toggle('is-on', index <= tier));
     fill.style.width = `${Math.round(state.progress * 100)}%`;
-    points.textContent = state.next === null ? `${state.affection} · 已满` : `${state.affection} / ${state.next}`;
+    points.textContent = state.next === null ? `${state.affection} · Đã đầy` : `${state.affection} / ${state.next}`;
     moodStamp.textContent = MOOD_NAMES[state.mood]; moodStamp.dataset.mood = state.mood;
     needs.hidden = !actions.needsEnabled();
     for (const key of ['fullness', 'cleanliness']) {
@@ -142,25 +142,25 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
       meters[key].level.style.width = `${value}%`; meters[key].value.textContent = String(value);
       meters[key].meter.dataset.low = String(value < 30);
     }
-    daysValue.textContent = state.days ? `${state.days} 天` : '还没见过';
+    daysValue.textContent = state.days ? `${state.days} ngày` : 'Chưa từng gặp';
     metValue.textContent = date(state.firstMet);
-    taskValue.textContent = `${state.counts.tasks} 次`;
+    taskValue.textContent = `${state.counts.tasks} lần`;
     intro.textContent = character.intro;
     const isCurrent = character.id === current;
     choose.disabled = isCurrent || !ready.ok;
     choose.dataset.state = isCurrent ? 'current' : ready.ok ? '' : 'unavailable';
-    choose.querySelector('span:last-child').textContent = isCurrent ? `${character.pronoun}正在陪你` : `换${character.pronoun}来陪我`;
+    choose.querySelector('span:last-child').textContent = isCurrent ? `${character.pronoun} đang ở bên bạn` : `Để ${character.pronoun.toLowerCase()} ra ngoài`;
     choose.title = ready.ok ? '' : ready.reason;
-    feed.querySelector('span:last-child').textContent = `喂${character.pronoun}`;
+    feed.querySelector('span:last-child').textContent = `Cho ${character.pronoun.toLowerCase()} ăn`;
     wash.disabled = !actions.needsEnabled();
     if (!diary.hidden) renderDiary(character, state);
   }
   function renderDiary(character, state) {
     entries.replaceChildren();
-    if (!state.diary.length) entries.append(el('li', '还没有记录。多陪陪她吧。', 'erii-house__empty'));
+    if (!state.diary.length) entries.append(el('li', 'Chưa có ghi chép nào. Hãy dành nhiều thời gian hơn cho cô ấy nhé.', 'erii-house__empty'));
     for (const item of state.diary.slice(0, 40)) {
       const row = el('li'); row.dataset.kind = item.kind;
-      const when = el('time', new Date(item.at).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })); when.dateTime = new Date(item.at).toISOString();
+      const when = el('time', new Date(item.at).toLocaleDateString('vi-VN', { month: 'numeric', day: 'numeric' })); when.dateTime = new Date(item.at).toISOString();
       row.append(when, el('span', item.text)); entries.append(row);
     }
     storyList.replaceChildren();
@@ -168,7 +168,7 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
       const open = state.tier >= story.tier;
       const card = el('article', undefined, 'erii-house__story'); card.dataset.locked = String(!open);
       const toggle = el('button', undefined, 'erii-house__story-title'); toggle.type = 'button';
-      toggle.append(el('span', open ? story.title : '？？？'), el('small', open ? '读一读' : `「${TIER_NAMES[story.tier]}」解锁`));
+      toggle.append(el('span', open ? story.title : '？？？'), el('small', open ? 'Đọc thử' : `Mở khóa ở mức 「${TIER_NAMES[story.tier]}」`));
       toggle.disabled = !open; toggle.dataset.story = story.title;
       toggle.setAttribute('aria-expanded', String(openedStory === `${character.id}:${story.title}`));
       card.append(toggle);
@@ -193,7 +193,7 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
   function finishRename(commit) {
     if (!editing) return;
     editing = false; nameInput.hidden = true; name.hidden = false;
-    if (commit && actions.nickname(focusId, nameInput.value)) say(nameInput.value.trim() ? `记住了：${nameInput.value.trim()}` : '恢复了原来的名字。');
+    if (commit && actions.nickname(focusId, nameInput.value)) say(nameInput.value.trim() ? `Đã ghi nhớ: ${nameInput.value.trim()}` : 'Đã khôi phục tên gốc.');
     render(); rename.focus({ preventScroll: true });
   }
   function open(id = currentId()) {
@@ -229,7 +229,7 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
   listen(feed, 'click', () => actions.feed(focusId));
   listen(wash, 'click', () => {
     const result = actions.clean(focusId);
-    say(result?.tooSoon ? `刚梳洗过，${Math.ceil(result.wait / 60000)} 分钟后再来。` : '洗得干干净净。');
+    say(result?.tooSoon ? `Vừa mới tắm xong, ${Math.ceil(result.wait / 60000)} phút nữa hãy quay lại.` : 'Đã tắm rửa sạch sẽ.');
     render();
   });
   listen(diaryOpen, 'click', () => { view = 'diary'; profile.hidden = true; diary.hidden = false; render(); diaryBack.focus({ preventScroll: true }); });

@@ -1,7 +1,7 @@
-// 检修模式的写入：只调用数据库公开的 AutoCardUpdaterAPI，只执行用户勾选并确认的条目。
-// 写之前先整份导出表格做备份；撤销就是把备份原样导回去（数据库会把它当作一次新的保存）。
-// 剧情推进预设只做“切换”：数据库的导入预设接口会顺带把当前聊天切到 LLM 召回模式，
-// 公开接口又没有删除预设或改回模式的方法，写了就撤销不了，所以不做。
+// Ghi vào cơ sở dữ liệu trong chế độ kiểm tra: Chỉ gọi AutoCardUpdaterAPI public của cơ sở dữ liệu, chỉ thực thi các mục mà người dùng đã tick chọn và xác nhận.
+// Trước khi ghi, sẽ xuất toàn bộ bảng ra để sao lưu; hoàn tác (undo) tức là nhập lại y nguyên bản sao lưu đó vào (cơ sở dữ liệu sẽ coi đây là một lần lưu mới).
+// Preset thúc đẩy cốt truyện chỉ thực hiện "chuyển đổi": API nhập preset của cơ sở dữ liệu sẽ tiện tay chuyển luôn chat hiện tại sang chế độ thu hồi LLM,
+// mà API public lại không có phương thức xóa preset hay chuyển lại chế độ, ghi vào thì không thể hoàn tác, vì vậy không làm.
 import { digestTables, executionOrder, locateRow, clip } from './repair.js';
 
 const NEEDED = ['exportTableAsJson', 'importTableAsJson', 'updateCell', 'updateRow', 'insertRow', 'deleteRow'];
@@ -20,84 +20,84 @@ export function createRepairService(host, { backups }) {
     const database = api();
     let presets = [];
     let current = '';
-    try { presets = (database.getPlotPresetNames?.() || []).map(String); } catch { /* 预设读不到时只是不能切换 */ }
-    try { current = String(database.getCurrentPlotPreset?.() ?? ''); } catch { /* 同上 */ }
+    try { presets = (database.getPlotPresetNames?.() || []).map(String); } catch { /* Không đọc được preset thì chỉ là không thể chuyển đổi thôi */ }
+    try { current = String(database.getCurrentPlotPreset?.() ?? ''); } catch { /* Như trên */ }
     return { data: tables(), presets, current, chatKey: chatKey() };
   }
   const done = text => ({ ok: true, text });
   const failed = text => ({ ok: false, text });
   async function applyOne(database, item) {
-    if (item.kind === 'preset') return await database.switchPlotPreset?.(item.after) ? done('已切换') : failed('数据库没有切换成功。');
+    if (item.kind === 'preset') return await database.switchPlotPreset?.(item.after) ? done('Đã chuyển đổi') : failed('Cơ sở dữ liệu chuyển đổi không thành công.');
     if (item.kind === 'refill') {
-      if (typeof database.manualUpdate !== 'function') return failed('这个版本的数据库没有提供重新填表的接口。');
-      return await database.manualUpdate() === false ? failed('数据库没有完成这次填表，可以在数据库里查看原因。') : done('数据库已重新填表');
+      if (typeof database.manualUpdate !== 'function') return failed('Phiên bản cơ sở dữ liệu này không cung cấp API để điền lại bảng.');
+      return await database.manualUpdate() === false ? failed('Cơ sở dữ liệu chưa hoàn thành lần điền bảng này, có thể kiểm tra lý do trong cơ sở dữ liệu.') : done('Cơ sở dữ liệu đã điền lại bảng');
     }
     const data = tables();
     const sheet = data[item.sheetKey];
-    if (!sheet || String(sheet.name) !== item.table) return failed('这张表已经找不到了。');
+    if (!sheet || String(sheet.name) !== item.table) return failed('Không tìm thấy bảng này nữa.');
     if (item.kind === 'insert') {
       const index = await database.insertRow(item.table, Object.fromEntries(item.values.map(value => [value.column, value.after])));
-      return Number(index) > 0 ? done(`已加在第 ${index} 行`) : failed('数据库没有接受这一行。');
+      return Number(index) > 0 ? done(`Đã thêm vào dòng thứ ${index}`) : failed('Cơ sở dữ liệu không chấp nhận dòng này.');
     }
     const index = locateRow(data, item.sheetKey, item.rowId);
-    if (index < 0) return failed('这一行已经不在了，没有改。');
+    if (index < 0) return failed('Dòng này không còn nữa, không sửa.');
     const headers = sheet.content[0];
     const now = column => String(sheet.content[index][headers.indexOf(column)] ?? '');
-    if (item.kind === 'delete') return await database.deleteRow(item.table, index) ? done('已删除') : failed('数据库拒绝了删除（这一行可能被锁定）。');
+    if (item.kind === 'delete') return await database.deleteRow(item.table, index) ? done('Đã xóa') : failed('Cơ sở dữ liệu từ chối xóa (dòng này có thể bị khóa).');
     if (item.kind === 'cell') {
-      if (now(item.column) !== item.before) return failed(`确认前这一格已经变了（现在是「${clip(now(item.column), 40)}」），没有改。`);
-      return await database.updateCell(item.table, index, item.column, item.after) ? done('已写入') : failed('数据库拒绝了写入（可能被锁定）。');
+      if (now(item.column) !== item.before) return failed(`Trước khi xác nhận, ô này đã thay đổi (hiện tại là "${clip(now(item.column), 40)}"), không sửa.`);
+      return await database.updateCell(item.table, index, item.column, item.after) ? done('Đã ghi') : failed('Cơ sở dữ liệu từ chối ghi (có thể bị khóa).');
     }
     if (item.kind === 'row') {
       const moved = item.changes.find(change => now(change.column) !== change.before);
-      if (moved) return failed(`确认前「${moved.column}」已经变了，没有改。`);
+      if (moved) return failed(`Trước khi xác nhận, "${moved.column}" đã thay đổi, không sửa.`);
       return await database.updateRow(item.table, index, Object.fromEntries(item.changes.map(change => [change.column, change.after])))
-        ? done('已写入') : failed('数据库拒绝了写入（可能被锁定）。');
+        ? done('Đã ghi') : failed('Cơ sở dữ liệu từ chối ghi (có thể bị khóa).');
     }
-    return failed('看不懂这一条，没有改。');
+    return failed('Không hiểu mục này, không sửa.');
   }
   async function apply(ticket, { character = '', onBackup } = {}) {
-    if (!available()) return { ok: false, text: '没有检测到数据库，没有写入。' };
-    if (ticket.chatKey && ticket.chatKey !== chatKey()) return { ok: false, text: '现在打开的不是提出这张修改单时的聊天，没有写入。' };
+    if (!available()) return { ok: false, text: 'Không phát hiện cơ sở dữ liệu, không ghi.' };
+    if (ticket.chatKey && ticket.chatKey !== chatKey()) return { ok: false, text: 'Cuộc trò chuyện hiện đang mở không phải là cuộc trò chuyện lúc đưa ra phiếu chỉnh sửa này, không ghi.' };
     const items = executionOrder(ticket.items);
-    if (!items.length) return { ok: false, text: '还没有勾选要改的地方。' };
+    if (!items.length) return { ok: false, text: 'Vẫn chưa tick chọn những chỗ cần sửa.' };
     const database = api();
     let presetBefore = '';
-    try { presetBefore = String(database.getCurrentPlotPreset?.() ?? ''); } catch { /* 只影响撤销时切回预设 */ }
+    try { presetBefore = String(database.getCurrentPlotPreset?.() ?? ''); } catch { /* Chỉ ảnh hưởng đến việc chuyển lại preset khi hoàn tác */ }
     let backupId = '';
     try { backupId = await backups.put({ chatKey: chatKey(), character, tables: JSON.stringify(database.exportTableAsJson() || {}), presetBefore }); }
     catch { backupId = ''; }
-    if (!backupId) return { ok: false, text: '备份没有成功，为了安全没有写入。' };
-    // 先把备份编号交给调用方存好：万一写到一半页面被关掉，之后仍能找到备份撤销或下载。
+    if (!backupId) return { ok: false, text: 'Sao lưu không thành công, để an toàn nên chưa ghi.' };
+    // Trước tiên giao mã số sao lưu cho bên gọi cất giữ: phòng khi đang ghi dở thì trang bị đóng, sau này vẫn có thể tìm lại bản sao lưu để hoàn tác hoặc tải xuống.
     onBackup?.(backupId);
     const results = [];
     for (const item of items) {
       let outcome;
-      try { outcome = await applyOne(database, item); } catch (error) { outcome = failed(`出错了：${clip(error?.message || error, 120)}`); }
+      try { outcome = await applyOne(database, item); } catch (error) { outcome = failed(`Đã có lỗi: ${clip(error?.message || error, 120)}`); }
       results.push({ id: item.id, ...outcome });
     }
     const written = results.filter(result => result.ok).length;
     let digest = '';
-    try { digest = digestTables(database.exportTableAsJson()); } catch { /* 没有指纹时撤销前一律再确认 */ }
+    try { digest = digestTables(database.exportTableAsJson()); } catch { /* Khi không có dấu vân tay (digest), luôn xác nhận lại trước khi hoàn tác */ }
     return { ok: written > 0, results, backupId, digest, durable: backups.durable,
       presetChanged: results.some(result => result.ok && items.find(item => item.id === result.id)?.kind === 'preset'),
-      text: written ? `已写入 ${written} 处${written < results.length ? `，${results.length - written} 处没写进去` : ''}。` : '一处都没有写进去，表格没有变化。' };
+      text: written ? `Đã ghi ${written} chỗ${written < results.length ? `, ${results.length - written} chỗ chưa ghi được` : ''}.` : 'Không ghi được vào chỗ nào, bảng biểu không có thay đổi.' };
   }
   async function undo(ticket, { force = false } = {}) {
-    if (!available()) return { ok: false, text: '没有检测到数据库，没法撤销。' };
-    if (ticket.chatKey && ticket.chatKey !== chatKey()) return { ok: false, text: '现在打开的不是这张修改单所在的聊天。切回那个聊天后再撤销。' };
+    if (!available()) return { ok: false, text: 'Không phát hiện cơ sở dữ liệu, không thể hoàn tác.' };
+    if (ticket.chatKey && ticket.chatKey !== chatKey()) return { ok: false, text: 'Cuộc trò chuyện hiện đang mở không phải là cuộc trò chuyện của phiếu chỉnh sửa này. Hãy chuyển lại cuộc trò chuyện đó rồi mới hoàn tác.' };
     const record = await backups.get(ticket.backupId);
-    if (!record?.tables) return { ok: false, text: '找不到这次的备份了（页面刷新过，而且浏览器没能把备份存下来）。' };
-    if (!force && !ticket.digest) return { ok: false, confirm: true, text: '上次写入的结果没有记录完整，没法确认表格之后有没有变过。撤销会把整份表格恢复到写入前。' };
+    if (!record?.tables) return { ok: false, text: 'Không tìm thấy bản sao lưu lần này nữa (trang đã được làm mới, và trình duyệt không thể lưu lại bản sao lưu).' };
+    if (!force && !ticket.digest) return { ok: false, confirm: true, text: 'Kết quả của lần ghi trước không được ghi lại đầy đủ, không thể xác nhận bảng biểu sau đó có thay đổi hay không. Hoàn tác sẽ khôi phục toàn bộ bảng về thời điểm trước khi ghi.' };
     if (!force && digestTables(api().exportTableAsJson()) !== ticket.digest)
-      return { ok: false, confirm: true, text: '写入之后表格又有变化（可能是数据库自己填了表）。撤销会把这些变化一起退回到写入前。' };
-    if (!await api().importTableAsJson(record.tables)) return { ok: false, text: '数据库没有接受恢复，表格没有变化。可以下载备份，在数据库里手动导入。' };
+      return { ok: false, confirm: true, text: 'Sau khi ghi, bảng biểu lại có thay đổi (có thể do cơ sở dữ liệu tự điền bảng). Hoàn tác sẽ đưa luôn những thay đổi này trở về thời điểm trước khi ghi.' };
+    if (!await api().importTableAsJson(record.tables)) return { ok: false, text: 'Cơ sở dữ liệu không chấp nhận khôi phục, bảng biểu không có thay đổi. Có thể tải xuống bản sao lưu và nhập thủ công trong cơ sở dữ liệu.' };
     let tail = '';
     if (ticket.presetChanged) {
-      try { tail = await api().switchPlotPreset?.(record.presetBefore ?? '') ? '，剧情推进预设也切回去了' : '，但剧情推进预设没能切回去'; }
-      catch { tail = '，但剧情推进预设没能切回去'; }
+      try { tail = await api().switchPlotPreset?.(record.presetBefore ?? '') ? ', preset thúc đẩy cốt truyện cũng đã chuyển lại rồi' : ', nhưng preset thúc đẩy cốt truyện không thể chuyển lại'; }
+      catch { tail = ', nhưng preset thúc đẩy cốt truyện không thể chuyển lại'; }
     }
-    return { ok: true, text: `已恢复到写入前的表格${tail}。` };
+    return { ok: true, text: `Đã khôi phục về bảng biểu thời điểm trước khi ghi${tail}.` };
   }
   return { available, snapshot, apply, undo, chatKey, backup: id => backups.get(id), get durable() { return backups.durable; } };
 }

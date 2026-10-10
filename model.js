@@ -13,7 +13,7 @@ export function normalizeSnapshot(value) {
       detail: typeof item.detail === 'string' ? item.detail : '', kind: KINDS.has(item.kind) ? item.kind : 'info', busy: item.busy === true,
       dismissible: item.dismissible === true,
       action: item.action && typeof item.action.run === 'function' ? {
-        label: text(item.action.label || '停止'),
+        label: text(item.action.label || 'Dừng'),
         variant: item.action.variant === 'danger' ? 'danger' : 'default',
         run: item.action.run,
       } : null })),

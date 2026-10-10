@@ -7,8 +7,8 @@ const poseFrame = (offset, x = 0, y = 0, angle = 0, sx = 1, sy = 1, easing = eas
 });
 const neutral = offset => poseFrame(offset);
 
-// Each action has its own timing: anticipation, movement, then a softer settle.
-// Greeting and landing finish; quiet actions and the suspended body keep moving.
+// Mỗi hành động có thời gian riêng: chuẩn bị (anticipation), chuyển động (movement), sau đó là một nhịp lắng lại nhẹ nhàng hơn (settle).
+// Chào hỏi và đáp đất sẽ kết thúc (không lặp); các hành động tĩnh và việc bị xách bổng lên sẽ tiếp tục chuyển động.
 const tracks = {
   idle: { duration: 5200, frames: [neutral(0), poseFrame(.48, 0, -.4, .5), neutral(1)] },
   received: { duration: 1080, iterations: 1, frames: [neutral(0), poseFrame(.18, 0, 1, -1, 1.018, .978, rise),
@@ -54,8 +54,8 @@ tracks['work-bakery'] = {...tracks.origami,duration:3800};
 tracks['work-florist'] = {...tracks.reading,duration:4400};
 for (const pose of ['eat-pudding','eat-riceball','eat-omurice','eat-ramen']) tracks[pose] = {...tracks.tea,duration:4600};
 
-// Browser frames are independent of the 250ms database sampling. Only a pose
-// change reads the rendered transform; dragging still has no layout reads.
+// Các frame render của trình duyệt độc lập với chu kỳ lấy mẫu 250ms của cơ sở dữ liệu. Chỉ khi nào thay đổi tư thế (pose) 
+// thì mới đọc thuộc tính transform đã render; việc kéo thả sẽ hoàn toàn không kích hoạt việc đọc layout (no layout reads).
 export function createMotion(stage, host) {
   const reduced = host.matchMedia?.('(prefers-reduced-motion: reduce)');
   let animation = null;
@@ -74,8 +74,8 @@ export function createMotion(stage, host) {
     const track = tracks[pose] || tracks.idle;
     const origin = track.origin || '50% 88%';
     const frames = track.frames.map(frame => ({ ...frame, transformOrigin: origin }));
-    // Move both the pose and its pivot from what is currently on screen.
-    // Switching from head suspension to a seated pose must not jump the pivot.
+    // Di chuyển cả tư thế và điểm neo (pivot) bắt đầu từ trạng thái hiện tại đang hiển thị trên màn hình.
+    // Việc chuyển đổi từ trạng thái bị xách bổng ở đầu sang trạng thái ngồi không được làm điểm neo bị giật (jump).
     const bridge = stage.animate([start, { transform: frames[0].transform, transformOrigin: origin }],
       { duration: track.bridge || 140, easing: settle, fill: 'forwards' });
     animation = bridge;

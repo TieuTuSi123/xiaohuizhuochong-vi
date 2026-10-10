@@ -1,19 +1,21 @@
-// 一键打开数据库的某个版面。打开数据库走它公开的 AutoCardUpdaterAPI；
-// 跳到指定版面要调用它界面里的切页动作（等同于点它的侧边栏），只换页面，不读写表格、不碰任务。
-// 找不到切页动作时退回点侧边栏，再不行就只打开数据库。
+// Mở nhanh một bảng của cơ sở dữ liệu. Việc mở cơ sở dữ liệu sẽ thông qua AutoCardUpdaterAPI public của nó;
+// Để nhảy đến bảng chỉ định, cần gọi thao tác chuyển trang trong giao diện của nó (tương đương với việc nhấp vào thanh bên của nó), chỉ chuyển trang, không đọc ghi bảng biểu, không đụng đến nhiệm vụ.
+// Khi không tìm thấy thao tác chuyển trang thì lùi về thao tác nhấp thanh bên, nếu vẫn không được thì chỉ mở cơ sở dữ liệu.
 export const DATABASE_PAGES = Object.freeze([
-  { id: 'dashboard', label: '仪表盘', icon: 'gauge' },
-  { id: 'form-fill', label: '填表工作台', icon: 'table' },
-  { id: 'plot', label: '剧情推进', icon: 'compass' },
-  { id: 'data-mgmt', label: '数据管理', icon: 'archive' },
+  { id: 'dashboard', label: 'Bảng điều khiển', icon: 'gauge' },
+  { id: 'form-fill', label: 'Bàn làm việc điền bảng', icon: 'table' },
+  { id: 'plot', label: 'Thúc đẩy cốt truyện', icon: 'compass' },
+  { id: 'data-mgmt', label: 'Quản lý dữ liệu', icon: 'archive' },
   { id: 'api', label: 'API', icon: 'plug' },
-  { id: 'visualizer', label: '看表格', icon: 'grid' },
+  { id: 'visualizer', label: 'Xem bảng biểu', icon: 'grid' },
 ]);
-const TITLES = { dashboard: '仪表盘', 'form-fill': '填表工作台', plot: '剧情推进', 'data-mgmt': '数据管理', api: 'API', 'advanced-tools': '高级工具' };
 
-// 报错时“去看看”该去哪：接口类问题去 API 版面，其余去高级工具（运行日志）。
+// CẢNH BÁO KỸ THUẬT: Các chuỗi dưới đây được dùng để tìm nút bấm DOM. Phải khớp chính xác với chữ trên giao diện cơ sở dữ liệu.
+const TITLES = { dashboard: 'Bảng điều khiển', 'form-fill': 'Bàn làm việc điền bảng', plot: 'Thúc đẩy cốt truyện', 'data-mgmt': 'Quản lý dữ liệu', api: 'API', 'advanced-tools': 'Công cụ nâng cao' };
+
+// Khi báo lỗi thì nút "Đi xem" nên chuyển đến đâu: Các vấn đề về API thì đến bảng API, còn lại thì đến Công cụ nâng cao (nhật ký chạy).
 export function pageForNotice(text) {
-  return /API|api|密钥|key|401|403|429|额度|余额|模型|超时|timeout|网络|连接|代理/.test(String(text || '')) ? 'api' : 'advanced-tools';
+  return /API|api|khóa|key|401|403|429|hạn mức|số dư|model|quá giờ|timeout|mạng|kết nối|proxy/.test(String(text || '')) ? 'api' : 'advanced-tools';
 }
 
 function routerStore(doc) {
@@ -25,7 +27,7 @@ function routerStore(doc) {
 
 function clickMenuItem(host, doc) {
   const item = doc.getElementById('acu-v2-menu-item') || doc.getElementById('shujuku_v120-menu-item')
-    || [...doc.querySelectorAll('#extensionsMenu .list-group-item')].find(node => node.querySelector('.fa-database') && /数据库/.test(node.textContent || ''));
+    || [...doc.querySelectorAll('#extensionsMenu .list-group-item')].find(node => node.querySelector('.fa-database') && /Cơ sở dữ liệu/.test(node.textContent || '')); // Từ khóa DOM
   if (!(item instanceof host.HTMLElement)) return false;
   item.click();
   return true;
@@ -36,12 +38,12 @@ const wait = (host, ms) => new Promise(resolve => host.setTimeout(resolve, ms));
 async function openApp(host, doc) {
   const api = host.AutoCardUpdaterAPI;
   if (typeof api?.openSettings === 'function') {
-    try { if (await api.openSettings() !== false) return true; } catch { /* fall back to the menu entry */ }
+    try { if (await api.openSettings() !== false) return true; } catch { /* lùi về điểm đầu vào trên menu */ }
   }
   return clickMenuItem(host, doc);
 }
 
-// 返回 { ok, exact, reason }：exact 表示已经停在目标版面。
+// Trả về { ok, exact, reason }: exact biểu thị đã dừng ở bảng mục tiêu.
 export async function openDatabasePage(host, pageId = 'dashboard') {
   const doc = host.document;
   const api = host.AutoCardUpdaterAPI;
@@ -49,16 +51,16 @@ export async function openDatabasePage(host, pageId = 'dashboard') {
     if (typeof api?.openVisualizer === 'function') {
       try { if (await api.openVisualizer() !== false) return { ok: true, exact: true }; } catch { /* report below */ }
     }
-    return (await openApp(host, doc)) ? { ok: true, exact: false, reason: '当前数据库没有提供可视化表格入口，已打开数据库。' }
-      : { ok: false, exact: false, reason: '未找到数据库入口，请先启用数据库。' };
+    return (await openApp(host, doc)) ? { ok: true, exact: false, reason: 'Cơ sở dữ liệu hiện tại không cung cấp điểm đầu vào cho bảng biểu trực quan, đã mở cơ sở dữ liệu.' }
+      : { ok: false, exact: false, reason: 'Không tìm thấy điểm đầu vào của cơ sở dữ liệu, vui lòng bật cơ sở dữ liệu trước.' };
   }
-  if (!(await openApp(host, doc))) return { ok: false, exact: false, reason: '未找到数据库入口，请先启用数据库。' };
+  if (!(await openApp(host, doc))) return { ok: false, exact: false, reason: 'Không tìm thấy điểm đầu vào của cơ sở dữ liệu, vui lòng bật cơ sở dữ liệu trước.' };
   if (pageId === 'dashboard' && !routerStore(doc)) return { ok: true, exact: false };
   for (let attempt = 0; attempt < 20; attempt++) {
     const store = routerStore(doc);
     if (store) {
       const visible = Array.isArray(store.visiblePages) ? store.visiblePages.some(page => page.id === pageId) : true;
-      if (!visible) return { ok: true, exact: false, reason: `「${TITLES[pageId] || pageId}」在当前数据库的功能档位里没有显示，已打开数据库。` };
+      if (!visible) return { ok: true, exact: false, reason: `Bảng "${TITLES[pageId] || pageId}" không hiển thị trong các tính năng của cơ sở dữ liệu hiện tại, đã mở cơ sở dữ liệu.` };
       store.setActivePage(pageId);
       if (store.activePageId === pageId) return { ok: true, exact: true };
       break;
@@ -69,5 +71,5 @@ export async function openDatabasePage(host, pageId = 'dashboard') {
   const button = title && [...(doc.getElementById('acu-app-v2')?.querySelectorAll('button, [role="tab"], a') || [])]
     .find(node => (node.textContent || '').trim() === title);
   if (button) { button.click(); return { ok: true, exact: true }; }
-  return { ok: true, exact: false, reason: '已打开数据库，但没能自动跳到对应版面。' };
+  return { ok: true, exact: false, reason: 'Đã mở cơ sở dữ liệu, nhưng không thể tự động nhảy đến bảng tương ứng.' };
 }

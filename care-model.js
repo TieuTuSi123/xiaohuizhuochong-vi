@@ -1,18 +1,18 @@
-// 养成：亲密度、需求值、心情、成长日记、昵称、每日见面。纯逻辑，时间可注入，保存交给调用方。
-// 约定：亲密度只涨不降；需求值只影响心情和台词，没有任何惩罚，可整体关闭。
+// Nuôi dưỡng: độ thân thiết, chỉ số nhu cầu, tâm trạng, nhật ký trưởng thành, biệt danh, gặp mặt hằng ngày. Chỉ chứa logic thuần, thời gian có thể tiêm (inject) vào, việc lưu trữ giao cho bên gọi (caller).
+// Quy ước: độ thân thiết chỉ tăng không giảm; chỉ số nhu cầu chỉ ảnh hưởng đến tâm trạng và lời thoại, không có bất kỳ hình phạt nào, có thể tắt toàn bộ.
 const MINUTE = 60000, HOUR = 60 * MINUTE, DAY = 24 * HOUR;
 export const TIERS = Object.freeze([0, 100, 300, 700, 1500]);
-export const TIER_NAMES = Object.freeze(['初识', '熟悉', '亲近', '信赖', '挚爱']);
-export const MOOD_NAMES = Object.freeze({ worried: '担心', sulky: '委屈', hungry: '饿了', dirty: '想梳洗', missing: '想你', happy: '开心', calm: '平静' });
+export const TIER_NAMES = Object.freeze(['Mới quen', 'Quen thuộc', 'Gần gũi', 'Tin tưởng', 'Yêu thương']);
+export const MOOD_NAMES = Object.freeze({ worried: 'Lo lắng', sulky: 'Tủi thân', hungry: 'Đói bụng', dirty: 'Muốn tắm rửa', missing: 'Nhớ bạn', happy: 'Vui vẻ', calm: 'Bình tĩnh' });
 export const DECAY = Object.freeze({ fullness: 100 / (12 * HOUR), cleanliness: 100 / (24 * HOUR) });
 export const FOOD_CARE = Object.freeze({ pudding: [15, 3], riceball: [25, 4], omurice: [40, 6], ramen: [50, 8] });
 export const CLEAN_COOLDOWN = 30 * MINUTE;
-// [每次加多少, 每天最多加多少]
+// [Mỗi lần cộng bao nhiêu, mỗi ngày cộng tối đa bao nhiêu]
 const GAINS = Object.freeze({ tap: [1, 20], gift: [5, 15], chat: [2, 20], task: [2, 20], greet: [5, 5], wage: [3, Infinity], clean: [2, 6], meal: [0, Infinity] });
 const TASK_MARKS = [1, 10, 50, 100, 500, 1000];
 const DAY_MARKS = [7, 30, 100, 365];
-const FOOD_NAMES = { pudding: '布丁', riceball: '饭团', omurice: '蛋包饭', ramen: '拉面' };
-const JOB_NAMES = { bookshop: '书店', bakery: '甜品店', florist: '花店' };
+const FOOD_NAMES = { pudding: 'Pudding', riceball: 'Cơm nắm', omurice: 'Cơm cuộn trứng', ramen: 'Ramen' };
+const JOB_NAMES = { bookshop: 'Tiệm sách', bakery: 'Tiệm bánh ngọt', florist: 'Tiệm hoa' };
 
 const count = value => Math.min(1e9, Math.max(0, Math.floor(Number(value) || 0)));
 const level = value => Math.min(100, Math.max(0, Number.isFinite(Number(value)) ? Number(value) : 80));
@@ -54,7 +54,7 @@ export class CareModel {
     state.diary.unshift({ at: this.now(), kind, text });
     state.diary.length = Math.min(120, state.diary.length);
   }
-  // 需求值按时间衰减；关闭需求值时冻结在关闭那一刻（setNeedsEnabled 负责结算）。
+  // Chỉ số nhu cầu giảm dần theo thời gian; khi tắt chỉ số nhu cầu sẽ đóng băng tại thời điểm tắt (setNeedsEnabled chịu trách nhiệm quyết toán).
   needs(id) {
     const state = this.state(id);
     if (!this.needsEnabled()) return { fullness: state.fullness, cleanliness: state.cleanliness };
@@ -84,20 +84,20 @@ export class CareModel {
     const before = tierOf(state.affection);
     state.affection = count(state.affection + add);
     const after = tierOf(state.affection);
-    if (after > before) this.note(state, 'tier', `亲密度升到「${TIER_NAMES[after]}」。`, `tier-${after}`);
+    if (after > before) this.note(state, 'tier', `Độ thân thiết tăng lên mức 「${TIER_NAMES[after]}」。`, `tier-${after}`);
     return { gained: add, capped: add < amount, tierUp: after > before ? after : 0 };
   }
-  // 每天第一次见面：返回 first（第一次认识）/ back（隔了三天以上）/ 普通问候；同一天再调用返回 null。
+  // Lần đầu gặp mặt mỗi ngày: trả về first (lần đầu quen biết) / back (cách nhau trên ba ngày) / chào hỏi bình thường; gọi lại trong cùng một ngày sẽ trả về null.
   greet(id) {
     const state = this.state(id);
     const now = this.now(), today = dayKey(now);
     if (state.lastSeen === today) return null;
     const first = !state.firstMet;
     const away = state.lastSeen ? Math.round((new Date(`${today}T00:00`) - new Date(`${state.lastSeen}T00:00`)) / DAY) : 0;
-    // 认识之前打开小屋也会建档；需求值从第一次见面才开始算。
-    if (first) { state.firstMet = now; state.fullness = 80; state.cleanliness = 80; state.needsAt = now; this.note(state, 'meet', '认识的第一天。', 'meet'); }
+    // Mở nhà nhỏ trước khi quen biết cũng sẽ tạo hồ sơ; chỉ số nhu cầu chỉ bắt đầu tính từ lần gặp mặt đầu tiên.
+    if (first) { state.firstMet = now; state.fullness = 80; state.cleanliness = 80; state.needsAt = now; this.note(state, 'meet', 'Ngày đầu tiên quen biết.', 'meet'); }
     state.lastSeen = today; state.days = count(state.days + 1); state.lastTouchAt = now;
-    for (const mark of DAY_MARKS) if (state.days === mark) this.note(state, 'days', `一起度过的第 ${mark} 天。`, `days-${mark}`);
+    for (const mark of DAY_MARKS) if (state.days === mark) this.note(state, 'days', `Ngày thứ ${mark} đồng hành cùng nhau.`, `days-${mark}`);
     const result = this.gain(id, 'greet');
     this.save();
     return { first, back: away >= 3, days: state.days, ...result };
@@ -106,7 +106,7 @@ export class CareModel {
   gift(id) {
     const state = this.state(id);
     state.lastTouchAt = state.lastTreatAt = this.now(); state.counts.gifts = count(state.counts.gifts + 1);
-    if (state.counts.gifts === 1) this.note(state, 'gift', '第一次收到你送的花。', 'gift');
+    if (state.counts.gifts === 1) this.note(state, 'gift', 'Lần đầu tiên nhận được hoa bạn tặng.', 'gift');
     const result = this.gain(id, 'gift'); this.save(); return result;
   }
   feed(id, foodId) {
@@ -116,7 +116,7 @@ export class CareModel {
     state.fullness = Math.min(100, state.fullness + fullness);
     state.lastTouchAt = state.lastTreatAt = this.now();
     state.counts.meals[foodId] = count((state.counts.meals[foodId] || 0) + 1);
-    if (state.counts.meals[foodId] === 1 && FOOD_NAMES[foodId]) this.note(state, 'meal', `第一次吃${FOOD_NAMES[foodId]}。`, `meal-${foodId}`);
+    if (state.counts.meals[foodId] === 1 && FOOD_NAMES[foodId]) this.note(state, 'meal', `Lần đầu tiên ăn ${FOOD_NAMES[foodId]}.`, `meal-${foodId}`);
     const result = this.gain(id, 'meal', affection); this.save(); return result;
   }
   clean(id) {
@@ -124,25 +124,25 @@ export class CareModel {
     if (this.now() - state.lastCleanAt < CLEAN_COOLDOWN) return { tooSoon: true, gained: 0, tierUp: 0, wait: CLEAN_COOLDOWN - (this.now() - state.lastCleanAt) };
     this.settle(state, id);
     state.cleanliness = 100; state.lastCleanAt = state.lastTouchAt = this.now(); state.counts.cleans = count(state.counts.cleans + 1);
-    if (state.counts.cleans === 1) this.note(state, 'clean', '第一次梳洗得干干净净。', 'clean');
+    if (state.counts.cleans === 1) this.note(state, 'clean', 'Lần đầu tiên được chải chuốt tắm rửa sạch sẽ.', 'clean');
     const result = this.gain(id, 'clean'); this.save(); return { tooSoon: false, ...result };
   }
   chatRound(id) {
     const state = this.state(id);
     state.lastTouchAt = this.now(); state.counts.chats = count(state.counts.chats + 1);
-    if (state.counts.chats === 1) this.note(state, 'chat', '第一次聊天。', 'chat');
+    if (state.counts.chats === 1) this.note(state, 'chat', 'Lần đầu tiên trò chuyện.', 'chat');
     const result = this.gain(id, 'chat'); this.save(); return result;
   }
   taskDone(id) {
     const state = this.state(id);
     state.counts.tasks = count(state.counts.tasks + 1);
-    for (const mark of TASK_MARKS) if (state.counts.tasks === mark) this.note(state, 'task', mark === 1 ? '第一次陪你填完数据库。' : `陪你完成了 ${mark} 次数据库任务。`, `task-${mark}`);
+    for (const mark of TASK_MARKS) if (state.counts.tasks === mark) this.note(state, 'task', mark === 1 ? 'Lần đầu tiên cùng bạn điền xong cơ sở dữ liệu.' : `Đã cùng bạn hoàn thành ${mark} nhiệm vụ cơ sở dữ liệu.`, `task-${mark}`);
     const result = this.gain(id, 'task'); this.save(); return result;
   }
   wage(id, jobId) {
     const state = this.state(id);
     state.lastTouchAt = this.now(); state.counts.jobs[jobId] = count((state.counts.jobs[jobId] || 0) + 1);
-    if (state.counts.jobs[jobId] === 1 && JOB_NAMES[jobId]) this.note(state, 'job', `第一次在${JOB_NAMES[jobId]}打工。`, `job-${jobId}`);
+    if (state.counts.jobs[jobId] === 1 && JOB_NAMES[jobId]) this.note(state, 'job', `Lần đầu tiên đi làm thêm ở ${JOB_NAMES[jobId]}.`, `job-${jobId}`);
     const result = this.gain(id, 'wage'); this.save(); return result;
   }
   setNickname(id, value) {
@@ -150,10 +150,10 @@ export class CareModel {
     const nickname = String(value || '').trim().slice(0, 12);
     if (nickname === state.nickname) return false;
     state.nickname = nickname;
-    if (nickname) this.note(state, 'name', `有了新的名字：${nickname}。`);
+    if (nickname) this.note(state, 'name', `Đã có cái tên mới: ${nickname}.`);
     this.save(); return true;
   }
-  // 老用户升级：按已有记录折算一份初始亲密度，最多到「熟悉」档；只做一次。
+  // Người dùng cũ nâng cấp: quy đổi độ thân thiết ban đầu dựa trên ghi chép đã có, tối đa đến mốc「Quen thuộc」; chỉ thực hiện một lần.
   seed(id, { chats = 0, jobs = 0, meals = 0, earliest = 0 } = {}) {
     const state = this.state(id);
     if (state.seeded) return false;
@@ -161,7 +161,7 @@ export class CareModel {
     if (!state.affection && !state.firstMet && (chats || jobs || meals || earliest)) {
       state.affection = Math.min(TIERS[2] - 1, count(chats) * 2 + count(jobs) * 3 + count(meals) * 5);
       state.firstMet = time(earliest) || this.now();
-      state.diary.unshift({ at: state.firstMet, kind: 'meet', text: '认识的第一天。' });
+      state.diary.unshift({ at: state.firstMet, kind: 'meet', text: 'Ngày đầu tiên quen biết.' });
       state.marks.meet = state.firstMet;
     }
     this.save(); return true;

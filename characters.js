@@ -1,5 +1,5 @@
-// 角色注册表。桌宠本体、聊天窗、生活手帐和桌宠小屋都只从角色对象取名字、台词和图片。
-// 放在仓库根目录：这里的 import.meta.url 与 index.js 同基准，绘梨衣的图片地址与 0.7.1 逐字相同。
+// Sổ đăng ký nhân vật. Bản thể pet màn hình, cửa sổ trò chuyện, sổ tay sinh hoạt và nhà nhỏ của pet đều chỉ lấy tên, lời thoại và hình ảnh từ đối tượng nhân vật.
+// Đặt ở thư mục gốc của repository: import.meta.url ở đây cùng cơ sở (base) với index.js, đường dẫn hình ảnh của Erii giống y hệt từng chữ so với bản 0.7.1.
 import erii from './characters/erii.js';
 import zero from './characters/zero.js';
 import naidan from './characters/naidan.js';
@@ -15,7 +15,7 @@ export const LIFE_POSES = Object.freeze(['work-bookshop', 'work-bakery', 'work-f
 export const resolveCharacter = id => CHARACTERS[id] || CHARACTERS[DEFAULT_CHARACTER];
 export const usesDatabaseArt = character => character.assets.source === 'database';
 
-// 返回一个姿势的图片地址。奶蛋这类取自数据库的角色需要运行时读到的图片表，读不到返回 null。
+// Trả về đường dẫn hình ảnh của một tư thế. Những nhân vật lấy từ cơ sở dữ liệu như Nai Dan cần bảng hình ảnh đọc được tại thời điểm runtime, nếu không đọc được sẽ trả về null.
 export function assetUrl(character, pose, runtimeImages = null) {
   const assets = character.assets;
   if (assets.source === 'database') return runtimeImages?.[assets.poses[pose] || assets.poses.idle] || null;
@@ -31,7 +31,7 @@ export function imageUrls(character, runtimeImages = null) {
 }
 
 export function poseLabel(character, pose) {
-  if (pose.startsWith('eat-')) return '慢慢吃一顿饭';
-  if (pose.startsWith('work-')) return '认真做好今天的小工作';
+  if (pose.startsWith('eat-')) return 'Thong thả ăn một bữa cơm';
+  if (pose.startsWith('work-')) return 'Chăm chỉ hoàn thành công việc nhỏ hôm nay';
   return character.labels[pose] || character.labels.idle;
 }

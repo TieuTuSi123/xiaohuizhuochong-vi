@@ -1,24 +1,24 @@
-# 绘梨衣桌宠动作图
+# Các khung hình hành động của Pet màn hình Erii
 
-角色：上杉绘梨衣，《龙族》非官方同人。
+Nhân vật: Uesugi Erii, sản phẩm fanmade không chính thức của "Long Tộc" (Dragon Raja).
 
-造型参考：顾清寒，Cardwright 绘梨衣桌宠素材。
-原素材：https://github.com/1798547983tt/Cardwright/tree/359019715afc60813384964b023a09c6dd6ed326/assets/pets/erii
-原素材许可：CC BY-NC 4.0，https://creativecommons.org/licenses/by-nc/4.0/
+Tham khảo tạo hình: Cố Thanh Hàn, asset pet màn hình Erii Cardwright.
+Asset gốc: https://github.com/1798547983tt/Cardwright/tree/359019715afc60813384964b023a09c6dd6ed326/assets/pets/erii
+Giấy phép asset gốc: CC BY-NC 4.0, https://creativecommons.org/licenses/by-nc/4.0/
 
-原有 16 张动作图由 ImageGen 根据上述参考生成，再切分为 384×384 透明无损 WebP。
-v0.3.0 的被拎起、坐稳、招呼、探头 4 张图为新增互动姿势。抱鸭动作沿用当时的修订素材。
-v0.3.1 对写记录、喝茶、伸懒腰、被拎起、坐稳、招呼、探头七张图分别使用内置 ImageGen 修正邻格残片及裁切边缘，再按统一大小与基线导出；保留透明通道。
-保留原作者署名；本包美术素材按 CC BY-NC 4.0 仅供非商业使用。
-角色及相关商标归原权利人所有。本项目不代表原作或官方授权。
+16 khung hình hành động gốc được tạo bằng ImageGen dựa trên tham khảo nêu trên, sau đó cắt thành định dạng WebP trong suốt, không nén (lossless) kích thước 384×384.
+4 ảnh ở v0.3.0 gồm: bị nhấc lên, ngồi vững, vẫy gọi, ló đầu là các tư thế tương tác mới được thêm vào. Động tác ôm vịt tiếp tục sử dụng asset đã được chỉnh sửa tại thời điểm đó.
+Bản v0.3.1 sử dụng ImageGen tích hợp để sửa các mảnh vụn từ ô bên cạnh và cắt rìa cho 7 ảnh: viết ghi chép, uống trà, vươn vai, bị nhấc lên, ngồi vững, vẫy gọi, ló đầu. Sau đó xuất file theo kích thước và đường cơ sở đồng nhất; giữ nguyên kênh trong suốt.
+Giữ nguyên ghi công tác giả gốc; tài nguyên mỹ thuật trong gói này tuân theo giấy phép CC BY-NC 4.0, chỉ dành cho mục đích phi thương mại.
+Nhân vật cùng các thương hiệu liên quan thuộc về chủ sở hữu bản quyền gốc. Dự án này không đại diện cho tác phẩm gốc hay sự ủy quyền chính thức.
 
-v0.5.11 新增 edge-left-v2.webp、edge-right-v2.webp、edge-bottom.webp 三张探头图，由内置 ImageGen 分别生成，再等比例缩小为 512×512 透明无损 WebP。三张图均保留头顶小黄鸭，裸手不戴手套。左右探头根据用户反馈重新绘制，改成身体藏在边缘后、只露一只扶边手的自然姿势。上方探头由浏览器旋转正面素材显示。提示词与原始 PNG 在维护工作区“outputs/小绘探头素材-v0.5.11”保存，不放入轻量安装包。造型参考与非商业许可继续沿用本文件说明。
-
-
-v0.7.0 新增 assets/life/work-bookshop.webp、work-bakery.webp、work-florist.webp、eating.webp。内置 ImageGen 参考本项目现有 idle.webp 的角色与画风，分别生成书店、甜品店、花店和吃饭的新姿势；保留头顶小黄鸭，裸手不戴手套。原图为独立透明 PNG，发布版仅等比例缩小并压缩为 768×768 WebP（质量 90，透明通道保留），没有再次抠图或改画。原图和完整提示词保存在维护工作区，不进入轻量安装包。造型参考署名及非商业使用条件沿用本文件。
+v0.5.11 bổ sung 3 ảnh ló đầu: edge-left-v2.webp, edge-right-v2.webp, edge-bottom.webp. Các ảnh này được tạo riêng biệt bằng ImageGen tích hợp, sau đó thu nhỏ theo tỷ lệ thành WebP trong suốt, không nén kích thước 512×512. Cả 3 ảnh đều giữ chú vịt vàng trên đầu, tay trần không đeo găng. Ảnh ló đầu trái và phải được vẽ lại dựa trên phản hồi của người dùng, đổi thành tư thế tự nhiên: giấu thân mình sau mép màn hình, chỉ lộ một tay vịn vào viền. Ảnh ló đầu phía trên được hiển thị bằng cách để trình duyệt xoay asset mặt trước. Prompt và ảnh PNG gốc được lưu trong không gian làm việc bảo trì tại "outputs/小绘探头素材-v0.5.11", không đưa vào gói cài đặt rút gọn. Tham khảo tạo hình và giấy phép phi thương mại tiếp tục áp dụng theo phần giải thích trong tệp này.
 
 
-v0.7.1 新增 assets/life/eat-pudding.webp、eat-riceball.webp、eat-omurice.webp、eat-ramen.webp 四张独立吃饭图。内置 ImageGen 根据本项目 idle.webp 的角色画风及原 eating.webp 的自然坐姿参考分别生成；各自呈现布丁、海苔饭团、蛋包饭、筷子夹拉面，不戴手套，头顶小黄鸭保留。发布版只等比例缩小并压缩为 768×768 透明 WebP。原图与完整提示词保存在工作区 outputs/Erii-Food-Art-v0.7.1 和“小绘-v0.7.1-四种吃饭配图提示词.md”，不进入安装包；署名及非商业条件沿用上文。
+v0.7.0 bổ sung assets/life/work-bookshop.webp, work-bakery.webp, work-florist.webp, eating.webp. ImageGen tích hợp lấy tham khảo từ nhân vật và phong cách vẽ của ảnh idle.webp hiện có trong dự án để tạo các tư thế mới tương ứng cho nhà sách, tiệm bánh ngọt, tiệm hoa và khi ăn; giữ chú vịt vàng trên đầu, tay trần không đeo găng. Ảnh gốc là định dạng PNG trong suốt độc lập, bản phát hành chỉ thu nhỏ theo tỷ lệ và nén thành WebP kích thước 768×768 (chất lượng 90, giữ nguyên kênh trong suốt), không thực hiện tách nền hay vẽ lại thêm. Ảnh gốc và prompt đầy đủ được lưu ở không gian làm việc bảo trì, không đưa vào gói cài đặt rút gọn. Việc ghi công tham khảo tạo hình và điều kiện sử dụng phi thương mại tuân theo quy định của tệp này.
 
 
-v0.8.0 新增的零的动作图在 assets/zero/，署名与许可见 assets/zero/NOTICE.md。奶蛋的图属于龙血玄黄·数据库，本扩展只在运行时读取数据库已经加载的图片，不在本包内。
+v0.7.1 bổ sung 4 ảnh ăn uống độc lập: assets/life/eat-pudding.webp, eat-riceball.webp, eat-omurice.webp, eat-ramen.webp. ImageGen tích hợp được dùng để tạo các ảnh này dựa trên tham khảo từ phong cách nhân vật của idle.webp và tư thế ngồi tự nhiên của eating.webp gốc; lần lượt thể hiện cảnh ăn bánh pudding, cơm nắm rong biển, cơm cuộn trứng (omurice), gắp mì ramen bằng đũa, không đeo găng tay, giữ nguyên vịt vàng trên đầu. Bản phát hành chỉ thu nhỏ theo tỷ lệ và nén thành WebP trong suốt kích thước 768×768. Ảnh gốc cùng prompt đầy đủ được lưu trong không gian làm việc ở thư mục outputs/Erii-Food-Art-v0.7.1 và tệp "小绘-v0.7.1-四种吃饭配图提示词.md", không đưa vào gói cài đặt; quy định ghi công và điều kiện phi thương mại áp dụng như trên.
+
+
+v0.8.0 bổ sung các khung hình hành động của Zero tại thư mục assets/zero/, thông tin ghi công và giấy phép xem tại assets/zero/NOTICE.md. Hình ảnh của Nai Dan (Sữa Trứng) thuộc về cơ sở dữ liệu Long Huyết Huyền Hoàng; tiện ích mở rộng này chỉ đọc hình ảnh đã được cơ sở dữ liệu tải lên tại thời điểm chạy (runtime) và không bao gồm chúng trong gói này.

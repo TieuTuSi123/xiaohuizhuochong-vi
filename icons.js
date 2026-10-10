@@ -1,4 +1,4 @@
-// 一套细线图标，统一描边，避免各平台 emoji 渲染不一致。只插入本文件里的固定 SVG。
+// Một bộ icon nét mảnh, độ dày viền đồng nhất, nhằm tránh việc render emoji không đồng bộ trên các nền tảng khác nhau. Chỉ chèn các SVG cố định có trong tệp này.
 const PATHS = {
   heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
   bowl: '<path d="M4 11h16a8 8 0 0 1-16 0z"/><path d="M8.5 7.5c0-1 1-1.4 1-2.4M12 7.5c0-1 1-1.4 1-2.4M15.5 7.5c0-1 1-1.4 1-2.4"/>',

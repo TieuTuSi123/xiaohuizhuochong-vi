@@ -1,659 +1,657 @@
-# 绘梨衣 · 数据库桌宠
+# Tiểu Erii · Pet màn hình cơ sở dữ liệu
 
-这是一个安装到 SillyTavern 的独立桌宠扩展。它读取「龙血玄黄·数据库」已经显示出来的任务状态和结果通知，再让桌宠用自己的动作、点击互动、任务气泡和台词作出反应。桌宠可以在绘梨衣、零和奶蛋之间切换，每个角色有自己的性格、台词、养成记录和聊天记录。也可以打开独立窗口，使用酒馆当前 API 或单独配置的 API 和桌宠聊天。
+Đây là một tiện ích mở rộng pet màn hình độc lập được cài đặt vào SillyTavern. Nó đọc trạng thái nhiệm vụ và thông báo kết quả đã được hiển thị bởi "Long Huyết Huyền Hoàng · Cơ sở dữ liệu", sau đó để pet màn hình phản ứng lại bằng hành động, tương tác nhấp chuột, bong bóng nhiệm vụ và lời thoại của riêng mình. Bạn có thể chuyển đổi pet màn hình giữa Tiểu Erii, Zero và Nai Dan, mỗi nhân vật có tính cách, lời thoại, hồ sơ nuôi dưỡng và lịch sử trò chuyện riêng. Bạn cũng có thể mở một cửa sổ độc lập để trò chuyện với pet màn hình bằng API hiện tại của Tavern hoặc API được cấu hình riêng.
 
-## 当前版本：v0.9.0
+## Phiên bản hiện tại: v0.9.0
 
-**v0.9.0：聊天窗口新增「检修数据库」模式——桌宠会看表格、最近的错误和最近几层正文，把要改的地方列成修改单；你逐条勾选、确认之后，才通过数据库公开的接口写入，写入前自动备份整份表格，可以一键撤销。新增「旁观陪聊」（默认关闭）：每隔几层，桌宠会看看新出现的正文，说一两句感想放进聊天记录，你可以直接回它；连着几次没人理，它会有点委屈。**
+**v0.9.0: Cửa sổ trò chuyện được bổ sung thêm chế độ "Bảo trì cơ sở dữ liệu" —— pet màn hình sẽ xem bảng biểu, các lỗi gần đây và vài tầng văn bản trò chuyện gần đây, liệt kê những chỗ cần sửa thành một danh sách sửa đổi; sau khi bạn kiểm tra và xác nhận từng mục, nó mới ghi vào thông qua giao diện công khai của cơ sở dữ liệu. Trước khi ghi, nó sẽ tự động sao lưu toàn bộ bảng và có thể hoàn tác bằng một nút bấm. Bổ sung "Quan sát trò chuyện" (mặc định tắt): Cứ cách vài tầng trò chuyện, pet màn hình sẽ xem văn bản mới xuất hiện và nói một hai câu cảm nghĩ vào lịch sử trò chuyện, bạn có thể trả lời trực tiếp; nếu liên tục vài lần không ai để ý, nó sẽ cảm thấy hơi tủi thân.**
 
-v0.8.0 的三个桌宠（绘梨衣 / 零 / 奶蛋）、桌宠小屋、养成、任务台词、一键打开数据库版面和精装手帐界面全部保留。
+Ba pet màn hình (Tiểu Erii / Zero / Nai Dan) của v0.8.0, nhà pet màn hình, hệ thống nuôi dưỡng, lời thoại nhiệm vụ, phím tắt mở bảng cơ sở dữ liệu và giao diện sổ tay bìa cứng đều được giữ nguyên.
 
-- 只有两种情况会读酒馆正文，而且都要你自己打开：检修模式（每次发消息时附上最近 0～10 层，可调）和旁观陪聊（开启后只看新出现的楼层）。读到的内容只发给桌宠聊天用的那个接口。
-- 只有检修模式会改数据库：每一条都要你勾选、点 **应用所选** 才写；写入只走数据库公开的 `AutoCardUpdaterAPI`，写前整份备份，可以撤销。没有自动应用。
-- 除此之外仍是只读同步：不复制、不替换数据库，平时不读写表格。
-- 只有用户手动拖动时，桌宠位置才会改变；没有恢复自主移动。
-- 奶蛋的图在运行时从正在运行的数据库读取，不随本扩展分发；数据库没开时不能换成奶蛋。
+- Chỉ có hai trường hợp tiện ích sẽ đọc văn bản trò chuyện của Tavern, và cả hai đều phải do bạn tự mở: chế độ bảo trì (mỗi lần gửi tin nhắn sẽ đính kèm từ 0～10 tầng trò chuyện gần đây, có thể điều chỉnh) và quan sát trò chuyện (sau khi bật, chỉ xem các tầng mới xuất hiện). Nội dung đọc được chỉ gửi đến API dùng để trò chuyện của pet màn hình.
+- Chỉ có chế độ bảo trì mới sửa cơ sở dữ liệu: mỗi mục đều cần bạn đánh dấu chọn, nhấn **Áp dụng mục đã chọn** mới ghi; việc ghi chỉ đi qua `AutoCardUpdaterAPI` công khai của cơ sở dữ liệu, sao lưu toàn bộ trước khi ghi và có thể hoàn tác. Không có tính năng tự động áp dụng.
+- Ngoài ra, vẫn duy trì cơ chế đồng bộ chỉ đọc: không sao chép, không thay thế cơ sở dữ liệu, bình thường không đọc/ghi bảng.
+- Vị trí của pet màn hình chỉ thay đổi khi người dùng kéo thả thủ công; không khôi phục việc tự động di chuyển.
+- Hình ảnh của Nai Dan được đọc từ cơ sở dữ liệu đang chạy lúc runtime, không phân phối kèm tiện ích này; khi cơ sở dữ liệu không mở thì không thể chuyển sang Nai Dan.
 
-旧版本曾经加入过自主移动、跑步和散步。那些逻辑已经从 **v0.5.8** 起回退，不应把旧版本的行为当成当前版本行为。
+Các phiên bản cũ từng thêm tính năng tự động di chuyển, chạy bộ và đi dạo. Những logic đó đã được hoàn tác từ **v0.5.8**, không nên nhầm lẫn hành vi của phiên bản cũ với phiên bản hiện tại.
 
-## 怎么判断 GitHub 仓库是不是最新版
+## Cách kiểm tra kho lưu trữ GitHub đã là bản mới nhất chưa
 
-按下面四处核对，全部显示 `0.9.0` 才算当前维护源已经更新完整：
+Hãy đối chiếu bốn điểm dưới đây, tất cả đều hiển thị `0.9.0` thì mới xem là mã nguồn bảo trì hiện tại đã được cập nhật đầy đủ:
 
-1. 打开仓库根目录的 [`manifest.json`](manifest.json)，查看 `version` 是否为 `0.9.0`。
-2. 查看本 README 顶部的“当前版本”是否为 **v0.9.0**。
-3. 查看 GitHub 最近一次提交是否包含本次修改文件；v0.9.0 必须有 `repair.js`、`repair-ticket.js`、`database-repair.js`、`backup-store.js`、`watch.js`，并且同时保留 v0.8.0 的 `characters/` 文件夹、`characters.js`、`care-model.js`、`lines.js`、`notebook.js`、`pet-house.js`、`sheet.js`、`effects.js`、`icons.js`、`database-shortcuts.js`，以及 `assets/zero/` 下的 19 张、`assets/zero/life/` 下的 7 张 WebP；`assets/run-*.webp` 已删除。
-4. 如果使用压缩包，文件名应为 `绘梨衣桌宠-独立扩展-v0.9.0.zip`，解压后 `manifest.json` 仍应为 `0.9.0`。
+1. Mở [`manifest.json`](manifest.json) ở thư mục gốc của kho lưu trữ, kiểm tra xem `version` có phải là `0.9.0` không.
+2. Kiểm tra phần "Phiên bản hiện tại" ở đầu README này xem có phải là **v0.9.0** không.
+3. Kiểm tra xem lần commit GitHub gần nhất có chứa các tệp chỉnh sửa của lần này không; v0.9.0 bắt buộc phải có `repair.js`, `repair-ticket.js`, `database-repair.js`, `backup-store.js`, `watch.js`, đồng thời vẫn giữ lại thư mục `characters/`, `characters.js`, `care-model.js`, `lines.js`, `notebook.js`, `pet-house.js`, `sheet.js`, `effects.js`, `icons.js`, `database-shortcuts.js` của v0.8.0, cũng như 19 ảnh WebP trong `assets/zero/` và 7 ảnh trong `assets/zero/life/`; `assets/run-*.webp` đã bị xóa.
+4. Nếu dùng file nén, tên file phải là `绘梨衣桌宠-独立扩展-v0.9.0.zip`, sau khi giải nén thì `manifest.json` vẫn phải là `0.9.0`.
 
-酒馆扩展列表显示的版本是实际加载版本。只看到 GitHub README 已更新，还不能证明酒馆已经加载新版；更新扩展并刷新页面后再核对酒馆里的版本号。
+Phiên bản hiển thị trong danh sách tiện ích của Tavern là phiên bản được tải thực tế. Chỉ nhìn thấy README trên GitHub đã cập nhật không chứng minh được Tavern đã tải bản mới; hãy cập nhật tiện ích và làm mới trang rồi mới đối chiếu lại số phiên bản trong Tavern.
 
-## 直接在酒馆安装
+## Cài đặt trực tiếp trong Tavern
 
-1. 打开酒馆顶部的 **扩展程序** → **安装扩展程序**。
-2. 粘贴仓库地址：`https://github.com/dzsks/xiaohuizhuochong`。
-3. 安装或更新完成后刷新酒馆页面。
-4. 在扩展列表确认 **绘梨衣 · 数据库桌宠** 的版本是 `0.9.0`。
-5. 电脑右键桌宠，或手机长按约 1.4 秒打开小本子；看到“已连接数据库”或“数据库正在处理任务”，说明已经找到数据库的数据来源。
+1. Mở phần **Tiện ích mở rộng** → **Cài đặt tiện ích mở rộng** ở thanh trên cùng của Tavern.
+2. Dán địa chỉ kho lưu trữ: `https://github.com/dzsks/xiaohuizhuochong`.
+3. Sau khi cài đặt hoặc cập nhật xong, hãy làm mới trang Tavern.
+4. Trong danh sách tiện ích, xác nhận phiên bản của **Tiểu Erii · Pet màn hình cơ sở dữ liệu** là `0.9.0`.
+5. Nhấp chuột phải vào pet màn hình trên máy tính, hoặc nhấn giữ khoảng 1.4 giây trên điện thoại để mở cuốn sổ nhỏ; nếu thấy "Đã kết nối cơ sở dữ liệu" hoặc "Cơ sở dữ liệu đang xử lý nhiệm vụ", điều đó có nghĩa là đã tìm thấy nguồn dữ liệu của cơ sở dữ liệu.
 
-仓库根目录应直接包含 `manifest.json`、`index.js`、`style.css` 等文件，不能多套一层外部文件夹。图片位于根目录的 `assets/` 文件夹内。
+Thư mục gốc của kho lưu trữ phải chứa trực tiếp các tệp `manifest.json`, `index.js`, `style.css`, v.v., không được bọc thêm một lớp thư mục bên ngoài. Hình ảnh nằm trong thư mục `assets/` ở thư mục gốc.
 
-## 更新已有安装
+## Cập nhật bản cài đặt hiện có
 
-### 通过 GitHub 仓库更新
+### Cập nhật qua kho lưu trữ GitHub
 
-1. 将新版文件覆盖上传到同一个仓库根目录，保留 `assets/` 的文件结构。
-2. 提交 GitHub 更改。
-3. 回到酒馆扩展管理，点击本扩展的更新按钮。
-4. 刷新酒馆页面，确认扩展列表版本为 `0.9.0`。
-5. 如果行为或图片仍是旧的，先重新加载扩展；仍未变化时使用 `Ctrl+F5` 强制刷新浏览器缓存。
+1. Ghi đè các tệp phiên bản mới lên cùng một thư mục gốc của kho lưu trữ, giữ nguyên cấu trúc tệp của `assets/`.
+2. Commit các thay đổi lên GitHub.
+3. Quay lại trình quản lý tiện ích của Tavern, nhấp vào nút cập nhật của tiện ích này.
+4. Làm mới trang Tavern, xác nhận phiên bản trong danh sách tiện ích là `0.9.0`.
+5. Nếu hành vi hoặc hình ảnh vẫn là của bản cũ, trước tiên hãy tải lại tiện ích; nếu vẫn không thay đổi, dùng `Ctrl+F5` để buộc làm mới bộ nhớ cache của trình duyệt.
 
-### 通过压缩包检查
+### Kiểm tra qua file nén
 
-当前维护包：`绘梨衣桌宠-独立扩展-v0.9.0.zip`。
+Gói bảo trì hiện tại: `绘梨衣桌宠-独立扩展-v0.9.0.zip`.
 
-解压后检查：
+Kiểm tra sau khi giải nén:
 
-- `manifest.json` 的 `version` 为 `0.9.0`；
-- `index.js` 中的桌宠版本标记为 `0.9.0`；
-- `assets/` 中没有左右跑步帧，`assets/zero/` 和 `assets/zero/life/` 都在；
-- README 顶部和版本历史的最新条目都是 `v0.9.0`。
+- `version` trong `manifest.json` là `0.9.0`;
+- Dấu phiên bản pet màn hình trong `index.js` là `0.9.0`;
+- Trong `assets/` không có các frame chạy trái phải, `assets/zero/` và `assets/zero/life/` đều có mặt;
+- Mục mới nhất ở đầu README và lịch sử phiên bản đều là `v0.9.0`.
 
-## 当前可用功能
+## Các chức năng hiện có
 
-### 点击和互动
+### Nhấp chuột và tương tác
 
-| 操作 | 桌宠的反应（以小绘为例） |
+| Thao tác | Phản ứng của pet màn hình (lấy Tiểu Erii làm ví dụ) |
 | --- | --- |
-| 轻点一下 | 挥手回应 |
-| 短时间点两下 | 抱着小黄鸭轻摇 |
-| 1.2 秒内点三下或更多 | 抱着本子躲一躲 |
-| 2.6 秒内点六下 | 探头 → 抱鸭 → 挥手，播完恢复 |
-| 按住不动约半秒 | 进入小憩；松开后继续休息约 12 秒 |
-| 小憩时轻点 | 提前唤醒 |
-| 拖动 | 被拎起，松手坐稳并保存位置 |
-| 电脑右键 | 打开 / 收起小本子 |
+| Chạm nhẹ một cái | Vẫy tay đáp lại |
+| Nhấp đúp trong thời gian ngắn | Ôm vịt vàng nhỏ lắc nhẹ |
+| Nhấp ba lần hoặc nhiều hơn trong 1.2 giây | Ôm cuốn sổ trốn đi một lát |
+| Nhấp sáu lần trong 2.6 giây | Ló đầu → Ôm vịt → Vẫy tay, phát xong sẽ khôi phục |
+| Nhấn giữ khoảng nửa giây | Bắt đầu chợp mắt; sau khi thả ra sẽ tiếp tục nghỉ ngơi khoảng 12 giây |
+| Chạm nhẹ khi đang chợp mắt | Đánh thức sớm |
+| Kéo thả | Bị xách lên, thả tay ra sẽ ngồi vững và lưu vị trí |
+| Nhấp chuột phải (PC) | Mở / Thu gọn cuốn sổ nhỏ |
 
-零和奶蛋的互动方式相同，只是动作换成各自的：零抱的是小黑天鹅、折的是纸天鹅、喝的是热可可；奶蛋双击怕痒、连点会气得哈气、长按坐着打呼噜。点击、送花、陪你填表都会让亲密度涨一点（见“养成”）。偶尔点一下，桌宠会在气泡里回一句。
+Cách tương tác của Zero và Nai Dan cũng tương tự, chỉ thay đổi hành động thành của riêng họ: Zero ôm thiên nga đen nhỏ, gấp thiên nga giấy, uống ca cao nóng; Nai Dan sợ nhột khi nhấp đúp, nhấp liên tục sẽ tức giận khè khè, nhấn giữ thì ngồi ngáy ngủ. Các hành động nhấp chuột, tặng hoa, cùng bạn điền bảng đều làm tăng một chút độ thân thiết (xem mục "Nuôi dưỡng"). Thỉnh thoảng nhấp một cái, pet màn hình sẽ đáp lại một câu trong bong bóng thoại.
 
-小本子标题是当前角色的名字，例如 **绘梨衣的小本子**、**零的小本子**，不显示版本号。普通点击不会打开页面；电脑端也可以从扩展设置进入小本子。关闭“显示桌宠”后，仍可从扩展设置打开小本子查看任务和打开数据库；隐藏期间休闲动作按钮停用。聚焦桌宠后，Enter / 空格可互动，Shift + Enter 可打开小本子，方向键可微调位置，Home 可重置位置。
+Tiêu đề của cuốn sổ nhỏ là tên của nhân vật hiện tại, ví dụ: **Cuốn sổ nhỏ của Tiểu Erii**, **Cuốn sổ nhỏ của Zero**, không hiển thị số phiên bản. Nhấp chuột thông thường sẽ không mở trang; trên máy tính cũng có thể vào cuốn sổ nhỏ từ phần cài đặt tiện ích. Sau khi tắt "Hiển thị pet màn hình", vẫn có thể mở cuốn sổ nhỏ từ cài đặt tiện ích để xem nhiệm vụ và mở cơ sở dữ liệu; trong thời gian ẩn, các nút hành động giải trí sẽ bị vô hiệu hóa. Khi đang focus vào pet màn hình, phím Enter / Phím cách dùng để tương tác, Shift + Enter để mở cuốn sổ nhỏ, các phím mũi tên để tinh chỉnh vị trí, Home để đặt lại vị trí.
 
-### 手机操作
+### Thao tác trên điện thoại
 
-手机没有鼠标右键，使用下面的方式：
+Điện thoại không có chuột phải, hãy sử dụng các cách sau:
 
-- 轻点或短按：互动；
-- 按住约半秒：小憩；
-- 继续按住约 1.4 秒：打开小本子；
-- 按住并移动：拖动小绘。
+- Chạm nhẹ hoặc nhấn ngắn: Tương tác;
+- Nhấn giữ khoảng nửa giây: Chợp mắt;
+- Tiếp tục nhấn giữ khoảng 1.4 giây: Mở cuốn sổ nhỏ;
+- Nhấn giữ và di chuyển: Kéo Tiểu Erii.
 
-输入框变高、键盘弹出、屏幕旋转或窗口变窄时，桌宠会限制在可见区域并避开输入框。手机上的小本子、聊天窗、生活手帐和桌宠小屋都从屏幕底部拉起，按住顶部往下拉就能关上；电脑上它们是可以拖动标题栏的浮窗，小本子仍贴在桌宠旁边，尽量不遮住她。
+Khi hộp nhập liệu cao lên, bàn phím hiện ra, xoay màn hình hoặc cửa sổ hẹp lại, pet màn hình sẽ bị giới hạn trong khu vực hiển thị và tránh hộp nhập liệu. Cuốn sổ nhỏ, cửa sổ trò chuyện, sổ tay sinh hoạt và nhà pet màn hình trên điện thoại đều được kéo lên từ dưới cùng màn hình, nhấn giữ phần đầu kéo xuống là có thể đóng lại; trên máy tính, chúng là các cửa sổ nổi có thể kéo thanh tiêu đề, cuốn sổ nhỏ vẫn gắn sát bên cạnh pet màn hình, cố gắng không che khuất nhân vật.
 
-### 数据库任务反应
+### Phản ứng với nhiệm vụ cơ sở dữ liệu
 
-- 接到任务：举起小本子；
-- 任务处理中：写记录；
-- 成功：展示完成记录；
-- 出错或警告：检查记录；
-- 空闲：喝茶、看书、折纸、抱小黄鸭、伸懒腰、小憩等。
+- Nhận được nhiệm vụ: Giơ cuốn sổ nhỏ lên;
+- Đang xử lý nhiệm vụ: Ghi chép;
+- Thành công: Hiển thị bản ghi hoàn thành;
+- Lỗi hoặc cảnh báo: Kiểm tra bản ghi;
+- Rảnh rỗi: Uống trà, đọc sách, gấp giấy, ôm vịt vàng, vươn vai, chợp mắt, v.v.
 
-动作之外，桌宠还会在任务气泡上方说一句话：接到任务、处理中（约 15 秒换一句）、完成、出错、被你停止时各有一组台词，填表、剧情推进和其他任务的台词不同。台词随角色性格、亲密度和心情变化，例如饿着肚子的时候会嘀咕一句再继续干活。台词全部是写好的本地文本，不调用 API、不花钱。下面一行小字仍是数据库给出的真实进度（简略版 / 完整版设置照旧）。扩展设置里的“任务时说话”可以关掉台词。
+Ngoài hành động, pet màn hình còn nói một câu phía trên bong bóng nhiệm vụ: sẽ có các bộ thoại riêng cho lúc nhận nhiệm vụ, đang xử lý (khoảng 15 giây đổi một câu), hoàn thành, gặp lỗi, hoặc khi bị bạn dừng lại; lời thoại cho việc điền bảng, thúc đẩy cốt truyện và các nhiệm vụ khác cũng khác nhau. Lời thoại sẽ thay đổi theo tính cách, độ thân thiết và tâm trạng của nhân vật, ví dụ khi đói bụng sẽ lầm bầm một câu rồi mới làm tiếp. Lời thoại hoàn toàn là văn bản cục bộ đã được viết sẵn, không gọi API, không tốn tiền. Dòng chữ nhỏ bên dưới vẫn là tiến độ thực tế do cơ sở dữ liệu cung cấp (Cài đặt bản tóm tắt / bản đầy đủ vẫn giữ nguyên). Bạn có thể tắt lời thoại bằng mục "Nói chuyện khi làm nhiệm vụ" trong phần cài đặt tiện ích.
 
-出错或警告时气泡会多停一会儿（约 9 秒），并多一个 **去看看**：接口类错误（API、密钥、额度、超时等）打开数据库的 API 版面，其他错误打开“高级工具”里的运行日志。
+Khi có lỗi hoặc cảnh báo, bong bóng sẽ dừng lại lâu hơn một chút (khoảng 9 giây) và có thêm một nút **Đi xem thử**: các lỗi liên quan đến API (API, khóa, hạn mức, quá giờ, v.v.) sẽ mở bảng API của cơ sở dữ liệu, các lỗi khác sẽ mở "Nhật ký chạy" trong mục "Công cụ nâng cao".
 
-任务处理中和成功/错误通知的反应优先于本地休闲动作。气泡提供数据库原任务的停止按钮时，小绘会显示 **停止任务**，点击后调用数据库原来的停止流程；没有停止能力时不会伪造按钮。停止目标跟随数据库当前任务，点击前再次核对；任务已经切换时先提示确认，不调用旧任务操作。停止失败提示保留约 8 秒，数据库错误通知优先于普通进度文字。原气泡切到笑话或通知、暂时没有当前任务时，小绘显示等待进度同步，待任务重新显示后恢复停止按钮。
+Phản ứng khi đang xử lý nhiệm vụ và thông báo thành công/lỗi được ưu tiên hơn các hành động giải trí cục bộ. Nếu bong bóng cung cấp nút dừng cho nhiệm vụ gốc của cơ sở dữ liệu, Tiểu Erii sẽ hiển thị **Dừng nhiệm vụ**, nhấp vào sẽ gọi quy trình dừng ban đầu của cơ sở dữ liệu; nếu không có khả năng dừng thì sẽ không làm giả nút. Mục tiêu dừng sẽ bám theo nhiệm vụ hiện tại của cơ sở dữ liệu, kiểm tra lại trước khi nhấp; nếu nhiệm vụ đã chuyển sang cái khác, nó sẽ yêu cầu xác nhận trước, không gọi thao tác của nhiệm vụ cũ. Thông báo dừng thất bại sẽ được giữ lại khoảng 8 giây, thông báo lỗi cơ sở dữ liệu được ưu tiên hiển thị hơn văn bản tiến độ thông thường. Khi bong bóng gốc chuyển sang chuyện cười hoặc thông báo, và tạm thời không có nhiệm vụ hiện tại, Tiểu Erii sẽ hiển thị trạng thái chờ đồng bộ tiến độ, sau khi nhiệm vụ xuất hiện lại sẽ khôi phục nút dừng.
 
-### 边缘探头与治愈故事
+### Ló đầu ở mép màn hình và những câu chuyện chữa lành
 
-- **探头怎么出现：**把小绘拖到左、右、上或下方边缘，松手就会缩进去探头，无需等待 6 秒或移开鼠标。默认位置已经贴边时也会直接探头。下边缘会避开输入栏，出现在可用区域的下方。
-- **位置会变吗：**探头只更换造型并做轻微原地晃动，不改变保存的位置，也不恢复自动走路。点击、长按、拖动、打开小本子或接到任务时恢复对应动作；鼠标悬停不会取消探头。互动结束后若仍贴边，会立即继续探头。
-- **怎么听故事：**小本子中点击“听一个小故事”。气泡打开后每 30 秒自动换一篇，12 篇轮换，一轮内不重复；也可点“换一篇”立即更换，或用叉号关闭。关闭后结束本轮连续换篇。
-- **主动讲故事：**空闲约 5 分钟后开始；正在显示时每 30 秒换一篇。鼠标悬停或键盘聚焦气泡时暂停换篇，移开后继续剩余时间；手机触摸故事后保留阅读状态，读完可主动换篇或关闭。
-- **任务优先：**数据库开始处理、发来结果通知或关闭小绘显示时，故事收起。任务气泡和原任务的停止按钮优先；故事不调用聊天模型，不发送聊天消息，也不写数据库。
-- **开关：**扩展设置可分别关闭“拖到边缘后探头”和“空闲时讲治愈小故事”。关闭空闲自动故事后，仍可手动点“听一个小故事”，打开期间照常每 30 秒换篇；阅读暂停规则同样生效。
+- **Cách làm ló đầu:** Kéo Tiểu Erii sang sát mép trái, phải, trên hoặc dưới, thả tay ra cô ấy sẽ thụt vào và ló đầu ra, không cần phải đợi 6 giây hay dời chuột đi. Nếu vị trí mặc định đã sát mép thì cũng sẽ ló đầu ra ngay. Mép dưới sẽ tránh thanh nhập liệu, xuất hiện ở phía dưới khu vực khả dụng.
+- **Vị trí có bị đổi không:** Hành động ló đầu chỉ thay đổi tạo hình và khẽ lắc lư tại chỗ, không thay đổi vị trí đã lưu, cũng không khôi phục việc tự đi bộ. Khi nhấp chuột, nhấn giữ, kéo thả, mở cuốn sổ nhỏ hoặc nhận nhiệm vụ sẽ khôi phục lại hành động tương ứng; di chuột qua sẽ không hủy ló đầu. Sau khi kết thúc tương tác, nếu vẫn đang ở sát mép, cô ấy sẽ tiếp tục ló đầu ngay lập tức.
+- **Làm sao để nghe kể chuyện:** Nhấp vào "Nghe một câu chuyện nhỏ" trong cuốn sổ nhỏ. Sau khi bong bóng mở ra, cứ mỗi 30 giây sẽ tự động đổi một câu chuyện, luân phiên 12 câu chuyện, không lặp lại trong cùng một vòng; cũng có thể nhấp vào "Đổi câu khác" để đổi ngay, hoặc đóng lại bằng dấu X. Sau khi đóng sẽ kết thúc việc đổi bài liên tục của vòng này.
+- **Chủ động kể chuyện:** Bắt đầu sau khi rảnh rỗi khoảng 5 phút; trong lúc đang hiển thị thì đổi bài mỗi 30 giây. Khi trỏ chuột vào hoặc focus bàn phím vào bong bóng sẽ tạm dừng đổi bài, khi dời đi sẽ tiếp tục thời gian còn lại; trên điện thoại, việc chạm vào câu chuyện sẽ giữ lại trạng thái đọc, sau khi đọc xong có thể chủ động đổi câu khác hoặc đóng lại.
+- **Ưu tiên nhiệm vụ:** Khi cơ sở dữ liệu bắt đầu xử lý, gửi thông báo kết quả hoặc khi tắt hiển thị Tiểu Erii, câu chuyện sẽ thu lại. Bong bóng nhiệm vụ và nút dừng của nhiệm vụ gốc được ưu tiên; câu chuyện không gọi mô hình trò chuyện, không gửi tin nhắn trò chuyện, cũng không ghi vào cơ sở dữ liệu.
+- **Công tắc:** Trong cài đặt tiện ích có thể tắt riêng "Kéo đến mép để ló đầu" và "Kể chuyện nhỏ chữa lành khi rảnh rỗi". Sau khi tắt tính năng kể chuyện tự động khi rảnh rỗi, vẫn có thể bấm thủ công "Nghe một câu chuyện nhỏ", và tính năng tự động đổi câu chuyện mỗi 30 giây vẫn hoạt động bình thường khi mở lên; quy tắc tạm dừng đọc cũng vẫn có hiệu lực.
 
-## 换桌宠：桌宠小屋
+## Đổi pet màn hình: Nhà pet màn hình
 
-打开方式：小本子底部的 **桌宠小屋**，或 **扩展设置 → 数据库桌宠** 里的角色按钮和“桌宠小屋”。小屋是一本翻开的图鉴：左页是立绘，右页是这个角色的养成档案。点上方的书签翻到别的角色，点 **换她来陪我** 就换过来，原来的角色挥手退场，新的落地打招呼。
+Cách mở: Mục **Nhà pet màn hình** ở cuối cuốn sổ nhỏ, hoặc thông qua nút nhân vật và "Nhà pet màn hình" trong **Cài đặt tiện ích → Pet màn hình cơ sở dữ liệu**. Căn nhà là một cuốn bách khoa toàn thư mở: trang bên trái là ảnh đứng, trang bên phải là hồ sơ nuôi dưỡng nhân vật đó. Nhấp vào các thẻ đánh dấu (bookmark) ở trên cùng để lật sang trang nhân vật khác, nhấn **Để cô ấy ra ngoài** để chuyển đổi, nhân vật cũ sẽ vẫy tay rút lui, người mới sẽ đáp xuống và chào hỏi.
 
-| 角色 | 简介 | 说明 |
+| Nhân vật | Tóm tắt | Ghi chú |
 | --- | --- | --- |
-| 绘梨衣（小绘） | 安静的红发巫女，喜欢小黄鸭、布丁和游戏 | 默认角色，素材和行为与 0.7.1 相同 |
-| 零 | 冰蓝眼睛的金发少女，话少、做事一丝不苟，头顶一只小黑天鹅 | 本版新增 26 张图（核心 19 张、生活 7 张） |
-| 奶蛋 | 数据库自带的奶黄色小家伙，贪吃、爱打滚 | 图在运行时从数据库读取；数据库没开或关了它自带的桌宠时不能切换，小屋会写明原因 |
+| Tiểu Erii (Erii) | Cô phù thủy tóc đỏ trầm lặng, thích vịt vàng nhỏ, bánh pudding và chơi game | Nhân vật mặc định, tài nguyên và hành vi giống như 0.7.1 |
+| Zero | Thiếu nữ tóc vàng với đôi mắt xanh băng giá, ít nói, làm việc vô cùng tỉ mỉ, trên đầu có một con thiên nga đen nhỏ | Bản này bổ sung 26 ảnh (19 ảnh chính, 7 ảnh sinh hoạt) |
+| Nai Dan | Chú nhóc màu vàng sữa béo ngậy đi kèm cơ sở dữ liệu, tham ăn, thích lăn lộn | Ảnh được đọc từ cơ sở dữ liệu lúc chạy; nếu cơ sở dữ liệu không bật hoặc tắt pet màn hình đi kèm thì không thể chuyển đổi, nhà pet màn hình sẽ ghi rõ lý do |
 
-换角色后：
+Sau khi đổi nhân vật:
 
-- **共用**：桌宠的位置和大小、各个开关、家里的钱包。
-- **各自分开**：聊天记录、称呼和人设设定、亲密度、需求值、成长日记、昵称、正在进行的打工或吃饭。
-- 第一次和新角色聊天时，会沿用小绘的连接设置（接口地址、模型、回复长度等），不用重填；设备上记住的密钥本来就共用。
-- 正在打工的角色换下去后会在后台继续打工，下班时桌宠气泡会提醒你去领工资。
+- **Dùng chung**: Vị trí và kích thước của pet màn hình, các nút bật/tắt, ví tiền chung ở nhà.
+- **Tách biệt riêng**: Lịch sử trò chuyện, cách xưng hô và thiết lập nhân vật, độ thân thiết, chỉ số nhu cầu, nhật ký trưởng thành, biệt danh, công việc làm thêm hoặc bữa ăn đang diễn ra.
+- Trong lần trò chuyện đầu tiên với nhân vật mới, sẽ dùng lại các cài đặt kết nối của Tiểu Erii (địa chỉ API, mô hình, độ dài phản hồi, v.v.), không cần nhập lại; khóa bảo mật đã lưu trên thiết bị cũng được dùng chung.
+- Nhân vật đang đi làm sau khi bị thay ra vẫn sẽ tiếp tục làm việc dưới nền, khi tan làm bong bóng thoại của pet màn hình sẽ nhắc bạn đi nhận lương.
 
-## 养成
+## Nuôi dưỡng
 
-所有养成都没有惩罚：亲密度只涨不降，需求值低了只会影响心情和台词，不会生病、不会离家出走，也不限制打工。
+Mọi hệ thống nuôi dưỡng đều không có hình phạt: độ thân thiết chỉ tăng chứ không giảm, chỉ số nhu cầu nếu thấp thì chỉ ảnh hưởng đến tâm trạng và lời thoại, sẽ không sinh bệnh, không bỏ nhà ra đi, cũng không cấm đi làm.
 
-- **亲密度**：分初识、熟悉、亲近、信赖、挚爱五档，每个角色各算各的。摸摸 +1（每天最多 20）、送花 +5（每天最多 3 次）、请吃饭 +3～+8、领工资 +3、聊天一轮 +2（每天最多 20）、每天第一次见面 +5、陪你完成一次数据库任务 +2（每天最多 20）、梳洗 +2。每升一档解锁一组新台词、一篇专属小故事和一个称号。
-- **需求值**：饱腹从满到空约 12 小时，清洁约 24 小时，离开期间也会慢慢掉。饱腹靠请吃饭补（布丁 +15、饭团 +25、蛋包饭 +40、拉面 +50），清洁靠小本子或小屋里的 **梳洗**（免费，冷却 30 分钟）。扩展设置里可以关掉需求值，关掉后数值冻结、不再显示。
-- **心情**：担心（数据库刚出错）、饿了、想梳洗、想你（很久没理她）、开心、平静。心情只决定台词和小屋里的心情章。
-- **成长日记**：小屋里的 **成长日记** 记下里程碑，例如认识的第一天、第一次吃拉面、陪你完成第 100 次数据库任务；解锁的专属小故事也在这里读。
-- **昵称**：在小屋里点名字旁边的笔可以给角色起昵称，界面和台词里的称呼跟着换，留空恢复原名。
-- **每日问候**：每天第一次见面，桌宠会按早中晚和你们的亲密程度打个招呼，并记一天“陪伴天数”。
-- **低保**：家里的钱包少于 5 金币时，每天可以在生活手帐里领一次 8 金币，正好够买一个饭团。
+- **Độ thân thiết**: Chia làm năm mức độ: Mới quen, Quen thuộc, Thân thiết, Tin cậy, Yêu thương sâu đậm, mỗi nhân vật tính riêng. Vuốt ve +1 (tối đa 20/ngày), tặng hoa +5 (tối đa 3 lần/ngày), mời ăn cơm +3～+8, nhận lương +3, trò chuyện một lượt +2 (tối đa 20/ngày), lần đầu gặp nhau mỗi ngày +5, cùng bạn hoàn thành một nhiệm vụ cơ sở dữ liệu +2 (tối đa 20/ngày), tắm rửa chải chuốt +2. Mỗi khi lên một mức sẽ mở khóa một bộ lời thoại mới, một câu chuyện nhỏ độc quyền và một danh hiệu.
+- **Chỉ số nhu cầu**: Độ no giảm từ đầy xuống rỗng mất khoảng 12 tiếng, độ sạch mất khoảng 24 tiếng, dù bạn không mở máy thì nó cũng sẽ từ từ giảm xuống. Độ no được hồi lại bằng cách mời ăn cơm (Pudding +15, Cơm nắm +25, Cơm cuộn trứng +40, Ramen +50), độ sạch thì bằng cách nhấp vào **Tắm rửa** trong cuốn sổ nhỏ hoặc trong nhà pet màn hình (miễn phí, hồi chiêu 30 phút). Trong phần cài đặt tiện ích có thể tắt các chỉ số nhu cầu này đi, sau khi tắt các con số sẽ bị đóng băng và không hiển thị nữa.
+- **Tâm trạng**: Lo lắng (cơ sở dữ liệu vừa báo lỗi), Đói bụng, Muốn tắm rửa, Nhớ bạn (đã lâu không để ý đến cô ấy), Vui vẻ, Bình tĩnh. Tâm trạng chỉ quyết định lời thoại và con dấu tâm trạng trong nhà pet.
+- **Nhật ký trưởng thành**: Mục **Nhật ký trưởng thành** trong nhà pet ghi lại các cột mốc, ví dụ ngày đầu quen biết, lần đầu ăn ramen, cùng bạn hoàn thành nhiệm vụ cơ sở dữ liệu lần thứ 100; các câu chuyện nhỏ độc quyền đã mở khóa cũng được đọc ở đây.
+- **Biệt danh**: Bấm vào cây bút bên cạnh tên trong nhà pet để đặt biệt danh cho nhân vật, cách xưng hô trên giao diện và lời thoại sẽ thay đổi theo, để trống để khôi phục tên gốc.
+- **Lời chào mỗi ngày**: Lần gặp gỡ đầu tiên mỗi ngày, pet màn hình sẽ chào hỏi tùy theo buổi sáng, trưa, tối và mức độ thân thiết của hai bạn, đồng thời ghi nhận một ngày "Số ngày đồng hành".
+- **Trợ cấp cơ bản**: Khi ví tiền chung ở nhà còn ít hơn 5 tiền vàng, mỗi ngày có thể vào Sổ tay sinh hoạt để nhận 8 tiền vàng một lần, vừa đủ để mua một phần cơm nắm.
 
-老用户升级时，小绘会按已有的聊天、打工和吃饭次数折算一份初始亲密度（最多到“熟悉”档），“认识的第一天”取最早的聊天或小账本记录。
+Đối với người dùng cũ khi nâng cấp, Tiểu Erii sẽ dựa vào số lần trò chuyện, đi làm và ăn cơm hiện có để quy đổi ra một lượng độ thân thiết ban đầu (tối đa đến mức "Quen thuộc"), "Ngày đầu gặp gỡ" sẽ lấy theo bản ghi trò chuyện hoặc sổ tay nhỏ sớm nhất.
 
-## 一键打开数据库版面
+## Phím tắt mở bảng cơ sở dữ liệu
 
-小本子的“数据库”一栏有一组快捷按钮：**打开数据库本体**（仪表盘）、**填表工作台**、**剧情推进**、**数据管理**、**API**、**看表格**（数据库的可视化表格）。聊天窗和生活手帐的任务栏里也有 **打开数据库**。
+Trong mục "Cơ sở dữ liệu" của cuốn sổ nhỏ có một nhóm phím tắt: **Mở cơ sở dữ liệu gốc** (Bảng điều khiển), **Bàn làm việc điền bảng**, **Thúc đẩy cốt truyện**, **Quản lý dữ liệu**, **API**, **Xem bảng** (Bảng trực quan của cơ sở dữ liệu). Trong thanh nhiệm vụ của cửa sổ trò chuyện và sổ tay sinh hoạt cũng có nút **Mở cơ sở dữ liệu**.
 
-打开数据库用的是它公开的 `AutoCardUpdaterAPI.openSettings()` / `openVisualizer()`；跳到指定版面相当于替你点了它侧边栏上的那一项，只换页面，不读写表格、不调用任务操作。如果某个版面在你当前的数据库档位里没有显示，按钮会只打开数据库并说明原因；找不到数据库入口时，小本子会提示先启用数据库。
+Việc mở cơ sở dữ liệu dùng hàm `AutoCardUpdaterAPI.openSettings()` / `openVisualizer()` công khai của nó; nhảy đến một bảng chỉ định tương đương với việc nó nhấp giúp bạn vào mục đó trên thanh bên, chỉ đổi trang chứ không đọc/ghi bảng biểu, không gọi thao tác nhiệm vụ. Nếu một bảng nào đó không được hiển thị trong phiên bản cơ sở dữ liệu hiện tại của bạn, nút bấm sẽ chỉ mở cơ sở dữ liệu và ghi rõ lý do; khi không tìm thấy lối vào cơ sở dữ liệu, cuốn sổ nhỏ sẽ nhắc bạn bật cơ sở dữ liệu lên trước.
 
-## 外观与特效
+## Ngoại hình và Hiệu ứng
 
-界面是“精装手帐”风格：纸张纹理、烫金细线、纸胶带和印章，三个角色各有一套颜色。扩展设置里的 **特效** 有四个选择：自动（电脑华丽、手机简约）、华丽、简约、关闭。华丽档会在送花、升级、换角色时撒花瓣、雪花或星星，桌宠小屋的立绘页有缓慢流动的光；简约档只保留少量粒子；系统开了“减少动态效果”时自动关闭。页面切到后台或面板关上时，所有动画都会停下。
+Giao diện mang phong cách "Sổ tay bìa cứng": vân giấy, viền ép kim, băng dính washi và con dấu, ba nhân vật có ba bộ màu sắc riêng. Mục **Hiệu ứng** trong cài đặt tiện ích có bốn mức: Tự động (Màn hình PC thì rực rỡ, điện thoại thì đơn giản), Rực rỡ, Đơn giản, Tắt. Mức "Rực rỡ" sẽ rải cánh hoa, bông tuyết hoặc ngôi sao khi tặng hoa, thăng cấp, hoặc đổi nhân vật, trang ảnh đứng của nhà pet màn hình cũng có dải ánh sáng lấp lánh chầm chậm chảy qua; mức "Đơn giản" chỉ giữ lại một lượng nhỏ hạt phân tử (particles); nếu hệ thống bật "giảm chuyển động động", hiệu ứng sẽ tự động tắt. Khi chuyển trang sang chạy ngầm hoặc đóng bảng điều khiển, mọi hình ảnh động sẽ dừng lại.
 
-## 打工、赚钱和吃饭
+## Đi làm, Kiếm tiền và Ăn cơm
 
-电脑右键 / 手机长按打开小本子，点击 **生活手帐**；也可从扩展设置打开。窗口顶部可以选让哪个角色去：钱包是所有角色共用的“家里的钱包”，打工和吃饭按角色各算各的，不同角色可以同时去不同的地方。
+Nhấp chuột phải trên PC / nhấn giữ trên điện thoại để mở cuốn sổ nhỏ, chọn **Sổ tay sinh hoạt**; cũng có thể mở từ phần cài đặt tiện ích. Trên đỉnh cửa sổ có thể chọn cho ai đi làm: ví tiền là "ví tiền chung của nhà" dùng chung cho mọi nhân vật, còn việc đi làm và ăn cơm thì tính riêng cho từng người, các nhân vật có thể đi đến những chỗ khác nhau cùng một lúc.
 
-### 工作和工资
+### Công việc và Tiền lương
 
-| 工作 | 做什么 | 时间 | 工资 |
+| Công việc | Nhiệm vụ | Thời gian | Lương |
 | --- | --- | --- | --- |
-| 书店 | 把新到的书放上书架 | 1 分钟 | 10 金币 |
-| 甜品店 | 准备小甜点 | 2 分钟 | 18 金币 |
-| 花店 | 整理花束、换水 | 3 分钟 | 25 金币 |
+| Tiệm sách | Đặt sách mới lên kệ | 1 Phút | 10 Tiền vàng |
+| Tiệm tráng miệng | Phụ chuẩn bị đồ ngọt | 2 Phút | 18 Tiền vàng |
+| Tiệm hoa | Sắp xếp bó hoa, thay nước | 3 Phút | 25 Tiền vàng |
 
-1. 在 **去打工** 选择工作。每次只进行一项活动。
-2. 手帐和桌宠气泡显示剩余时间，桌宠换上对应工作插图，在原地轻轻呼吸。
-3. 工作结束后点击 **领取工资**。也可关掉手帐，在桌宠的下班气泡直接领取。
-4. 同一个角色要先领完工资，才能开始下一份工作或买饭。未领取的工资会一直保留，没有领取期限。
+1. Chọn công việc trong phần **Đi làm**. Mỗi lần chỉ thực hiện một hoạt động.
+2. Sổ tay và bong bóng thoại sẽ đếm ngược thời gian còn lại, pet màn hình thay trang phục làm việc và khẽ hô hấp tại chỗ.
+3. Khi làm xong, nhấp **Nhận tiền lương**. Bạn cũng có thể đóng sổ tay đi và nhận trực tiếp từ bong bóng thoại lúc tan làm.
+4. Mỗi nhân vật phải nhận lương xong thì mới được làm tiếp hoặc mua đồ ăn. Lương chưa nhận sẽ được giữ mãi, không có kỳ hạn.
 
-**提前下班** 需要再点一次确认：停止这一份工作，没有工资，也不扣已有金币。已经完成的工作直接领取，不能误取消。
+Tính năng **Tan làm sớm** yêu cầu xác nhận thêm một lần nữa: dừng công việc đang làm, không có lương nhưng cũng không bị trừ tiền. Các công việc đã hoàn thành sẽ được nhận ngay, không thể bấm nhầm hủy bỏ.
 
-### 请桌宠吃饭
+### Mời pet ăn cơm
 
-| 食物 | 价格 | 吃饭时间 |
+| Thức ăn | Giá | Thời gian ăn |
 | --- | --- | --- |
-| 布丁 | 5 金币 | 8 秒 |
-| 饭团 | 8 金币 | 9 秒 |
-| 蛋包饭 | 15 金币 | 10 秒 |
-| 拉面 | 20 金币 | 12 秒 |
+| Pudding | 5 Tiền vàng | 8 Giây |
+| Cơm nắm | 8 Tiền vàng | 9 Giây |
+| Cơm cuộn trứng | 15 Tiền vàng | 10 Giây |
+| Ramen | 20 Tiền vàng | 12 Giây |
 
-在 **吃点好的** 购买，确认操作后扣金币并开始吃饭，吃完饱腹会涨。余额不足或正在进行其他活动时，购买按钮会禁用。吃完会记入小账本；四种食物各用独立吃饭配图：布丁用小勺吃焦糖布丁，饭团用手拿海苔饭团，蛋包饭用勺子吃金黄蛋包饭，拉面用筷子夹面。点餐卡片、吃饭时的手帐插图和浮动桌宠都使用同一项对应的图片。没有饥饿值、饿肚子惩罚或强制喂饭。
+Mua đồ trong phần **Ăn chút đồ ngon**, sau khi xác nhận sẽ trừ tiền vàng và bắt đầu ăn, ăn xong độ no sẽ tăng. Nếu số dư không đủ hoặc đang có hoạt động khác diễn ra, nút mua sẽ bị vô hiệu hóa. Ăn xong sẽ được ghi vào cuốn sổ tay nhỏ; bốn món đồ ăn sử dụng bốn ảnh khác nhau: Pudding dùng thìa nhỏ ăn, Cơm nắm cầm bằng tay, Cơm cuộn trứng xúc bằng thìa to, Ramen gắp bằng đũa. Các thẻ gọi món, tranh minh họa trên sổ tay và ảnh pet màn hình nổi đều đồng nhất hình ảnh. Không có chỉ số đói khát, không có hình phạt nếu bị đói hay ép ăn.
 
-### 保存与数据库任务
+### Lưu trữ và Nhiệm vụ Cơ sở dữ liệu
 
-- 钱包初始为 0 金币。工作由你手动开始，不会自动接下一份或无限挂机赚钱；钱快花完时可以领一次低保。
-- 金币、当前活动、累计打工 / 吃饭次数和最近 20 条小账本记录保存在当前酒馆账号的扩展设置中。
-- 已开始的工作按设备时间计时。关闭窗口、刷新或暂时离开后，回来会继续计时，或者显示待领取；离线时吃完的饭只结算一次，不会重复扣款。
-- 数据库任务出现时，原任务动作、气泡和停止按钮优先；生活手帐也提供原数据库的停止操作。已开始的打工计时照常，数据库任务结束后再开始新工作或买饭。
-- 聊天、生活手帐、桌宠小屋和小本子分别打开。生活玩法不调用 API，也不修改数据库或酒馆正文。没有恢复自主移动。
-- 本版是账号设置中的轻量单人玩法，防止同一页面重复领取 / 扣款；没有跨设备并发的钱包交易服务。
+- Ví tiền khởi điểm có 0 tiền vàng. Công việc do bạn tự tay bắt đầu, sẽ không có chuyện tự động nhận việc tiếp theo hay treo máy kiếm tiền vô hạn; khi sắp hết tiền có thể đi nhận trợ cấp một lần.
+- Tiền vàng, hoạt động hiện tại, tổng số lần đi làm/ăn cơm và 20 bản ghi sổ tay gần nhất sẽ được lưu trong phần cài đặt tiện ích của tài khoản Tavern hiện tại.
+- Công việc đã bắt đầu sẽ tính giờ theo thời gian trên thiết bị. Việc đóng cửa sổ, tải lại trang hay tạm thời rời đi đều không ảnh hưởng, lúc về thời gian vẫn chạy tiếp, hoặc hiện trạng thái chờ nhận lương; khi offline mà ăn xong thì cũng chỉ tính tiền một lần chứ không trừ tiền nhiều lần.
+- Khi nhiệm vụ cơ sở dữ liệu xuất hiện, các hành động, bong bóng thoại và nút dừng của nhiệm vụ gốc được ưu tiên hiển thị trước; sổ tay sinh hoạt cũng cung cấp tính năng dừng cơ sở dữ liệu gốc. Đồng hồ đếm ngược công việc vẫn chạy bình thường, đợi nhiệm vụ cơ sở dữ liệu kết thúc rồi mới bắt đầu công việc mới hoặc mua cơm.
+- Cửa sổ trò chuyện, sổ tay sinh hoạt, nhà pet màn hình và cuốn sổ nhỏ được tách biệt với nhau. Trò chơi sinh hoạt không gọi API, cũng không ghi đè vào cơ sở dữ liệu hay văn bản trò chuyện Tavern. Tính năng tự di chuyển vẫn không được khôi phục.
+- Đây chỉ là lối chơi nhẹ nhàng cho từng tài khoản một để ngăn việc lặp lại nhận lương / trừ tiền trên một trang; không có dịch vụ giao dịch ví tiền xuyên thiết bị.
 
-## 和桌宠聊天
+## Trò chuyện cùng pet màn hình
 
-每个角色有自己的聊天记录、称呼和人设设定，换角色不会串记录。零的人设是按《龙族》原作性格起草的，奶蛋是元气贪吃的小伙伴（默认关系“小伙伴”），欢迎按自己的理解在 `characters/` 里修改。
+Mỗi nhân vật có riêng lịch sử trò chuyện, cách xưng hô và thiết lập, chuyển đổi nhân vật sẽ không bị lẫn lộn dữ liệu. Thiết lập của Zero được soạn theo tính cách nguyên tác của "Long Tộc", còn Nai Dan là cậu bạn đồng hành háu ăn đầy sức sống (Mối quan hệ mặc định là "Bạn đồng hành"), bạn có thể tự điều chỉnh theo ý hiểu của mình trong mục `characters/`.
 
-1. 电脑右键桌宠，或手机按住约 1.4 秒打开小本子，点击 **和小绘聊天**（换成零或奶蛋时按钮跟着变）。也可在扩展设置中直接打开聊天。
-2. 默认 **使用酒馆当前 API**，沿用当前连接、模型和已有密钥。先在酒馆配置好可用的聊天补全或文本补全连接。
-3. 输入消息，点击 **发送**。电脑 Enter 发送、Shift+Enter 换行；手机回车换行，用发送按钮提交。
-4. **停止回复** 取消小绘这一次请求；**重试** 再发未获回复的聊天内容。关闭窗口或停用扩展也会取消未完成的聊天请求。
-5. 点击 **连接设置**，可以调整称呼、关系、聊天风格、回复长度和希望小绘记住的事，或切换到 **单独配置 API（OpenAI 兼容）**。
+1. Nhấp chuột phải vào pet màn hình (PC), hoặc nhấn giữ khoảng 1.4 giây (điện thoại) để mở cuốn sổ nhỏ, nhấn vào **Trò chuyện cùng Tiểu Erii** (khi đổi sang Zero hay Nai Dan, nút bấm sẽ đổi tên theo). Bạn cũng có thể mở trực tiếp cửa sổ trò chuyện trong Cài đặt tiện ích.
+2. Mặc định sẽ **Dùng API hiện tại của Tavern**, sử dụng kết nối, mô hình và các khóa hiện tại. Hãy cấu hình sẵn kết nối hoàn thành trò chuyện (chat completion) hoặc hoàn thành văn bản (text completion) hoạt động tốt trên Tavern.
+3. Nhập tin nhắn và nhấp **Gửi**. Trên PC, nhấn Enter để gửi, Shift+Enter để xuống dòng; trên điện thoại dùng phím Return để xuống dòng, nút Gửi để đẩy tin nhắn lên.
+4. **Dừng phản hồi** hủy bỏ yêu cầu lần này của Tiểu Erii; **Thử lại** gửi lại nội dung trò chuyện chưa nhận được phản hồi. Việc đóng cửa sổ hay tắt tiện ích cũng sẽ hủy các yêu cầu trò chuyện chưa xong.
+5. Nhấp vào **Cài đặt kết nối**, bạn có thể tùy chỉnh danh xưng, quan hệ, phong cách trò chuyện, độ dài câu trả lời và những việc muốn cô ấy nhớ, hoặc chuyển sang phần **Cấu hình API riêng (Tương thích OpenAI)**.
 
-### 单独配置 API
+### Cấu hình API riêng
 
-填写 API 基础地址（例如 `https://你的接口/v1`）和密钥，点击 **获取模型列表**，在 **可用模型** 中选择，确认下方 **模型名称** 后点击 **保存设置**。
+Điền URL cơ sở (Base URL) API (ví dụ: `https://api.cua.ban/v1`) và Khóa (Key), nhấp **Lấy danh sách mô hình**, chọn trong danh sách **Mô hình khả dụng**, rồi xem lại mục **Tên mô hình** bên dưới trước khi nhấp **Lưu cài đặt**.
 
-仍可以手动填写模型名称；部分接口不提供模型列表，获取失败不一定代表聊天接口不可用。获取过程中可点击 **取消获取**。更改地址或密钥会取消旧请求并清掉旧列表；关闭窗口或停用扩展同样会取消获取。列表按模型 ID 去重排序，选择列表不会改动酒馆全局模型。
+Bạn vẫn có thể nhập tay tên mô hình; một số giao diện không cung cấp danh sách mô hình, việc không lấy được danh sách chưa chắc là do kết nối trò chuyện không khả dụng. Trong quá trình lấy danh sách, có thể nhấn **Hủy lấy**. Thay đổi URL hoặc Khóa sẽ tự hủy các yêu cầu cũ và xóa danh sách cũ; việc đóng cửa sổ hoặc vô hiệu hóa tiện ích cũng sẽ hủy yêu cầu đang gọi. Danh sách sẽ lọc bỏ các ID mô hình trùng lặp và sắp xếp lại, việc chọn mô hình trong danh sách này sẽ không làm thay đổi thiết lập mô hình toàn cục của Tavern.
 
-**使用酒馆当前 API** 模式跟随酒馆当前模型；需要单独选择时，切换到 **单独配置 API**。
+Chế độ **Sử dụng API hiện tại của Tavern** sẽ bám sát vào mô hình mà Tavern đang chọn; còn khi bạn muốn lựa chọn riêng, hãy chuyển sang chế độ **Cấu hình API riêng**.
 
-已经填写完整 `/chat/completions` 地址时，会自动识别基础地址。本版单独连接支持 OpenAI 兼容的聊天补全接口；Claude / Gemini 原生接口可通过酒馆当前连接使用。
+Hệ thống sẽ tự động nhận diện URL cơ sở nếu bạn đã điền sẵn đường dẫn hoàn chỉnh kết thúc bằng `/chat/completions`. Phần kết nối riêng này hỗ trợ các giao diện API hoàn thành trò chuyện tương thích chuẩn OpenAI; bạn vẫn có thể dùng giao diện gốc của Claude / Gemini thông qua hệ thống kết nối hiện tại của Tavern.
 
-请求由运行酒馆的设备转发，浏览器仅连接酒馆。如果填入 `localhost`，它指运行酒馆的设备。**测试连接** 会发送一次简短请求，也可能计费；测试内容不会加入聊天记录。
+Yêu cầu sẽ được chuyển tiếp qua thiết bị đang chạy Tavern, trình duyệt chỉ kết nối duy nhất vào Tavern. Nếu bạn điền `localhost`, nó sẽ được hiểu là cái thiết bị đang chạy Tavern. Nút **Kiểm tra kết nối** sẽ phát đi một yêu cầu siêu ngắn, có thể tốn phí; nội dung đoạn test này sẽ không bị ném vào lịch sử trò chuyện.
 
-密钥默认只用于本次扩展运行，刷新后需要重新填写。勾选 **记住此设备上的密钥** 后保存在浏览器存储中；取消勾选并保存会删除。密钥不写入扩展设置、聊天提示词或安装包。
+Khóa API theo thiết lập mặc định sẽ chỉ hoạt động trong lần chạy tiện ích hiện tại, tải lại trang sẽ phải điền lại. Tích chọn **Ghi nhớ khóa trên thiết bị này** sẽ lưu vào bộ nhớ trình duyệt; bỏ chọn và lưu lại sẽ xóa khóa. Khóa sẽ không bị ghi vào cài đặt tiện ích, prompt trò chuyện hay gói cài đặt.
 
-### 消息操作和草稿
+### Thao tác tin nhắn và bản nháp
 
-- **复制**：每条消息都可以复制。浏览器不允许自动复制时，也能选中文字手动复制。
-- **重新回答**：位于最后一条成功回复下面，回应同一个问题。等新回复成功后才替换旧回复；取消或出错会保留原记录。不会保存多个候选分支。
-- **修改重发**：修改最近一条用户消息，再重新生成这一轮回复。同样只在成功后更新原记录。点击“取消修改”会恢复进入修改前的草稿。
-- **草稿保存**：正常草稿和正在修改的草稿会保存。关闭窗口再打开、刷新后，可以继续写。
-- **导出**：将当前保存的聊天导出为 TXT，包含称呼、消息内容和已有时间，不包含连接设置、密钥或单独填写的记忆。
-- **清空记录**：需再次点击确认。清空聊天不清空连接设置和手动记忆；后两项在连接设置中自行修改。
+- **Sao chép**: Mọi tin nhắn đều có thể sao chép. Dù trình duyệt chặn việc tự động sao chép thì bạn vẫn có thể bôi đen văn bản để copy tay.
+- **Trả lời lại**: Nằm ở phía dưới cùng của phản hồi thành công cuối cùng, dùng để trả lời lại cùng một câu hỏi. Cần đợi phản hồi mới thành công xong thì mới thế chỗ câu cũ; nếu hủy bỏ hoặc báo lỗi thì nội dung gốc vẫn được giữ lại. Sẽ không lưu lại nhiều nhánh câu trả lời phụ.
+- **Sửa rồi gửi lại**: Cho phép sửa tin nhắn cuối cùng của bạn, rồi bắt nó tạo lại một vòng câu trả lời khác. Cũng cần phải thành công xong thì mới thế chỗ bản ghi gốc. Bấm vào "Hủy chỉnh sửa" sẽ quay trở về cái bản nháp trước lúc sửa.
+- **Lưu bản nháp**: Các bản nháp bình thường và bản nháp đang chỉnh sửa dở đều sẽ được lưu lại. Cho dù đóng cửa sổ mở lại hay làm mới trang web thì bạn vẫn có thể viết tiếp.
+- **Xuất dữ liệu**: Xuất lịch sử trò chuyện hiện tại thành tệp TXT, bao gồm danh xưng, nội dung tin nhắn và thời gian đã có, không bao gồm cấu hình kết nối, mã khóa hay ký ức tự điền.
+- **Xóa bản ghi**: Cần phải bấm xác nhận thêm lần nữa. Hành động xóa chat sẽ không xóa thiết lập kết nối và ký ức điền tay; 2 mục đó phải tự sửa trong phần Cài đặt kết nối.
 
-消息显示头像和时间；旧版没有时间的消息仍能读取，不会补造发送时间。等待接口时显示“绘梨衣正在写回复”，结果返回后再完整展示；本版仍为非流式回复。
+Tin nhắn sẽ hiện rõ avatar và mốc thời gian; những đoạn nhắn từ phiên bản cũ không có thời gian cũng không sao, nó vẫn đọc được và sẽ không tự chế ra cái mốc thời gian giả tạo nào. Lúc chờ API, nó sẽ hiện "Erii đang soạn hồi âm", tới lúc nhận xong thì bung ra đầy đủ luôn; ở phiên bản này, câu trả lời vẫn không phải dạng luồng (non-streaming).
 
-看旧消息时，新回复不会强制拉到底部，点击“回到最新消息”即可回去。电脑可用标题栏的 ↔ 扩大窗口，也可拖动标题栏；手机输入框随文字增高到上限，并给可见键盘留下空间。
+Lúc lật xem lại tin nhắn cũ, có câu trả lời mới xuất hiện nó cũng sẽ không tự động cuộn tuột xuống đáy đâu, phải bấm "Quay lại tin nhắn mới nhất" thì nó mới xuống. PC thì kéo cái thanh tiêu đề ↔ để giãn cửa sổ ra, còn kéo đi đâu cũng được; điện thoại thì phần gõ chữ sẽ tự động phình to lên tới giới hạn nhất định, đồng thời còn phải chừa chỗ cho cái bàn phím ảo nhảy lên nữa.
 
-空记录时的三个话题按钮只填入草稿，由你确认后发送，不会自动发出请求。
+Khi lịch sử trống trơn, ba nút bấm chủ đề sẽ chỉ điền chữ vào ô nháp thôi, bạn phải bấm nút Gửi nó mới đi, không có vụ tự gửi luôn đâu.
 
-### 聊天风格和手动记忆
+### Phong cách trò chuyện và ký ức thủ công
 
-在 **连接设置 → 你和小绘** 中调整：
+Bạn có thể chỉnh trong phần **Cài đặt kết nối → Bạn và Tiểu Erii**:
 
-- **自然闲聊**：按话题决定长度，回应具体内容。
-- **简短陪伴**：通常一到三句，避免无关展开。
-- **详细交流**：认真提问时讲完整，日常交流保持自然。
-- **希望小绘记住的事**：最多 2000 字符，可写称呼习惯、偏好和近况，保存后每次请求都会带上，可以随时修改或清空。
+- **Trò chuyện tự nhiên**: Độ dài dài ngắn là tùy vào chủ đề, chú tâm vào việc hồi đáp nội dung chi tiết.
+- **Bầu bạn ngắn gọn**: Thường chỉ một đến ba câu, hạn chế lan man sang mấy thứ chả liên quan.
+- **Giao tiếp chi tiết**: Lúc nghiêm túc hỏi thăm thì sẽ trả lời đẩy đủ, còn giao tiếp thường ngày thì vẫn tự nhiên.
+- **Mong Tiểu Erii ghi nhớ**: Tối đa 2000 ký tự, có thể ghi thói quen gọi nhau, sở thích hay tình hình dạo này, sau khi lưu thì lần nào yêu cầu nó cũng đính kèm theo, bạn có thể sửa hay xóa bất cứ lúc nào.
 
-这是你手动维护的资料，不会自动提取聊天，不会额外调用模型总结，也不会读取数据库或酒馆正文。风格通过提示词表达，实际回复仍取决于所用模型；“回复长度上限”仍用于限制输出。
+Mấy cái này là dữ liệu bạn tự cập nhật bằng tay, nó không tự chiết xuất từ khung chat ra đâu, cũng không gọi model đi tóm tắt chi cho tốn tiền, và dĩ nhiên là nó cũng chả thèm ngó ngàng tới cơ sở dữ liệu hay mấy cái khung văn bản của Tavern đâu. Phong cách được truyền đạt qua câu lệnh prompt, còn trả lời thế nào thì lại phải xem cái model kia; còn "Giới hạn độ dài câu trả lời" thì vẫn dùng để gò cái đầu ra cho chuẩn.
 
-### 提示词与记录
+### Lệnh prompt và bản ghi
 
-内置提示词由用户提供的绘梨衣预设中 `opt_mode_chat`、人格气质等条目整理，默认恋人关系，可自行调整为朋友或其他关系。采用普通文本，不依赖酒馆预设宏、世界书、正则或预设中的故事本脚本。维护文件为 `chat-prompt.js`。
+Câu lệnh prompt tích hợp sẵn đã được nhào nặn lại từ cái preset của Erii do người dùng tạo (như mục `opt_mode_chat`, tính cách và khí chất, v.v...), mặc định là quan hệ người yêu, bạn có thể tự chỉnh lại thành bạn bè hay quan hệ nào khác cũng được. Dùng toàn bộ bằng văn bản thuần, không cần phải bấu víu vào macro preset của Tavern, sách thế giới, regex hay kịch bản sổ truyện (storybook script). Tệp bảo trì ở đây là `chat-prompt.js`.
 
-聊天记录单独保存在当前酒馆账号的扩展设置中，最多 100 条、约 128000 字符。请求携带最近最多 40 条、约 24000 字符的聊天内容；不会自动携带酒馆正文、角色卡、世界书或数据库表格。**清空记录** 需要再次点击确认。
+Lịch sử trò chuyện được cất vào một xó riêng trong phần cấu hình cài đặt cho cái tài khoản Tavern đó, sức chứa tối đa là 100 dòng, tầm đâu cỡ 128000 chữ. Mỗi lần xin yêu cầu thì nó kẹp thêm cỡ 40 dòng chat gần nhất, khoảng 24000 chữ; nó sẽ không tự động ôm đồm thêm văn bản từ Tavern, thẻ nhân vật, sách thế giới hay bảng dữ liệu gì đâu. **Xóa bản ghi** bắt buộc phải ấn lần nữa để xác nhận.
 
-聊天窗口独立显示，电脑可拖动窗口标题栏，手机随可见屏幕调整大小。小绘等待回复时会做原地记录动作，收到回复时挥手；聊天期间暂停本地自动故事。数据库任务在聊天窗口上方显示，并有独立的 **停止任务** 按钮。
+Cửa sổ chat hiển thị tách biệt luôn, trên PC thì túm thanh tiêu đề kéo đi đâu cũng được, điện thoại thì nó sẽ tự co giãn lấp đầy màn hình. Lúc chờ nó phản hồi, Tiểu Erii sẽ làm hành động ghi chép tại chỗ, nhận được tin thì sẽ vẫy tay chào; lúc chat thì tạm thời dẹp vụ tự động kể chuyện sang một bên. Nhiệm vụ cơ sở dữ liệu sẽ hiển thị ở ngay phía trên cửa sổ trò chuyện và có hẳn cái nút **Dừng nhiệm vụ** độc lập.
 
-### 当前 API 的范围
+### Phạm vi của API hiện tại
 
-- 酒馆聊天补全连接：沿用其当前提供商、模型及后端密钥，包括酒馆已配置的 Claude、Gemini、OpenRouter 等来源；本版采用非流式回复，等待时显示状态。
-- 酒馆文本补全连接 `textgenerationwebui`：使用原生参数生成器和对应后端。
-- Kobold、Horde、NovelAI 连接暂不提供独立聊天适配，会明确提示切换连接或使用单独配置。
-- 1.14.0 使用该版原生的独立 quiet 请求；其最大输出长度沿用酒馆当前设置。1.15.0–1.19.0 使用参数生成器的设置副本，可以使用小绘单独的回复长度，不修改酒馆当前设置。
+- Kết nối hoàn thành trò chuyện (chat completion) của Tavern: Dùng nguyên nhà cung cấp, mô hình và khóa Backend của nó hiện tại, kể cả mấy nguồn kiểu Claude, Gemini, OpenRouter mà Tavern đang cấu hình; ở bản này, câu trả lời vẫn không phải dạng luồng, và sẽ hiện trạng thái lúc đang chờ.
+- Kết nối hoàn thành văn bản `textgenerationwebui` của Tavern: Sử dụng trình tạo tham số nguyên bản và backend tương ứng.
+- Hiện chưa hỗ trợ trò chuyện độc lập cho các kết nối Kobold, Horde, NovelAI, nếu dính phải nó sẽ nhắc thẳng là phải đổi kết nối hoặc phải xài cài đặt riêng.
+- 1.14.0 thì tận dụng luôn cái tính năng yêu cầu ẩn (quiet request) độc lập có sẵn của nó; giới hạn độ dài đầu ra bám theo thiết lập hiện thời của Tavern. Từ 1.15.0-1.19.0 thì copy cái trình tạo tham số ra xài, bạn có thể chỉnh độ dài câu trả lời riêng cho Tiểu Erii mà chả ảnh hưởng gì đến thiết lập chung của Tavern cả.
 
-## 检修数据库（聊天窗口的检修模式）
+## Bảo trì cơ sở dữ liệu (Chế độ bảo trì của cửa sổ trò chuyện)
 
-填表出错、表格和剧情对不上时，可以让桌宠帮你看一看。
+Lúc điền bảng bị lỗi, hoặc bảng biểu và cốt truyện không khớp, bạn có thể gọi pet màn hình ra kiểm tra xem.
 
-1. 打开聊天窗口，点上方的 **检修数据库**（再点 **闲聊** 回到日常聊天；两边的记录分开保存，检修的资料不会混进日常聊天）。
-2. 窗口顶部写着它这次能看到什么：**全部表格**、**最近几层正文**（下拉框里选 0～10 层，默认 3 层）和 **最近的错误**（数据库发来的出错 / 警告通知，最多 5 条）。
-3. 直接说哪里不对，或者点 **帮我检查一下**。它会用自己的口吻说明看到了什么；需要改的话，回复下面会附一张 **修改单**。
-4. 修改单里每一条都写着位置（哪张表、第几行、哪一列）、原来的值 → 新的值，以及理由。所有条目 **默认不勾选**。核对不通过的条目（表名、列名写错，行不存在，新值和原来一样，和别的条目冲突）会标出原因，不能勾选。
-5. 勾选要采用的条目，点 **应用所选（N 处）**。写入前会先把整份表格备份；然后按“先改已有的行 → 删行 → 加行 → 切换剧情推进预设 → 重新填表”的顺序逐条写入，每条后面显示成功或没写进去的原因。
-6. 写完后可以点 **撤销**，把表格恢复到写入前（切换过的剧情推进预设也会切回去）；也可以 **下载备份**，得到一份表格 JSON。
+1. Bật cửa sổ trò chuyện lên, bấm vào cái chữ **Bảo trì cơ sở dữ liệu** ở trên đỉnh (bấm lại vào **Trò chuyện** để quay về như cũ; dữ liệu của 2 bên lưu riêng, mấy thông tin bảo trì sẽ chả dính vô cuộc sống đời thường của bạn đâu).
+2. Phía trên cửa sổ sẽ ghi rõ lần này nó ngó được những gì: **Toàn bộ bảng biểu**, **Mấy tầng văn bản gần đây** (bấm vào để chọn từ 0-10, mặc định là 3 tầng) và **Mấy cái lỗi gần đây** (thông báo lỗi/cảnh báo từ cơ sở dữ liệu bay qua, tối đa là 5 thông báo).
+3. Cứ thẳng thắn nói ra chỗ sai ở đâu, không thì ấn **Kiểm tra giúp tôi**. Nó sẽ lấy cái ngữ khí riêng của nó để kể lại nó thấy gì; nếu phải sửa, bên dưới câu trả lời của nó sẽ đi kèm theo một **Danh sách sửa đổi**.
+4. Trong đó, mỗi cái mục sửa đổi đều ghi rõ nằm ở chỗ nào (bảng nào, hàng thứ mấy, cột nào), giá trị cũ -> giá trị mới, và luôn cả lý do vì sao. Lúc đầu **mặc định là không chọn mục nào hết**. Những mục nào đối chiếu thấy fail (ghi sai tên bảng, sai cột, hàng lặn đâu mất tiêu, giá trị mới với cũ như nhau, đụng độ (conflict) với mục khác) sẽ bị chú thích lý do và bị mờ đi không cho chọn.
+5. Đánh dấu mấy mục bạn cần, rồi ấn **Áp dụng mục đã chọn (N mục)**. Trước khi ghi vào, nó sẽ sao lưu toàn bộ cái bảng đó; sau đó sẽ nạp theo thứ tự: "sửa dòng có sẵn -> xóa dòng -> thêm dòng -> chuyển đổi preset thúc đẩy cốt truyện -> điền bảng lại", mục nào làm xong hay báo lỗi đều được hiển thị kết quả.
+6. Sau khi nạp xong xuôi, bạn có thể ấn **Hoàn tác**, lôi cái bảng về lại như lúc chưa đụng vào (kể cả preset cốt truyện đã chuyển cũng sẽ kéo về luôn); hoặc bạn có thể **Tải bản sao lưu về** dưới định dạng JSON.
 
-修改单能做的事：
+Những việc mà Danh sách sửa đổi làm được:
 
-- **改格子**、**改整行**、**加一行**、**删一行**：通过数据库公开的 `updateCell`、`updateRow`、`insertRow`、`deleteRow` 写入，和你在数据库里手动改表走同一条保存路径。被锁定的行、列、格子，数据库会拒绝，这里照实显示“没写进去”。
-- **切换剧情预设**：把当前聊天切换到另一个已有的剧情推进预设（`switchPlotPreset`）。
-- **重新填表**：让数据库按它现在的设置重新填一次表（`manualUpdate`）。这会调用你在数据库里配置的填表 API，和平时填表一样计费。
+- **Sửa ô**, **sửa cả dòng**, **thêm dòng**, **xóa dòng**: Dùng thẳng qua giao diện công khai `updateCell`, `updateRow`, `insertRow`, `deleteRow` để ghi vào, nó y hệt như lúc bạn sửa bảng bằng tay bên trong cơ sở dữ liệu. Mấy cái dòng, cột hay ô đang bị khóa sẽ bị cơ sở dữ liệu đá văng ra, phần mềm sẽ hiện đúng trạng thái "chưa được nạp vào".
+- **Chuyển preset cốt truyện**: Giúp chuyển đoạn chat hiện tại sang một cái preset cốt truyện khác đã có sẵn (`switchPlotPreset`).
+- **Điền bảng lại**: Ép cơ sở dữ liệu điền bảng một lần nữa dựa theo cái cài đặt hiện tại của nó (`manualUpdate`). Tính năng này sẽ kích hoạt cái API điền bảng mà bạn đã cài bên trong cơ sở dữ liệu, có tính tiền y như lúc bạn điền bảng bình thường.
 
-为了能撤销，有几件事故意不做：
+Để còn nước cứu vãn, có mấy món cố tình không được cài vào:
 
-- **不改剧情推进预设的内容，也不另存副本。** 数据库导入预设的接口会顺带把当前聊天切到“LLM 召回模式”，而公开接口没有删除预设、也没有改回模式的方法，写了就撤销不了。需要改预设内容时，桌宠会在回复里说明要改什么，你去数据库的 **剧情推进** 页面自己改（小本子上有一键打开的按钮）。
-- 不提议删整张表、清空表格或大批量重写；一张修改单最多 12 条。
-- 不会自动应用，也不会在你没点的时候写入。
+- **Không sửa nội dung của preset cốt truyện, cũng không lưu bản phụ.** Giao diện nhập preset của cơ sở dữ liệu sẽ vô tình kéo theo cuộc hội thoại hiện tại vào "Chế độ triệu hồi LLM" (LLM Recall), mà cái giao diện công khai của nó thì không có nút xóa hay trả về chế độ cũ, nên nạp vô rồi là khỏi hoàn tác. Nếu muốn sửa thì pet màn hình sẽ nói cho bạn biết trong tin nhắn, bạn tự qua bên trang **Thúc đẩy cốt truyện** của cơ sở dữ liệu mà sửa bằng tay (Trên cuốn sổ nhỏ có luôn nút bấm bay tới thẳng).
+- Không đề xuất vụ xóa bay cả cái bảng, xóa sạch dữ liệu hay nạp lại với số lượng lớn; một cái danh sách sửa chữa giới hạn nhiều nhất là 12 mục thôi.
+- Không tự động nạp vô, bạn không ấn thì nó chả bao giờ tự ghi.
 
-安全规则：
+Chính sách bảo vệ an toàn:
 
-- 每一条写入前都会再核对一次：这一格在你确认之前已经变了，或者这一行已经不在了，就不写，并说明原因。行按数据库的 `row_id` 找，所以删行、加行不会让后面的条目改错行。
-- 只在提出修改单的那个聊天里应用和撤销；换了聊天会拒绝。
-- 撤销时如果发现写入之后表格又变过（比如数据库自己又填了一次表），会先提醒“撤销会把这些变化一起退回”，再点 **仍要撤销** 才执行。
-- 备份存在这台设备的浏览器里（IndexedDB），每台设备保留最近 10 份，刷新页面后仍可撤销。浏览器不允许本地存储时，备份只留在这次打开的页面里，界面会提示你先下载一份。
-- 数据库正在处理任务时，**应用所选** 暂时不可用，等它做完再应用。
+- Mỗi mục trước khi được nạp vô đều sẽ được đối chiếu lại một lần: Cái ô này đã bị thay đổi trước khi bạn xác nhận rồi, hoặc cái dòng này mất tiêu luôn rồi, thì khỏi nạp, ghi thẳng lý do. Hàng được tra bằng `row_id` của cơ sở dữ liệu, nên vụ xóa dòng hay thêm dòng sẽ không khiến những mục phía sau sửa nhầm.
+- Chỉ cho phép áp dụng và hoàn tác trên cái đoạn chat mà cái danh sách đó được đẻ ra; nếu bạn đổi qua phòng chat khác thì hệ thống sẽ từ chối cái lệnh hoàn tác.
+- Lúc bấm hoàn tác, nếu nó phát hiện cái bảng đã bị chỉnh sửa sau lần ghi đó (ví dụ như cơ sở dữ liệu tự nhiên nó nhảy ra điền bảng một lần nữa), nó sẽ cảnh báo ngay: "Hoàn tác sẽ kéo theo mấy cái thay đổi mới này lùi về theo luôn đó", bạn bấm **Vẫn muốn hoàn tác** thì nó mới chịu thực thi.
+- Sao lưu sẽ được giấu vào trong trình duyệt của thiết bị này luôn (IndexedDB), một máy tính giữ lại được tối đa 10 bản mới nhất, bấm F5 load lại trang thì vẫn hoàn tác được. Nếu trình duyệt chặn không cho lưu cục bộ, hệ thống sẽ chỉ giữ lại trong lần mở trang này thôi, nó sẽ hiện thông báo khuyên bạn nên tải một bản nháp về máy.
+- Trong lúc cơ sở dữ liệu bận bịu, nút **Áp dụng mục đã chọn** sẽ tối màu, đợi nó rảnh tay rồi tính.
 
-检修会把表格、最近的错误和你选的几层正文一起发给桌宠聊天用的接口（聊天窗口 **连接设置** 里那一个）。表格很大时，会先省略最长那张表里较早的行，并在资料里注明。
+Quá trình kiểm tra sẽ kẹp cái bảng, mớ lỗi gần đây với những tầng văn bản chat mà bạn chọn quăng luôn cho kết nối API của pet màn hình (Cái giao diện cài đặt ngay ở tab **Cài đặt kết nối** trong khung trò chuyện). Bảng biểu mà dài quá là nó tự hớt bớt phần mào đầu ở bảng nào dài nhất, rồi nó còn để lại dòng ghi chú báo hiệu luôn.
 
-## 旁观陪聊
+## Quan sát trò chuyện
 
-开启后，桌宠会像坐在屏幕旁边陪你看故事一样，隔几层说一两句感想。
+Bật cái này lên, con pet nó sẽ kiểu như đang chầu chực kế bên coi bạn diễn, lâu lâu quăng ra một hai câu review.
 
-- 在 **扩展设置 → 陪聊与检修** 里打开 **旁观陪聊**（默认关闭），再选 **评论频率**（每 1～20 层，默认每 4 层）。
-- 只数开启之后新出现的楼层：换聊天会重新数，删楼层不倒扣，滑动重新生成（楼层数没变）不算。被隐藏的楼层不算，也不会被读到。
-- 新楼层够数、并且角色的回复写完之后，等 4 秒再决定；两次评论至少隔 60 秒。数据库正在填表时最多等 30 秒，还在忙就这次先不说，下一层写完再看。
-- 评论会出现在桌宠气泡里（带 **回她** / **回它** 按钮），同时作为一条“旁观”消息放进这个角色的聊天记录。点按钮会打开聊天窗口，直接写回复。
-- 回复它、摸摸它或者送它花，都算理它了。连着 3 条评论没人理，心情会变成“委屈”；下一次评论时会轻轻问一句是不是在忙——不责备、不催你，而且一小时最多问一次。
-- 评论用这个角色的聊天连接发出请求，每次评论就是一次调用。接口出错时不会重试刷屏，设置里会显示上次没成功的原因。
+- Vào **Cài đặt tiện ích → Quan sát & Bảo trì** bật **Quan sát trò chuyện** lên (Mặc định nó bị tắt). Sau đó lựa chọn **Tần suất bình luận** (Từ 1-20 tầng, mặc định là 4 tầng).
+- Nó chỉ đếm mấy cái tầng chat mới sinh ra sau khi bật thôi: Lướt sang khung chat khác là nó đếm lại từ đầu, bạn có lỡ tay xóa cũng không bị trừ bớt, bạn có lướt lên bắt nó tạo lại (chưa sinh thêm tầng mới) thì nó chả tính đâu. Mấy tầng chat bị ẩn đi là nó mù luôn, cũng không coi được gì hết.
+- Sau khi đã đủ target, phải chờ nhân vật thả câu xong thì 4 giây sau nó mới quyết định bình phẩm; cách mỗi lần sủa phải cách nhau tầm 60 giây. Đợt nào mà dữ liệu nó đang điền bảng thì nó sẽ nén thêm tầm 30 giây nữa, mà đang bận tối tăm mặt mũi thì nó nhịn không bình phẩm, để tầng tới nói luôn.
+- Những lời nhận xét của nó sẽ nhảy ngay trên bong bóng thoại (đi kèm nút **Trả lời cô ấy/nó**), cái này cũng sẽ được ghi luôn vào lịch sử chat cá nhân dưới tư cách "người quan sát". Bấm vô là mở thẳng cửa sổ chat để nhắn lại luôn.
+- Bất kể bạn rep, xoa đầu nó hay tặng hoa thì cũng coi như là đã phản hồi. Liên tục 3 câu chả ai thèm nghía, thì tâm trạng nó chuyển sang "Tủi thân" liền; tới lúc cất lời tiếp theo nó sẽ rụt rè hỏi thăm xem bạn có đang kẹt lịch không——không chửi rủa, không hối thúc, mà một tiếng đồng hồ nó chỉ dám hỏi một lần.
+- Cứ mỗi lần mỏ nó nhấp nháy là coi như request gọi thông qua mạng của nhân vật; nếu lỗi API là nó chịu chết chứ không spam lại, trong menu cài đặt sẽ thảy lỗi hôm đó.
 
-## 任务气泡：简略版与完整版
+## Bong bóng nhiệm vụ: Bản tóm tắt và Bản đầy đủ
 
-在 **扩展设置 → 绘梨衣 · 数据库桌宠 → 任务内容显示** 中选择：
+Trong **Cài đặt tiện ích → Tiểu Erii · Pet màn hình cơ sở dữ liệu → Hiển thị nội dung nhiệm vụ**, hãy chọn:
 
-- **简略版（默认）**：例如“正在手动追平…”。
-- **完整版（真实工作内容）**：显示原任务名称及完整 `detail`，例如“手动追平 / 批次 1/4 · 调用 AI（第 1/3 次尝试）”。原始换行保留，长内容可滚动，停止按钮仍可操作。
+- **Bản tóm tắt (Mặc định)**: Ví dụ "Đang cập nhật thủ công…".
+- **Bản đầy đủ (Nội dung công việc thực tế)**: Hiển thị tên nhiệm vụ ban đầu và `detail` (chi tiết) đầy đủ, ví dụ "Cập nhật thủ công / Đợt 1/4 · Gọi AI (Lần thử thứ 1/3)". Giữ nguyên ngắt dòng ban đầu, nội dung dài có thể cuộn, nút dừng vẫn thao tác được bình thường.
 
-这个选择会保存，并同时作用于桌宠气泡和聊天窗口的任务栏。任务内容直接读取数据库原界面的 `feature` 与 `detail`；不猜测百分比、批次或重试次数。数据库轮播当前未提供任务时，显示等待进度同步。
+Lựa chọn này sẽ được lưu lại, và áp dụng đồng thời cho bong bóng của pet màn hình lẫn thanh nhiệm vụ trong cửa sổ trò chuyện. Nội dung nhiệm vụ đọc trực tiếp `feature` và `detail` từ giao diện gốc của cơ sở dữ liệu; không đoán mò phần trăm, số đợt hay số lần thử lại. Khi thanh cuộn của cơ sở dữ liệu không có nhiệm vụ nào, nó sẽ hiển thị trạng thái đang đợi đồng bộ tiến độ.
 
-## 数据库同步边界
+## Giới hạn đồng bộ cơ sở dữ liệu
 
-本扩展平时只读数据库当前界面提供的任务状态、轮播中的任务文字和结果通知：
+Bình thường tiện ích này chỉ đọc trạng thái nhiệm vụ được cung cấp trên giao diện hiện tại của cơ sở dữ liệu, văn bản nhiệm vụ đang hiển thị và thông báo kết quả:
 
-- 不复制数据库插件；
-- 不替换数据库入口；
-- 不改酒馆正文聊天、酒馆全局 API 设置或数据库任务按钮；小绘自己的聊天记录与连接设置单独保存；
-- 数据库表格只在检修模式里、经你逐条勾选并点“应用所选”后才改，而且只走数据库公开的 `AutoCardUpdaterAPI`，写前整份备份；剧情推进预设只会切换，不改内容；
-- 酒馆正文只在检修模式（附上最近几层）和你打开的旁观陪聊里读取，只发给桌宠聊天用的接口；
-- 不调用奶蛋（数据库原桌宠）的动作控制；奶蛋角色的图只是在运行时读取数据库已经加载的图片，不复制、不分发；
-- 小本子保留最近观察到的任务文字，这些记录不等于仍在运行的完整任务列表；停止按钮只绑定数据库当前提供的任务；
-- 没有真实百分比时，显示数据库原来的进度文字；
-- 一键打开版面只打开数据库界面、切换它的页面，不读写表格、不调用任务操作。
+- Không sao chép plugin cơ sở dữ liệu;
+- Không thay thế lối vào cơ sở dữ liệu;
+- Không sửa đổi văn bản trò chuyện trong Tavern, thiết lập API toàn cục của Tavern hay các nút nhiệm vụ của cơ sở dữ liệu; lịch sử trò chuyện và cài đặt kết nối của Tiểu Erii được lưu riêng;
+- Bảng biểu của cơ sở dữ liệu chỉ bị thay đổi khi ở chế độ bảo trì, và sau khi bạn tích chọn từng mục rồi nhấn "Áp dụng mục đã chọn", hơn nữa chỉ dùng `AutoCardUpdaterAPI` công khai, sao lưu toàn bộ trước khi ghi; preset thúc đẩy cốt truyện chỉ thực hiện chuyển đổi, không sửa nội dung của nó;
+- Văn bản của Tavern chỉ được đọc khi ở chế độ bảo trì (kèm theo một vài tầng gần nhất) và khi bạn bật tính năng quan sát trò chuyện, nội dung đó cũng chỉ được gửi đến API dành riêng cho trò chuyện của pet màn hình;
+- Không gọi điều khiển hành động của Nai Dan (pet gốc của cơ sở dữ liệu); ảnh của Nai Dan chỉ được đọc lúc runtime khi cơ sở dữ liệu đã tải xong hình ảnh, không đi sao chép hay phát tán lại;
+- Cuốn sổ nhỏ lưu lại phần văn bản nhiệm vụ quan sát được gần đây nhất, những bản ghi này không đồng nghĩa với toàn bộ danh sách các nhiệm vụ đang chạy; nút dừng chỉ ăn khớp với nhiệm vụ mà cơ sở dữ liệu đang hiển thị ra ngoài;
+- Khi không có số liệu phần trăm thực, nó sẽ hiện luôn cái dòng tiến độ gốc của cơ sở dữ liệu;
+- Tính năng mở trang chỉ là mở cái giao diện cơ sở dữ liệu, nhảy sang cái trang cần mở, chứ không đọc ghi bảng, cũng chả gọi thao tác nhiệm vụ.
 
-当前适配数据库 `naiv1` 的现有界面结构。数据库未来如果改动 `DeskPetLayer`、`DeskPet` 或 `NoticeBubble` 等界面结构，小绘可能提示“数据库界面不兼容”，并保留原数据库桌宠显示。
+Hiện tại đang tương thích với cấu trúc giao diện sẵn có của cơ sở dữ liệu `naiv1`. Nếu tương lai cơ sở dữ liệu có chỉnh sửa cấu trúc giao diện như `DeskPetLayer`, `DeskPet` hay `NoticeBubble`, Tiểu Erii có thể thông báo "Giao diện cơ sở dữ liệu không tương thích", và nó sẽ bảo toàn cho cái hiển thị pet màn hình gốc của cơ sở dữ liệu.
 
-建议在数据库设置中保留原奶蛋和原任务气泡运行，再在本扩展设置中隐藏它们。这里的“隐藏”只改变显示，不会卸载数据库，也不会切断数据来源。
+Khuyến nghị nên duy trì việc hiển thị con Nai Dan gốc lẫn bong bóng nhiệm vụ trong phần cài đặt của cơ sở dữ liệu, rồi sau đó vào cài đặt tiện ích này ẩn chúng đi. Chữ "ẩn" ở đây chỉ là che đi cái phần hiển thị, không gỡ bỏ cơ sở dữ liệu, cũng không cắt đứt nguồn cấp dữ liệu.
 
+## Thông báo về Xem trước cục bộ và Trả lời lặp lại
 
-## 本地预览与重复回复说明
+Trong phiên bản v0.6.0, tính năng xem trước độc lập (standalone preview) từng bị chặn lại để gửi một mẫu cố định, khiến cho tin nhắn khác nhau cũng chỉ nhận được cùng một câu trả lời, và kiểm tra kết nối cũng chỉ là giả lập kết quả. Vấn đề này đã được khắc phục ở phần xem trước của bản v0.6.1; gói cài đặt chính thức luôn lấy phản hồi thật qua API.
 
-v0.6.0 的独立预览曾把请求拦截为固定示例，所以不同消息可能得到同一句话，连接测试也只是模拟结果。这个问题已在 v0.6.1 的预览中修正；正式安装包一直通过接口取得回复。
+Bản xem trước mặc định của phiên bản mới cần bạn phải tự điền API của riêng mình vào Cài đặt kết nối, để lấy danh sách mô hình, test kết nối và nhắn tin nó mới gọi API thật. Giao diện trang độc lập thì chịu chết không đọc được thông số kết nối của Tavern; chỉ khi đã cài tiện ích vô rồi mới có thể kế thừa API mặc định của Tavern. Giao diện sẽ đính mác **Xem trước độc lập · Cấu hình API riêng là có thể trò chuyện thật**.
 
-新版默认预览需要在连接设置填写自己的 API，模型列表、测试连接和聊天都会真实请求该接口。独立页面无法读取酒馆当前连接；安装扩展后才可以默认沿用酒馆 API。界面会标出 **独立预览 · 单独配置 API 后可真实对话**。
+Chỉ có tự nguyện xài thêm cái đuôi `demo=1` ở link Demo thì mới thấy được mẫu test. Giao diện sẽ thông báo rành rọt "Chế độ xem trước", cái phần Demo với Xem trước thực tế là hai mục riêng biệt chả ai đụng ai, phần dữ liệu demo cũ mềm không có len lỏi vào lịch sử trò chuyện được. Lỗi giao diện thì nó cũng nổ thông báo lỗi, chả nhét đại một cái mẫu thoại vô tri đâu.
 
-只有主动使用带 `demo=1` 的演示地址时才会得到固定示例。界面会明确显示“演示模式”，演示与真实预览的记录分开保存，旧版模拟记录不会混入真实聊天。接口出错时显示错误，不补上一句固定台词。
+Cái xem trước trên máy dùng cục bộ này chạy qua `work/erii_preview_server.mjs` hốt hết request rồi đẩy lại trong localhost; nó chả được kẹp vô cục cài đặt đâu. Bản cài trong Tavern thì dùng xài luôn cái backend của Tavern, khỏi cần tốn công boot thêm cái server xem trước rách việc này nữa.
 
-本地预览使用工作区的 `work/erii_preview_server.mjs` 转发请求，仅监听本机；它不放进安装包。酒馆安装版使用酒馆自己的后端，无需额外启动这个预览服务。
+## Toàn bộ lịch sử phiên bản
 
-## 完整版本历史
+Phiên bản được sắp xếp theo thời gian từ mới nhất đến cũ nhất. Hành vi của phiên bản mới nhất sẽ lấy theo mục ở trên cùng.
 
-版本按时间倒序排列。最新版本的行为以最上方条目为准。
+### v0.9.0 · Chế độ bảo trì & Quan sát trò chuyện (Hiện tại)
 
-### v0.9.0 · 检修模式与旁观陪聊（当前）
+- Cửa sổ trò chuyện thêm nút chuyển đổi **Trò chuyện / Bảo trì cơ sở dữ liệu**. Khi bảo trì, pet màn hình đọc bảng, các lỗi gần đây và 0～10 tầng văn bản gần nhất (có thể chỉnh), đưa ra danh sách sửa đổi; người dùng phải đánh dấu và xác nhận từng mục, việc ghi chỉ dùng API công khai của cơ sở dữ liệu, sao lưu trước toàn bộ và có nút hoàn tác nhanh; không tự động áp dụng.
+- Danh sách sửa đổi hỗ trợ chỉnh ô, đổi cả hàng, thêm hàng, xóa hàng, đổi preset cốt truyện, hoặc kêu cơ sở dữ liệu tự điền bảng lại; dựa vào `row_id` để định vị, check lại giá trị cũ trước khi đè vô, nếu đổi đoạn chat, bị lock hoặc xung đột là từ chối thẳng và báo lỗi luôn.
+- Preset thúc đẩy cốt truyện chỉ thực hiện chuyển đổi chứ không đổi ruột: API chèn preset của cơ sở dữ liệu tiện tay gạt đoạn chat hiện tại sang chế độ gọi LLM, mà API mở chả có tính năng xóa preset hoặc vác về chế độ cũ, nên viết xong là vô phương cứu vãn.
+- Thêm tính năng **Quan sát trò chuyện** (Mặc định đóng): Cứ cách N tầng (1～20, mặc định là 4) nó đọc tầng mới xuất hiện, để lại bình luận vào lịch sử chat và cho phép reply thẳng luôn; 3 câu liên tiếp mà không rep là nó sầu não, lần sau nó nói nó sẽ hỏi rụt rè lại, tiếng đồng hồ hỏi 1 lần thôi; khoảng cách mỗi đợt chém gió là 60 giây, lúc cơ sở dữ liệu đang điền là ráng ôm thêm 30 giây nữa.
+- Lời thoại mới: tâm trạng "Tủi thân" của cả 3 đứa, với phản ứng lúc đang ghi dữ liệu bảo trì hoặc hoàn tác.
+- Bổ sung file: `repair.js` (Làm gọn dữ liệu, tháo dỡ rồi đối soát phiếu sửa), `repair-ticket.js` (Khung phiếu sửa), `database-repair.js` (Thực thi ghi vô hoặc rút về), `backup-store.js` (Lưu vô cache của trình duyệt), `watch.js` (Nhẩm tính số tầng với me đúng thời gian để hót).
 
-- 聊天窗口新增 **闲聊 / 检修数据库** 切换。检修时桌宠读表格、最近的错误和最近 0～10 层正文（可调），给出修改单；每一条都要用户勾选并确认，写入只走数据库公开接口，写前整份备份，可一键撤销；不自动应用。
-- 修改单支持改格子、改整行、加一行、删一行、切换剧情推进预设、让数据库重新填一次表；按 `row_id` 定位，写前再核对原值，换聊天、锁定、冲突都不写并说明原因。
-- 剧情推进预设只切换、不改内容：数据库的导入预设接口会把当前聊天切到 LLM 召回模式，又没有删除预设或改回的公开接口，写了就撤销不了。
-- 新增 **旁观陪聊**（默认关闭）：每隔 N 层（1～20，默认 4）读新出现的楼层，评论进聊天记录，可以直接回复；连续 3 条没人理会委屈，下一次轻轻问一句，一小时最多一次；两次评论至少隔 60 秒，数据库忙时最多等 30 秒。
-- 新增台词：三个角色的“委屈”心情、检修写入和撤销后的反应。
-- 新文件：`repair.js`（资料整理、修改单解析与核对）、`repair-ticket.js`（修改单卡片）、`database-repair.js`（写入与撤销）、`backup-store.js`（浏览器本地备份）、`watch.js`（数楼层与评论时机）。
+### v0.8.0 · Ba pet màn hình, Nuôi dưỡng và Phím tắt mở bảng cơ sở dữ liệu (Bản cũ)
 
-### v0.8.0 · 三个桌宠、养成与一键打开数据库版面（历史版本）
+- Thêm nhân vật Zero (26 hình) và Nai Dan (đọc trực tiếp hình gốc của cơ sở dữ liệu đang chạy); gom chung tư liệu nhân vật vào `characters/`, muốn nhét thêm nv là chỉ cần bổ sung 1 file với 1 folder tài nguyên thôi.
+- Cập nhật thêm tính năng Nhà pet màn hình: Cái đống card nhân vật kiểu sổ tay bách khoa, anime lúc thay đứa khác, rồi thì tên gọi, ghi nhật ký, đến mấy cái mẩu chuyện bé xinh làm riêng cho nhân vật.
+- Nhét thêm tính năng Nuôi bé: Độ thân thiết 5 nấc, sạch với no, đủ trò vui buồn, chào buổi sáng, ân xá cho lính mới; mọi thứ chả có gì trừng phạt, thậm chí có quyền gạt bay cái chỉ số nhu cầu.
+- Lương bổng với cắm cơm là tách biệt theo từng nhân vật, nhưng kho tiền là cái thẻ Visa dùng chung; file save chơi tương thích tuốt 0.7.1 (tiến độ sinh hoạt của Tiểu Erii sẽ bám dính vào file cũ).
+- Có đống lời thoại offline theo tính cách, tâm trạng, và độ khăng khít cho đủ loại hầm bà lằng từ việc cơ sở dữ liệu, sờ đụng, hầu hạ, lêu lổng; cái bong bóng thoại cũng tách làm 2 nhịp thoại với tiến độ gốc; tắt được tuốt.
+- Cuốn sổ tay thêm cái phím tắt bay qua cơ sở dữ liệu với nút "Xem bảng"; error cũng lòi thêm "Chạy qua xem thử".
+- UI biến tấu mang đậm phong vị sổ da xịn xò, có level hiệu ứng bung xòe; UI lúc xem điện thoại thì kéo từ dưới mông lên cho nhanh.
+- Thanh lọc cả đám hình nhấp nhô chạy sang ngang chả xài (Bay mất tầm 21 MB), tóm lại extension gọt từ hơn 25 MB về cỡ 6.5 MB.
+- Nhét thêm con `tools/slice-pose-sheet.py`: Tách bảng biểu tạo dáng ra cái frame rời đúng chuẩn cho dự án.
+- Hình ảnh, đường dẫn, văn bản, tương tác, đồng bộ độc quyền đọc (read-only) cơ sở dữ liệu, phím dừng, mấy đoạn kể chuyện nhảm, lịch mần ăn đều bất di bất dịch của Tiểu Erii; Nếu cài đặt cũ chả lòi thêm thuộc tính gì thì ưu tiên xài của Tiểu Erii; `settings.chat` tiếp tục ghi, giật lùi về 0.7.1 không rớt một sợi lông.
 
-- 新增角色零（26 张图）和奶蛋（运行时读取数据库自带的图）；角色资料集中在 `characters/`，以后加角色只需新增一个文件和素材文件夹。
-- 新增桌宠小屋：图鉴式的角色卡片、换角色动画、昵称、成长日记和专属小故事。
-- 新增养成：亲密度五档、饱腹和清洁、心情、每日问候、低保；都没有惩罚，需求值可以关闭。
-- 打工和吃饭按角色分开，钱包共用；存档兼容 0.7.1（小绘的活动仍写在原字段）。
-- 数据库任务、互动、照顾和闲时都有按性格、亲密度和心情挑选的本地台词；任务气泡分成台词和真实进度两行；可关闭。
-- 小本子新增数据库快捷按钮和“看表格”；出错时气泡里有“去看看”。
-- 界面改为精装手帐风格，加特效档位；手机上窗口改成底部抽屉。
-- 删除没再使用的左右跑步帧（约 21MB），扩展文件的总大小约从 25MB 降到 6.5MB。
-- 新增 `tools/slice-pose-sheet.py`：把生成的姿势表切成本仓库规格的单张图。
-- 小绘的图片、路径、文案、交互、数据库只读同步、停止按钮、故事、打工吃饭规则保持；老设置没有新字段时默认小绘；`settings.chat` 继续写入，退回 0.7.1 不丢记录。
+### v0.7.1 · Bốn hình minh họa riêng lúc ăn với đổi tên nút (Bản cũ)
 
-### v0.7.1 · 四种独立吃饭配图与入口改名（历史版本）
+- Mấy cái Pudding / Cơm nắm / Cơm cuộn trứng / Ramen lấy luôn 4 bộ ảnh nền WebP xuyên thấu là eat-pudding / eat-riceball / eat-omurice / eat-ramen.
+- Card gọi món đổi thành mấy cái biểu tượng lúc ăn của Tiểu Erii; mua đồ ăn thì trong sổ tay với ngoài màn hình nó lên đồ giống y chang nhau, bỏ luôn bộ icon ăn cơm chung.
+- Hình mới cũng cố giữ đầu gắn vịt vàng, xòe hai tay, mắt đỏ tóc đỏ, mận áo kimono đỏ trắng; hình HD được lưu chui, hình up lên bị ép lại thành WebP 768x768.
+- Lối vào của sổ tay nhỏ, cài đặt extension, với trang Preview được nhét thành 1 tên "Sổ tay sinh hoạt".
+- Cơ chế tiền bạc, giá cả đồ ăn, thời lượng cạp, tiến độ nhặt gạch, dữ kiện có sẵn y xì đúc; bản record ăn dở cũ được đẩy qua ảnh mới nếu trùng cái Food ID.
 
-- 布丁 / 饭团 / 蛋包饭 / 拉面分别使用 eat-pudding / eat-riceball / eat-omurice / eat-ramen 四张透明 WebP。
-- 点餐卡片替换为对应的小绘吃饭缩略图；买饭后手帐和桌宠显示相同的食物姿势，不再共用通用吃饭图。
-- 新图保留头顶小黄鸭、裸手、红发红眼和白红和服；高清原图单独保存，发布图压缩为 768×768 WebP。
-- 小本子、扩展设置及预览页面的入口统一改为“生活手帐”。
-- 金币、食物价格、吃饭时间、工作时间和已有记录规则保持；旧版正在进行的吃饭记录按原食物 ID 自动使用新版配图。
+### v0.7.0 · Đi làm, Bào tiền và Ăn cơm (Bản cũ)
 
-### v0.7.0 · 打工、赚钱与吃饭（历史版本）
+- Mở thêm Sổ tay sinh hoạt với cái cửa sổ trơ chọi: cày tiền, bốc cái gì ngon xơi đi, quyển sổ bé hạt tiêu.
+- Mấy tiệm như Tiệm sách / Tráng miệng / Tiệm Hoa cắn tầm 1 / 2 / 3 phút, hốt 10 / 18 / 25 tiền vàng; Xong là nghỉ chứ đếch cho tự động mần lại.
+- Tương ứng Pudding / Cơm nắm / Cơm cuộn trứng / Ramen ngốn hết 5 / 8 / 15 / 20 tiền vàng, ăn uống trôi qua 8 / 9 / 10 / 12 giây.
+- Ghi sổ ví, giờ giấc nổ máy, tổng lượng hoạt động với 20 lượt bốc mần ăn; F5 hoặc sập mạng cũng hồi lại như cũ.
+- Lương chưa rinh chả bao giờ rụng đi đâu, chung một tab đố mà ấn trùng hay thồn gấp đôi; Hủy kèo bốc phét là phải dằn mặt xác nhận.
+- 4 bức WebP trong vắt 768x768 nhét thêm có 584 KB; Ảnh cũ nằm yên. Gõ phím / Hốc cơm ngồi ỳ một xó, múa may chầm chậm, chả đi bộ rong ruổi nữa.
+- Lòi thêm thanh trạng thái sinh hoạt với cái bong bóng hốt bạc lúc hết giờ; cơ sở dữ liệu bay ra cướp cờ thì chịu lùi bước, tab sinh hoạt cũng có thể diệt trừ lệnh cũ gốc.
+- Mấy cái chức năng múa phím, chỉnh tone, nhớ dài, nháp văn, API với đổi model hồi v0.6.2 vẫn yên vị.
 
-- 新增生活手帐入口和独立窗口：去打工、吃点好的、小账本。
-- 书店 / 甜品店 / 花店分别 1 / 2 / 3 分钟，领取 10 / 18 / 25 金币；工作不自动重复。
-- 布丁 / 饭团 / 蛋包饭 / 拉面分别 5 / 8 / 15 / 20 金币，吃饭 8 / 9 / 10 / 12 秒。
-- 保存钱包、活动开始时间、累计次数和最近 20 条生活记录；刷新及离线完成恢复。
-- 待领取工资不会丢失，同一页面不能重复领取或重复买单；提前结束工作需二次确认。
-- 四张新的 768×768 透明 WebP 插图，共约 584 KB；原有图片保留。工作 / 吃饭在原地显示，配轻微动效，没有新增自动移动。
-- 新增生活进度和下班领取气泡；数据库任务出现时让位，生活窗口也能执行原任务停止。
-- 保留 v0.6.2 的全部聊天操作、风格、记忆、草稿、API 和模型列表功能。
+### v0.6.2 · Sổ tay trò chuyện và Thao tác tin nhắn (Bản cũ)
 
-### v0.6.2 · 聊天手帐与消息操作（历史版本）
+- Băm lại khung chat: Ava, giờ giấc, dải phân cách ngày, cái tag rỗng, status treo mạng, với tab settings nhóm.
+- Mọc thêm chức năng Copy từng cái, hốt cả mảng TXT, xé nháp rep lại cái đuôi, hốt văn cũ nắn lại rớt ra chém tiếp.
+- Làm mới hay sửa đè chỉ nuốt lời lúc API phím pass, tạch hay hủy là câu cũ vẫn ngồi im.
+- Nuốt nháp thường với nháp đang nặn; hủy nặn là khè lại ngay mớ văn thô chưa nổ.
+- Ba style: Tự nhiên / Cụt lủn / Nhây nhớt, cộng thêm cái kho ghi chú tống tay mắc xê được 2000 chữ.
+- Coi đồ cổ vẫn neo đúng tọa độ cày, thêm nút "Chạy vèo xuống coi câu mới"; PC xòe to hẹp nhỏ được, Mobile tự dãn khung text lên lấp bàn phím.
+- Ăn rơ cả đống log thời xưa rít, chả bốc phét thời điểm tin nhắn; Mã key vẫn tống ly thân với mớ chat và setting.
+- Cái list Model, API đơn / cục bộ, chức năng cắt cổ lệnh cũ cơ sở dữ liệu, với mấy trò bẹo má tương tác pet y như cũ; tính năng tản bộ, làm cu li chả ló dạng.
 
-- 整理聊天窗口：头像、时间、日期分隔、空白页话题、等待状态和分组设置。
-- 增加逐条复制、TXT 记录导出、最后一条回复的重新回答及最近用户消息的修改重发。
-- 重新回答和修改只在请求成功后替换原记录，取消与失败保留原成功对话。
-- 保存普通草稿和修改草稿；取消修改恢复之前的未发送内容。
-- 增加自然 / 简短 / 详细三种风格，以及最多 2000 字符的手动记忆资料。
-- 阅读旧消息时保留滚动位置，并提供“回到最新消息”；电脑支持展开窗口，手机输入框自动调整高度。
-- 兼容旧聊天记录，没有时间的旧消息不编造时间；密钥仍与聊天记录、设置分开保存。
-- 保留模型列表、当前 / 单独 API、数据库原停止操作和既有桌宠互动；未加入主动走路或打工系统。
+### v0.6.1 · Danh sách mô hình và Kết nối thực cho bản xem trước (Bản cũ)
 
+- Mục cấu hình API riêng có thêm tính năng "Lấy danh sách mô hình", giúp lựa chọn các mô hình hiện có, nhưng vẫn có thể tự gõ tên.
+- Hiện lên lúc húp data, chửi thề vì fail, với bấm Hủy; bẻ tay cắm IP/Key khác, ngắt tab, hay tắt đi là nó xả kèo request, đỡ phải lo chèn đồ cũ.
+- Quăng mẻ lấy model xuyên qua cái cổng Model Native Tavern, lôi hẳn Key riêng đang ghi, chứ chả thèm móc ngoéo gì vô connection của Tavern.
+- Bản Local Preview đẻ ra là chỏ thẳng tới API query model, móc connection check test, nhào vô chat thiệt; chôn cái trò sample fix cứng, nhái fake connection thành công.
+- Muốn vọc cái Demo mode là phải khai rõ ràng, băm log ra xài riêng biệt.
+- Check hàng 2 chiều câu mới nứt đọt với dây leo; Lỗi API nổ chữ đỏ, chả nặn thêm cái câu bù khú cho qua chuyện.
+- Cái tab Chat độc lập, tắt bật status chi tiết task với cái nút trảm lệnh cơ sở dữ liệu đời v0.6.0 thì vẫn để y.
 
-### v0.6.1 · 模型列表与预览真实连接（历史版本）
+### v0.6.0 · Trò chuyện độc lập và Nội dung công việc thực tế (Bản cũ)
 
-- 单独配置 API 新增“获取模型列表”、可用模型选择，保留手动填写。
-- 显示获取结果、失败原因和取消操作；更换地址 / 密钥、关闭窗口或停用时取消旧请求，避免迟到结果覆盖。
-- 列表查询通过酒馆原生模型接口，使用当前填写的独立密钥，不改酒馆全局连接或模型。
-- 本地预览默认真实转发模型查询、连接测试和聊天；移除默认固定回复与模拟连接成功。
-- 演示模式必须明确启用并标识，与真实预览分开保存记录。
-- 核对连续对话的最新消息和历史传递；接口失败显示错误，不生成替代回复。
-- 保留 v0.6.0 的独立聊天、任务详情切换与数据库原停止按钮。
+- Ợ thêm cái tab độc lập để Chat, nhét sẵn đống Prompt của con ẻm Erii, có quyền set xưng hô/tình trạng 2 đứa.
+- Trả về cái Completion Chat / Text của Tavern xài mặc định; Hoặc tay bo nhồi API tương thích OpenAI, Model, với Key vô.
+- API rời rạc cũng xài nút cắt phăng Request riêng; Ném lệnh, thử lửa lại, check IP, diệt chat log, sao lưu lịch sử có cả.
+- Mobile Layout vẹo vọ nắn theo cái view hiển thị, PC kéo cái Header bứng đi cũng ngon. Cái vụ Save API Key lên Device thì quăng cho Options.
+- Cái Setting Extension đẻ thêm mục coi Status gọn gọn hay ném mẹ nó ra; Full là ôm luôn tên cũ, giữ cái ngắt dòng của `detail`, content cuộn thả phanh, nút diệt Task còn nhạy.
+- Màn Chat quất luôn cái nút chặt Task gốc của cơ sở dữ liệu, Chat Stop với Task Stop chia ra hai đường.
+- Cái trò rớt vịt vàng trên đầu, bê kéo tự do, mép là chòi, vỗ lạch bạch vô em nó, câu chuyện ru ngủ 30 giây rải rác tuốt; Cái trò tự bay bộ là chả thấy mọc lên nữa.
 
-### v0.6.0 · 独立聊天与真实工作内容（历史版本）
+### v0.5.14 · Câu chuyện nhỏ tự động đổi bài mỗi 30 giây (Bản cũ)
 
-- 增加独立聊天窗口、内置绘梨衣闲聊提示词和称呼 / 关系设置。
-- 默认使用酒馆当前聊天补全或文本补全连接；可填写单独的 OpenAI 兼容 API 地址、模型及密钥。
-- 单独请求拥有自己的停止控制；支持发送、重试、连接测试、清空确认和聊天记录保存。
-- 手机布局随可见屏幕调整，电脑标题栏可拖动。API 密钥的设备保存为可选项。
-- 扩展设置增加任务内容简略版 / 完整版；完整保留数据库任务详情及换行，长内容可滚动。
-- 聊天窗口同时提供数据库任务的原停止操作，聊天停止与数据库停止分开。
-- 沿用头顶小黄鸭、手动拖动、即时探头、点击互动和三十秒故事换篇；没有加入主动走路。
+- Sau khi mở bóng thoại câu chuyện, cứ 30 giây nó nhảy sang truyện mới; tự mở hay máy rảnh ném ra thì đều dùng được.
+- Quất loạn cái mớ 12 bài, nhưng 1 vòng cấm lặp, 2 vòng cạnh nhau cấm trùng liên hoàn.
+- Để chuột hơ hơ, gõ gõ thì nó ngừng, lấy đi thì đếm lùi tiếp; Mobile thì chọc 1 phát là ghim lại.
+- Bấm "Đổi câu khác" là trảm ngay luôn; Diệt tab, Task cơ sở dữ liệu lao vào, bung cuốn sổ là bóp cổ cái loop này.
+- Cái chức năng 5 phút quăng Story, Toggles của nó với cái trò sửa cái nút băm Task hồi v0.5.13 vẫn chạy bền.
 
-### v0.5.14 · 小故事每 30 秒自动换篇（历史版本）
+### v0.5.13 · Sửa lỗi dừng nhiệm vụ và ẩn cuốn sổ nhỏ (Bản cũ)
 
-- 故事气泡打开后，每 30 秒自动换一篇；手动打开与闲置自动出现的故事都适用。
-- 继续按轮次打乱 12 篇故事，一轮内不重复，相邻轮次也避免立即重复。
-- 悬停和键盘聚焦暂停换篇，移开后继续剩余时间；手机触摸保留阅读状态。
-- 手动“换一篇”立即更换；关闭、数据库任务到来或打开小本子时结束本轮连续换篇。
-- 保留空闲约 5 分钟开始讲故事、空闲故事开关及 v0.5.13 的任务停止修复。
+- Nút dừng nối thẳng vào cái đuôi Task hiện tại của cơ sở dữ liệu, khỏi có vụ Task dỏm ngồi lên đầu.
+- Rờ chuột vô cái là nó ngó lại nguồn với Task; Nguồn đứt, Task biến hình thì khỏi xài lệnh mốc, nó hỏi dò xem có hốt cái mới không.
+- Cơ sở dữ liệu cập nhật cái tính năng thao tác tắt chứ chả thay đổi chữ thì nó cũng nhặt luôn thao tác mới.
+- Lệnh vỡ mồm thì ghim tầm 8 giây, F5 là điếng người chả đè lên kịp; Lỗi/Báo động của cơ sở dữ liệu ngoi lên trên cùng.
+- Tắt "Hiển thị Erii" thì mớ Setting vẫn gọi được cuốn sổ nháp với Cổng cơ sở dữ liệu; nhưng mất bóng thì đồ chơi giải trí tạch hết.
+- Cái chức năng ngó mép, bê kéo, vỗ vỗ, kể truyện của v0.5.12 giữ sạch; Đéo có cái tính năng lội bộ đâu.
 
-### v0.5.13 · 任务停止与隐藏小本子修复（历史版本）
+### v0.5.12 · Kéo vào sát mép là ló đầu ra ngay (Bản cũ)
 
-- 停止按钮跟随数据库当前任务，避免旧任务记录占据按钮。
-- 点击前再次核对来源与任务；来源断开或任务切换时不执行过期操作，提示确认新任务。
-- 数据库只更新停止操作、任务文字没有变化时，也同步最新操作。
-- 停止失败提示保留约 8 秒，刷新不会立即覆盖；数据库错误或警告优先显示。
-- 关闭“显示绘梨衣”后，扩展设置仍可打开任务小本子与数据库入口；隐藏期间停用休闲动作按钮。
-- 保留 v0.5.12 的即时探头、拖动、点击互动和治愈故事；没有恢复主动移动。
+- Bẻ cổ cái đếm lùi 6 giây chờ ngó chỏm; Ném ẻm tới mép buông tay là nó lút thụt chỏm ra.
+- Trỏ chuột vứt vưởng ngay cạnh thì cứ ngó thôi, chả thèm đuổi đi.
+- Nếu ở cái thế mép sẵn rồi thì nó khè luôn, khỏi chờ lết kéo đè lưu.
+- Đang dính mép thì dẹp cái khung chờ êm mông, chuyển dáng lướt qua cái chéo 0.16 giây thôi.
+- Kéo tay vẫn báo là xách cổ, Đụng chạm, chợp mắt, ngó nháp, nhét Task thì nổ trước; Hết việc rớt vô góc thì lại ló đầu ra.
+- Vẫn nén 12 mẩu truyện gốc với nút băm Task của cơ sở dữ liệu; Đếch thèm trả lại tính năng tự thân vận động.
 
-### v0.5.12 · 贴近边缘立即探头（历史版本）
+### v0.5.11 · Ló đầu ở mép và câu chuyện nhỏ chữa lành (Bản cũ)
 
-- 删除约 6 秒的探头等待；拖到边缘松手后直接缩进去。
-- 鼠标停在小绘旁边也保持探头，不再要求先移开指针。
-- 默认位置已经贴边时同样生效，不再要求先保存一次拖动位置。
-- 贴边时跳过完整坐稳等待，边缘造型过渡缩短到约 0.16 秒。
-- 拖动中仍显示拎起，点击互动、小憩、小本子和数据库任务优先；结束后贴边就恢复探头。
-- 保留 12 篇本地治愈故事和数据库原任务停止按钮；没有恢复自主移动。
+- Gim mẹ cái X vào góc trên bên phải của cuốn nháp, kéo xa cái nút chui cổng Cơ sở dữ liệu cho khỏi chọt mù mắt.
+- Cho lên sóng 3 cái WebP trong vắt 512x512 ló đầu mép (trái, phải, đít); Cái mép trên sài lại hình thò đầu xuôi bình thường.
+- Sửa lại cái hình cho anh em la ó: Cái xác nó chui gọn, ló đầu với 1 tay bám mép (tay lột trần), gỡ cái mớ hai tay chèn một ống lồng với cái dáng quặt quẹo.
+- Kéo tống vào góc, 6 giây sau nó thò mặt; Mèo, đụng tay, ấn mút, kéo cổ hoặc dính Task là trở mặt lại.
+- Dồn 12 mẩu chuyện tự kỉ sáng tác; 5 phút không chọc ngoáy là tự nổ, bật tay trên nháp cũng ok.
+- Nhồi nút qua bài, tắt, lơ chuột ngừng, bàn phím chặn, mobile bấm để đọc.
+- Task với Log của cơ sở dữ liệu là nổ trước Story, nút cắt Task vẫn trỏ vào rễ của Cơ sở dữ liệu.
+- Mọc 2 cái công tắc rời rạc; Hình hỏng thì quay về pose cũ.
+- Hành vi không tự bay, bật sổ chuột phải, rúc Tavern 1.14.0 - 1.19.0 từ v0.5.8 vẫn thế.
 
-### v0.5.11 · 边缘探头与治愈小故事（历史版本）
+### v0.5.10 · Căn chỉnh lại các nút trong cuốn sổ nhỏ (Bản cũ)
 
-- 叉号固定到小本子的右上角，增加与数据库入口按钮的实际空隙。
-- 新增左、右、底部三张 512×512 透明无损 WebP 探头图；上边缘复用倒挂的正面探头。
-- 根据反馈重画左右探头：身体自然藏在边缘后，仅露头和一只扶边的裸手，修正两只手挤在同一袖口及姿势不自然的问题。
-- 手动贴边后空闲约 6 秒触发探头；鼠标靠近、点击、长按、拖动或任务开始时恢复。
-- 新增 12 篇本地原创治愈小故事；空闲约 5 分钟主动出现，也可从小本子手动打开。
-- 增加换一篇、关闭、悬停暂停、键盘阅读暂停和手机触摸保留。
-- 数据库任务及结果优先于故事，停止按钮继续调用数据库原任务流程。
-- 增加两个独立开关；专用素材失败时回到普通姿势。
-- 保持 v0.5.8 起的无自主走动行为、右键开关和酒馆 1.14.0–1.19.0 的入口方式。
+- "Tặng cô ấy một bông hoa" chui vô ổ đồ chơi tiêu khiển, từ Font, Viền, Back Color với Mode Disabled đều sài chuẩn chung.
+- Quất cái List "Vươn vai -> Ngủ hờ -> Quăng cái hoa", hốt dọn đi để khỏi nới dòng tốn chỗ.
+- Dịch cái X đóng nháp nhích sang góc xíu xiu, nới cái nút "Chui cổng gốc" xa thêm tí ti cho bớt vồ nhầm.
+- Lối mở chuột phải, cổng vào database hồi v0.5.9 vẫn để mốc.
 
-### v0.5.10 · 小本子按钮排版修正（历史版本）
+### v0.5.9 · Bật tắt bằng chuột phải và cổng vào cơ sở dữ liệu (Bản cũ)
 
-- “送她一朵花”移入休闲动作按钮组，字体、边框、背景和禁用状态与其他动作统一。
-- 按钮顺序调整为“伸懒腰 → 小憩 → 送她一朵花”，不再单独占下一行。
-- 小本子右上角叉号向右上方微调，与“打开数据库本体”按钮保持更明显的距离，减少误触。
-- 保留 v0.5.9 的右键开关小本子和打开数据库本体功能。
+- Mút chuột phải (PC) vô cái mặt con nhóc: Phát 1 bung sổ, Phát 2 xếp luôn, Đỡ phải lết tay tìm con X.
+- Thổi bay hai nút "Quăng về ổ mặc định", "Đảo bên mông" khỏi cuốn nháp, vì đéo ai dùng tốn space.
+- Kẹp cái "Vô cái lõi cơ sở dữ liệu" thẳng trên đầu sổ nháp, cắm vào cái Extension của cơ sở dữ liệu mà quẩy.
+- Ráp tuốt cái menu V2 `acu-v2-menu-item` với cái đồ cũ `shujuku_v120-menu-item`; Ngó đéo ra mặt cơ sở dữ liệu thì nó chửi mở lên trước.
+- Kèo v0.5.8 bảo trì chuẩn: Nhỏ kia đéo tự thèm nhấc mông, tao bê thì nó mới lết.
 
-### v0.5.9 · 右键开关与数据库入口（历史版本）
+### v0.5.8 · Hoàn tác việc tự động di chuyển
 
-- 电脑右键小绘：第一次打开小本子，再次右键直接收起，不必只能点击叉号。
-- 删除小本子里的“回到默认位置”和“换一边坐”按钮，减少不常用操作占位。
-- 在小本子顶部增加“打开数据库本体”，直接调用数据库扩展自己的入口。
-- 兼容新版数据库入口 `acu-v2-menu-item` 和旧版入口 `shujuku_v120-menu-item`；找不到数据库扩展时会提示先启用它。
-- 继续保留 v0.5.8 的行为：小绘不会主动移动，只有手动拖动才会改变位置。
+- Đập bay vụ lôi hình chạy qua lại.
+- Xóa sổ bộ logic dạo phố, nhích mông hóng mát.
+- Bé kia đéo thèm chạy hay dời mông tự xưng, chỉ lúc hất tay tao kéo thì nó chịu đi.
+- Giữ cái thói thở khò, chạm vô, ấn lún, xách cổ, móc đồng bộ với trảm Task.
+- Hốt sạch rác rưởi của cái mớ hình lộn xộn, cho file setup nó mỏng đi tí với trừ logic thừa.
 
-### v0.5.8 · 回退主动移动
+### v0.5.7 · Sửa lỗi cập nhật vị trí lúc đi dạo (Bản cũ)
 
-- 移除左右跑步帧调用。
-- 移除自动散步和自动改变位置逻辑。
-- 小绘不会自己跑动或改变位置，只有用户手动拖动才会移动。
-- 保留待机动作、点击互动、长按互动、拖动、数据库同步和任务停止按钮。
-- 从当前安装包删除跑步素材，减少包体积和旧逻辑残留。
+- Sửa cái phốt "Dáng thì đang lượn, mà cái hồn vẫn cắm neo yên 1 góc".
+- Mỗi nhịp ném toạ độ đàng hoàng, ẻo lượn mạn trái mạn phải xíu xíu rồi bò về mốc đầu.
 
-### v0.5.7 · 修复散步位置更新（历史版本）
+**Tính năng chủ động đi bộ của bản này đã bị ăn rìu từ bản v0.5.8.**
 
-- 修复“动作帧在变化，但桌宠屏幕位置没有变化”的问题。
-- 每一步实际更新坐标，先向左或向右走一段，再按原路走回起点。
+### v0.5.6 · Ổn định thời gian hành vi chủ động (Bản cũ)
 
-**该版本的主动移动已经在 v0.5.8 移除。**
+- Delay mốc đục khoét chập choạng cỡ 12 - 20 giây cho đỡ dính phốt lag.
+- Hốt bớt cái mớ rác của cái timer lách cách đi dạo lúc vứt màn ngâm dấm.
 
-### v0.5.6 · 稳定主动行为计时（历史版本）
+**Tính năng chủ động đi bộ của bản này đã bị ăn rìu từ bản v0.5.8.**
 
-- 主动互动间隔调整为约 12–20 秒，避免触发过密。
-- 清理散步步骤计时器引用，减少长时间运行时的计时器累积。
+### v0.5.5 · Đi bộ qua lại chầm chậm (Bản cũ)
 
-**该版本的主动移动已经在 v0.5.8 移除。**
+- Dựa dẫm vô cái vụ múa chân của con Nai Dan, cứ vắt 260 củ ms nó ếch 8 pixel.
+- Gần tới target rồi thì quay xe đi nhùi cái đường vừa dẫm.
+- Hết dạo thì đóng nguyên chỗ cũ, méo Save cái gốc tào lao.
+- Nút Setting Option chà lại rực sáng cho đỡ lòi mắt.
 
-### v0.5.5 · 慢速来回散步（历史版本）
+**Tính năng chủ động đi bộ của bản này đã bị ăn rìu từ bản v0.5.8.**
 
-- 参考奶蛋的分步散步方式，每约 260 毫秒移动约 8 像素。
-- 走到目标附近后再沿原路走回来。
-- 散步结束恢复到原位置，不保存自动移动位置。
-- 设置面板按钮改为更容易看清的高对比样式。
+### v0.5.4 · Ảnh động chạy bộ trái phải (Bản cũ)
 
-**该版本的主动移动已经在 v0.5.8 移除。**
+- Câu vô 2 set chạy bộ 8 khung quẩy qua trái phải.
+- Xách vịt lên đầu ẻm như cũ.
+- Lết xong thả lại điểm xuất, méo Save vào kho.
+- Khung chạy ập vô chung cái lưới Transparent, Trục tâm, Baseline chuẩn đế.
 
-### v0.5.4 · 左右跑步动画（历史版本）
+**Tính năng hoạt ảnh chạy bộ của bản này đã bị ăn rìu từ bản v0.5.8.**
 
-- 接入左右两套 8 帧跑步动画。
-- 保留头顶小黄鸭。
-- 自动移动结束后回到原位置，不保存自动移动位置。
-- 跑步帧统一透明画布、中心线和脚底基线。
+### v0.5.3 · Tương tác chủ động và Tự động di chuyển (Bản cũ)
 
-**该版本的跑步动画已经在 v0.5.8 移除。**
+- Ế mốc ra thì tự lấy trà húp, đọc cuốn, múc giấy, bó vịt vàng, xoay mình, dòm nhòm, hất tay.
+- Rảnh quá bứng cả cái mông tự xục 1 nhát trong mốc an toàn.
+- Dính đống Task, bị xách cổ, lôi sổ nháp thì cạch đéo thèm nhích.
 
-### v0.5.3 · 主动互动与自主移动（历史版本）
+**Tính năng chủ động di chuyển của bản này đã bị ăn rìu từ bản v0.5.8. Đống vẹo tương tác nhàn rỗi thì tha.**
 
-- 空闲时随机做喝茶、看书、折纸、抱小鸭、伸懒腰、探头和挥手。
-- 偶尔在安全范围内自己移动一小段。
-- 任务处理中、拖动中和打开小本子时不会主动移动。
+### v0.5.2 · Thêm nút dừng vào bong bóng nhiệm vụ
 
-**该版本的自主移动已经在 v0.5.8 移除。空闲动作仍保留。**
+- Lúc đẩy truyện với cày bảng, nếu Task cơ sở dữ liệu ngầm cho cắt, bong bóng nổ nút Dừng.
+- Nhấp mỏ vô là quăng luồng lệnh dẹp của cơ sở dữ liệu gốc.
+- Đéo có khả năng ngắt thì đéo mọc nút lụi (fake).
 
-### v0.5.2 · 任务气泡增加停止按钮
+### v0.5.1 · Nhấn giữ trên điện thoại để mở cuốn sổ nhỏ
 
-- 剧情推进或填表时，如果数据库原任务提供停止能力，小绘气泡显示停止按钮。
-- 点击后调用数据库原任务的停止流程。
-- 没有停止能力时不显示假按钮。
+- Trên mobile bói không ra cái Right-Click, thì đè mẹ nó 1.4s sổ nháp phọt lên.
+- Đục ngắn, ấn mù, lút hờ mút dãn, lôi cổ cắt mẹ nó ra rành mạch khỏi tạch thành bật Tab nháp.
 
-### v0.5.1 · 手机长按打开小本子
+### v0.5.0 · Khả năng tương thích Tavern bản cũ
 
-- 手机端没有右键时，可以长按约 1.4 秒打开小本子。
-- 短按、连点、长按小憩和拖动继续分开识别，避免拖动结束误打开页面。
+- Hướng vào họng súng của SillyTavern 1.14.0–1.19.0.
+- Lướt mượt với mấy đồ xưa đéo có Call-back Start, nốc luôn cả Call-back New-Life.
+- Buff cái Shield né trò khởi tạo trùng cho khỏi mọc nấm hai bé con.
+- Hình chưa Decode lòi thì éo múc con pet cũ của Cơ sở dữ liệu; Hình tạch thì ném cái đồ cổ ra.
+- Trét thêm đống Kill, Cleans, Back Cache Refresh của Trình duyệt vô luồng Hồi sinh.
 
-### v0.5.0 · 兼容旧版酒馆
+### v0.4.1 · Kéo dài thời gian chợp mắt và nối ảnh động
 
-- 目标兼容 SillyTavern 1.14.0–1.19.0。
-- 兼容旧版没有启动回调的加载方式，也兼容新版生命周期回调。
-- 增加重复初始化保护，避免回调重复时生成第二只桌宠。
-- 图片没有成功解码前不隐藏原数据库桌宠；图片失败时保留原显示。
-- 增加停用、清理和浏览器返回缓存时的恢复处理。
+- Ấn tầm nửa giây cho bé ngủ, nhả ra cho cày thêm 12 sọc ngủ khì.
+- Khì khì, hất tay, vỗ mỏ thì đéo cho mấy trò linh tinh khác ngắt.
+- Thó mấy chiêu xòe thế, nẩy người, thở chập chùng với nhịp điệu của Nai Dan ráp vào nhịp vung tay, nổ bong bóng, tụt dốc, bó vịt với ngủ ngày.
+- Bốc lên tụt xuống êm ái cái Trọng tâm (Pivot), bóp cổ cái phốt quay vòng mòng.
 
-### v0.4.1 · 延长小憩与动效衔接
+### v0.4.0 · Nhấp, liên tục nhấp và nhấn giữ tương tác
 
-- 长按约半秒进入小憩，松开后继续休息约 12 秒。
-- 小憩、挥手和连点动作播放时，不被普通休闲动作打断。
-- 参考奶蛋的起势、回弹、分层呼吸和动作独立节奏，调整挥手、完成、落地、抱鸭和小憩的时序。
-- 拎起和落地时平滑切换支点，减少突然转动。
+- 1 búa thì Hất tay, 2 búa nhồi nhẹ con vịt, 3 búa xúm lấy sổ trốn một tí, 6 nhát nổ chùm pháo hoa (Combination).
+- Đè sâu chui vào nấc Ngủ; Rút rê, quăng mẩu tin, Click thì dọn rành mạch đéo nhầm lộn cuối rê là búa phọt.
+- Cuốn nháp cạo mả đổi thành "Cuốn sổ nhỏ của Tiểu Erii", cạo sạch đuôi version lố lăng trên tít.
+- Menu Task còn giữ được cả quả Click chuột phải, mớ Icon Setting với xài Key nấp.
 
-### v0.4.0 · 点击、连点与长按互动
+### v0.3.1 · Giảm gánh nặng kéo, Dọn dẹp đồ cổ với múa khớp
 
-- 单击挥手，双击抱鸭轻摇，三连点抱本子躲一躲，六连点播放组合动作。
-- 长按进入小憩；拖动、任务状态和点击分别处理，不把拖动结束算成额外点击。
-- 小本子改名为“绘梨衣的小本子”，去掉页面标题里的版本号。
-- 任务页面保留右键、扩展设置和键盘入口。
+- Lúc kéo, Update mỗi toạ độ với ẻo người thôi, đéo moi họng đo Viewport Size hay nhả thêm chữ Task dỏm.
+- Nhả bay cục bóng chat với sổ nháp khỏi chân con ẻm, lướt êm méo mấp mô giật bọ xít.
+- Hệ Hô hấp chạy riêng con server; Quệt ảnh, nẩy bốc ẻm, rơi uỵch đít nhồi sụn mượt òm.
+- Trị mấy phốt vụn vặt: Bơm record, húp nước chè, oằn lưng, xách lủng lẳng, chạm sàn, thè lè tay, thò mặt ngơ (Bị lem nham rác).
+- Bắt phải xài trọn bộ 384x384 WebP cực trong; Dáng kẹp ẻm vẫn nốc giữ mớ mỏ con vịt vàng.
 
-### v0.3.1 · 拖动减负、清理素材与动作衔接
+### v0.3.0 · Kéo, Nhớ vị trí và Bộ sưu tập Full HD
 
-- 拖动时只更新位置和摆动，不再每一帧重复读取页面尺寸或重写任务文字。
-- 气泡和小本子与桌宠位置分开，减少拖动时的跳动和遮挡。
-- 呼吸动画独立运行；切图过渡、拎起摆动和坐稳缓动重新调整。
-- 修正写记录、喝茶、伸懒腰、被拎起、坐稳、招手、探头七张图的残片和裁边问题。
-- 统一使用 384×384 透明无损 WebP；抱鸭动作保留手里的鸭子。
+- Lấy sức rinh con chuột với vọc chạm màn, cản mép ranh giới, dí vào góc, lưu mộc toạ.
+- Bị dồn khung, xoay màn nhào ngang xấp ngửa hay lòi Bàn phím thì nó né cục Input.
+- Rớt 4 chiêu: Xách cổ, Chân tiếp địa, Hỏi mào, Dòm bám ngó; Cửa nháp thêm chọt dáng.
+- Nạp sẵn ảnh hông cần la hét, Decode mượt nẩy phím, vả rách nhịp trễ Database Sync cùi.
+- Cho vào đời dàn WebP khủng 384x384 (16 pic), đéo mượn cái đống Pixel 192 chích ép nén bẩn.
 
-### v0.3.0 · 拖动、位置保存与高清素材
+### v0.2.0 · Phiên bản Tiện ích độc lập
 
-- 支持鼠标和触摸拖动、边界限制、边缘吸附和位置保存。
-- 窗口变窄、横竖屏切换或键盘弹起时避开输入框。
-- 增加被拎起、坐稳、招呼和探头姿势，小本子可选择休闲动作。
-- 图片预加载、解码后切换和连续缓动与数据库轮询分开运行。
-- 使用 16 张 384×384 透明无损 WebP，不再放大旧的 192 像素压缩图。
+- Lôi đầu từ cái động "Đục khoét DB" rẽ thành cái mác SillyTavern Extension chảnh.
+- Hút chực dữ liệu DB qua cái ống nhòm (Observer) để nẩy bọt UI.
+- Éo Cop DB, đéo độ sọ DB Business, Khỏi xưng API lôi thôi.
+- Tọng Option Setting, Mốc toạ độ, Cửa sổ nháp với Action Task Basic mồi vô.
 
-### v0.2.0 · 独立扩展版
+### v0.1.1 · Bản thử nghiệm tương thích Windows (Đã bị vứt)
 
-- 从“替换数据库代码”的方案改为独立 SillyTavern 扩展。
-- 通过只读观察器读取数据库当前界面状态。
-- 不复制数据库、不修改数据库业务、不需要单独填写 API。
-- 增加独立设置、桌宠位置、小本子和基础任务反应。
+- Cục Adapter bẩn mót làm cho Windows ngày trước, dính rễ đống cắm sạc cùi bắp.
+- Rác rồi, đừng lấy râu ông nọ cắm cằm bà kia (Đéo phải cục trên Git).
 
-### v0.1.1 · Windows 适配实验版（已作废）
+### v0.1.0 · Bản thử nghiệm đầu tiên (Đã bị vứt)
 
-- 这是早期本地 Windows 适配包，依赖旧的接口接入方式。
-- 该版本不是现在 GitHub 独立扩展的安装包，不要继续使用。
+- Test mẹo cục Patch Interface gốc DB xưa rích.
+- Buộc đục chui đường tắt DB, sau thọt bay nhường ghế cho Standalone.
+- Repo với Note mớ này đéo chơi nữa.
 
-### v0.1.0 · 首个实验版（已作废）
+## Cài đặt và Khôi phục
 
-- 这是最初的数据库接口补丁实验版。
-- 需要修改数据库入口，后来已被独立扩展方案取代。
-- 当前仓库和当前安装说明不再使用这个版本。
+Trong phần cài đặt tiện ích của Tavern, bạn có thể điều chỉnh:
 
-## 设置与恢复
+- Pet màn hình hiện tại (Tiểu Erii / Zero / Nai Dan) và đường dẫn vào nhà pet màn hình;
+- Công tắc hiển thị pet màn hình;
+- Kích thước pet màn hình;
+- Hành động khi rảnh rỗi;
+- Ló đầu sát mép;
+- Câu chuyện chữa lành tự động (vẫn có thể tự bấm nghe chuyện);
+- Có ẩn Nai Dan và bong bóng thoại gốc đi không;
+- Nội dung nhiệm vụ bản tóm tắt / bản đầy đủ;
+- Nói chuyện khi làm nhiệm vụ;
+- Công tắc chỉ số nhu cầu (độ no, độ sạch);
+- Hiệu ứng: Tự động / Rực rỡ / Đơn giản / Tắt;
+- Bật/tắt "Quan sát trò chuyện" và Tần suất bình luận (Mỗi 1～20 tầng);
+- Số tầng văn bản đính kèm khi bảo trì (0～10 tầng);
+- Mở cuộc trò chuyện và cấu hình kết nối, danh xưng, quan hệ trong cửa sổ trò chuyện;
+- Đặt lại vị trí pet màn hình.
 
-在酒馆扩展设置中可以调整：
+Sau khi tắt hoặc gỡ tiện ích này, chỉ cần làm mới trang Tavern là nó sẽ hồi sinh lại cái pet màn hình gốc của cơ sở dữ liệu. Bản thân cơ sở dữ liệu đéo cần phải Rollback đi đâu cả, mà bạn cũng đừng có lôi cái đống thử nghiệm thời cổ đại mà rải lên cái mặt cổng của cơ sở dữ liệu nghen.
 
-- 当前桌宠（绘梨衣 / 零 / 奶蛋）和桌宠小屋入口；
-- 桌宠显示开关；
-- 桌宠大小；
-- 空闲动作；
-- 边缘探头；
-- 自动治愈故事（手动听故事仍可使用）；
-- 是否隐藏原奶蛋和原气泡；
-- 任务内容简略版 / 完整版；
-- 任务时说话；
-- 需求值（饱腹、清洁）开关；
-- 特效：自动 / 华丽 / 简约 / 关闭；
-- 旁观陪聊开关和评论频率（每 1～20 层）；
-- 检修时附上的正文层数（0～10 层）；
-- 打开聊天及在聊天窗口配置连接、称呼、关系；
-- 重置桌宠位置。
+## Phạm vi tương thích và Ranh giới xác nhận
 
-关闭或卸载本扩展后，刷新酒馆即可恢复原数据库桌宠显示。数据库本身不需要回滚，也不要用旧版实验包覆盖数据库入口。
+- Mục tiêu SillyTavern: **1.14.0–1.19.0**.
+- 1.14.0–1.16.0: Cổng nạp tự ôm cây đợi API setup của Tavern phọt nảy.
+- 1.17.0–1.19.0: Gắn vô Call-back vòng đời do Tavern bố thí, có chèn luôn khiên Single Instance.
+- Banh mắt dòm thêm chi tiết tại [`COMPATIBILITY.md`](COMPATIBILITY.md).
 
-## 兼容范围与验证边界
+Vụ Test file với cái trò cách ly check của Trình duyệt chỉ xì ra được mấy cái mã nguồn, list, nhái task với lợp khung bố cục ra sao thôi, méo thể thay bạn tự bê cái Tavern thật ra mà Test được. Bạn vẫn phải tự thọt tay test trên máy bạn mấy cái này:
 
-- 目标 SillyTavern：**1.14.0–1.19.0**。
-- 1.14.0–1.16.0：入口自行等待酒馆设置接口。
-- 1.17.0–1.19.0：使用酒馆提供的生命周期回调，并有单实例保护。
-- 兼容性细节见 [`COMPATIBILITY.md`](COMPATIBILITY.md)。
+- Sau khi Update trên GitHub, ngó coi cái Tavern của bạn đã nhai đúng cái Ver `0.9.0` chưa;
+- Cái cơ sở dữ liệu của bạn có còn ban phát cái State giao diện khớp rơ không;
+- Thúc cốt truyện thật, Nhồi bảng biểu thật, Dính Error, Trảm Task;
+- Lúc nạp Model thiệt, cái Danh sách sửa đổi mà màn hình Bảo trì nó rặn ra có xài được không (Trước lúc vọc là phải căng mắt đọc kỹ từng mục rồi hẵng vung tay tích chọn);
+- Cái cảm giác sờ nắn chọc chạm trên Mobile thiệt với lúc cái bàn phím ập lên.
 
-文件检查和隔离浏览器检查只能证明源码、清单、模拟任务和布局符合预期，不能代替你的真实酒馆验收。下面这些仍需要在你的环境确认：
+## Câu hỏi thường gặp
 
-- 更新 GitHub 后，酒馆是否实际加载到 `0.9.0`；
-- 你的数据库版本是否仍提供兼容的界面状态；
-- 真实剧情推进、填表、成功、错误和停止任务；
-- 用真实模型时，检修给出的修改单是否靠谱（写入前请逐条看清楚再勾选）；
-- 实体手机的触摸手感和键盘弹起效果。
+### Cập nhật xong Tiểu Erii vẫn tự chạy rong
 
-## 常见问题
+Check ngay coi danh sách tiện ích của Tavern nó đã nhảy đúng Ver mới nhất chưa. Nếu không trúng `0.9.0`, nghĩa là cái Tavern của bạn vẫn đang ôm đống rác rưởi cũ kỹ; nhấp update lại rồi ấn F5 nghen. Phiên bản `v0.5.7` đổ về trước mới chứa cái logic lăng quăng, chứ từ `v0.5.8` là vứt mẹ nó vụ lượn lờ rồi.
 
-### 更新后小绘还会自己移动
+### GitHub hiện bản mới, mà Tavern vẫn dở hơi thói cũ
 
-先在酒馆扩展列表确认版本。如果不是最新的 `0.9.0`，说明酒馆仍在运行旧包；重新点击更新并刷新。`v0.5.7` 及更早版本包含主动移动逻辑，`v0.5.8` 起已经回退。
+File trên GitHub mọc thêm bản mới méo có nghĩa là Tavern của bạn đã nuốt vào đầu. Cứ triển khai y nguyên xì: Update trên trình Extension -> Ấn Refresh Trang -> Đè cái `Ctrl+F5` vỡ phím cho tôi. Xong check lại coi Ver Extension trong Tavern có nhích chưa, đừng bói chữ trên tít cái cuốn sổ; tít nháp từ v0.4.0 là cạo sạch dấu ấn phiên bản rồi.
 
-### GitHub 显示新版本，但酒馆还是旧行为
+### Pet lù lù ra đó, mà lại réo chưa kết nối Cơ sở dữ liệu
 
-GitHub 文件已经更新不等于酒馆已经重新加载。请依次执行：扩展管理更新 → 刷新页面 → `Ctrl+F5`。再检查酒馆扩展列表中的版本，而不是只看小本子标题；小本子标题从 v0.4.0 起不显示版本号。
+Xác định coi cái cơ sở dữ liệu gốc đang gào mồm chạy chưa, có bị thằng nào dán cái đống nạp Experimental lụi thế vô không. Khuyên chân thành là cứ để kệ cha cái con Nai Dan gốc với bong bóng Task chạy ẩn trong nền, chỉ cần ấn che màn trong phần Option Extension là ngon. Cấu trúc UI DB mà nát, là bé Pet ngậm họng hoặc ném cảnh báo không khớp cọc, đéo thèm giả lụi cái trò "Connected".
 
-### 桌宠显示了，但提示没有连接数据库
+### Tại sao không đổi được sang Nai Dan
 
-确认原数据库仍在运行，并且没有被替换成本地实验入口。建议保留数据库原奶蛋和任务气泡运行，只在本扩展设置中隐藏它们。数据库界面结构改变时，桌宠会等待或提示不兼容，不会伪造“已连接”。
+Cái đống hình chóp của Nai Dan là nhặt từ mồm cơ sở dữ liệu đang thè ra chạy. Vui lòng coi lại xem cơ sở dữ liệu đã mở chưa, và cái đám Pet mặc định của nó có bị ngắt rốn không; Éo vớt được mớ hình thì trong Căn nhà sẽ thét lớn nguyên do, và pet màn hình sẽ lấy cái nhân vật gốc ra đứng bồi tiếp.
 
-### 为什么换不成奶蛋
+### Lỡ tay sửa sai trong lúc bảo trì thì sao
 
-奶蛋的图来自正在运行的数据库。请确认数据库已经启用，并且它自带的桌宠没有被关掉；读到图之前，小屋会写明原因，桌宠会继续由原来的角色陪你。
+Thì lấy cái nút **Hoàn tác** chọt dô ngay dưới danh sách sửa lỗi đó, bảng tính sẽ hồi quang phản chiếu về lúc chưa lụi. Load lại trang F5 vẫn cứ ok (Bản Backup ghim dưới Cache Browser); mà lỡ Browser nó hãm không cho ghi Local, hệ thống sẽ khều tay kêu gào "Tải cái bản Backup dằn túi đi". Trước khi bấm rút lại, nếu cái bảng tự nhiên nó lại trồi thêm khúc mới (do DB đè), thì hệ thống sẽ xọt mồm nói cho mầy nghe.
 
-### 检修改错了怎么办
+### Sao thằng Quan sát trò chuyện câm mồm quài thế
 
-在那张修改单下面点 **撤销**，表格会回到写入前的样子。页面刷新过也可以撤销（备份存在浏览器本地）；如果浏览器不让存，界面会提示，你可以先点 **下载备份**。撤销前如果表格又被数据库改过，会先提醒你。
+Xem kĩ coi cài đặt Tiện ích đã nẩy **Quan sát trò chuyện** lên chưa, mớ chat mới nứt ra từ lúc mở đã vỡ họng đúng cái chỉ số gáy bài (Comment Frequency) chưa; Mỗi lần quăng nùi bình luận phải rớt nhau 60 giây, DB mà mót điền bảng là ẻm nín thêm 1 phát rưỡi. Ngó vô setting Option **Quan sát & Bảo trì**, nó vạch rõ thời gian đợt hót gần nhất hoặc lỗi sập nguồn chưa phọt.
 
-### 旁观陪聊为什么一直没说话
+### Mobile không có Click Chuột phải, mở Cuốn sổ nhiệm vụ bằng niềm tin à
 
-确认扩展设置里已经打开 **旁观陪聊**，而且开启之后新出现的楼层够了评论频率的数；两次评论至少隔 60 秒，数据库正在填表时会先等一等。设置里 **陪聊与检修** 下面会显示上次评论的时间或没成功的原因。
+Nhấn tí là vỗ ve, dí cái 0.5s là ngáy khì, dặm sâu tầm 1.4s là banh cái Nháp ra liền; Hoặc rặn ra đường Setting Extension múc "Xem cuốn nháp nhiệm vụ" là có lối thoát.
 
-### 手机上没有右键，怎么打开任务本子
+## Tài nguyên & Cấp phép
 
-短按用于互动，按住约半秒进入小憩，继续按住约 1.4 秒打开小本子；也可以从酒馆扩展设置点击“查看任务小本子”。
+Kiểu dáng Tiểu Erii đúc theo cái nguồn [Cardwright 绘梨衣桌宠素材](https://github.com/1798547983tt/Cardwright/tree/359019715afc60813384964b023a09c6dd6ed326/assets/pets/erii). Đống hình múa may ImageGen phệt rồi tỉa tót dặm lại, bộ khung chỏm là nền rỗng vắt kiệt WebP, tới v0.7.0 chích cái đống hình đời sống giữ lằn ranh tàng hình của WebP nét băm. Đống tài sản Graphic là hàng Non-Official Đạo nhái fanmade của "Long Tộc", đè chiếu xài theo chữ ký & nguyên lý méo vì Lợi Nhuận của file [`assets/NOTICE.md`](assets/NOTICE.md); Rễ của mớ Code bợ quyền MIT License, MIT đéo đè vô đám Mĩ Thuật được.
 
-## 素材与许可
+Chùm hình của Zero do ImageGen đẻ theo 2 bảng tạo mẫu Pose, bơm bung bét qua cái Real-ESRGAN (Bơm dòng Anime) xong mới xắn khúc bằng con mã `tools/slice-pose-sheet.py`, Nhãn chữ ký với chứng chỉ ném tuốt tại [`assets/zero/NOTICE.md`](assets/zero/NOTICE.md). Mớ ảnh con Nai Dan của Database, tụi này chỉ húp vớt từ hình phọt đang ngốn, miễn Copy, đéo chôm chĩa phát tán.
 
-绘梨衣造型参考 [Cardwright 绘梨衣桌宠素材](https://github.com/1798547983tt/Cardwright/tree/359019715afc60813384964b023a09c6dd6ed326/assets/pets/erii)。动作图由 ImageGen 生成并作局部修正，原动作图为透明无损 WebP，v0.7.0 生活插图为保留透明通道的高质量压缩 WebP。美术素材是非官方《龙族》同人内容，按 [`assets/NOTICE.md`](assets/NOTICE.md) 中的署名和非商业条件使用；程序代码使用 MIT 许可，MIT 不覆盖美术素材。
-
-零的动作图由 ImageGen 按两张姿势表生成，经 Real-ESRGAN（动漫模型）放大后用 `tools/slice-pose-sheet.py` 切分，署名与许可见 [`assets/zero/NOTICE.md`](assets/zero/NOTICE.md)。奶蛋的图属于数据库，本扩展只在运行时读取已加载的图片，不复制、不分发。
-
-数据库参考：[AlbusKen/shujuku](https://github.com/AlbusKen/shujuku)。
+Nguồn Database xào nấu: [AlbusKen/shujuku](https://github.com/AlbusKen/shujuku).
