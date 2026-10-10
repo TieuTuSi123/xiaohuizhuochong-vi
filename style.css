@@ -15,7 +15,7 @@
   --pet-hand: "LXGW WenKai", "LXGW WenKai Screen", "霞鹜文楷", "KaiTi", "STKaiti", "Kaiti SC", "楷体", serif;
   --pet-body: "HarmonyOS Sans SC", "MiSans", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", sans-serif;
   --pet-serif: "Palatino Linotype", "Book Antiqua", Palatino, "Iowan Old Style", Georgia, serif;
-  --pet-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .3  0 0 0 0 .2  0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --pet-grain: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATCbrcAAAACHRSTlMAvH3+/n5+fv4+fn5+fvx8fH18fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHx8fHxrU95zAAAAlklEQVQ4y2NgQAX8DIxgxMQgyIAG+BnwA0YGRiYwA0yxgBmMGxkYGYAAMxMjmAEGQAaYwQQwgAEmRkYgA0yxgBmMGxkYGYAAMxMjmAEGQAaYwQQwgAEmRkYgA0yxgBmMGxkYGYAAMxMjmAEGQAaYwQQwgAEmRkYgA0yxgBmMGxkYGYAAMxMjmAEGQAaYwQQwgAEmRkYgA0yxAC0IAwB+4Bv8z3+6rAAAAABJRU5ErkJggg==");
   --pet-ease: cubic-bezier(.2, .8, .2, 1);
   --pet-spring: cubic-bezier(.34, 1.56, .64, 1);
 }
@@ -81,9 +81,9 @@
 .erii-companion__sprite {
   position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain;
   user-select: none; pointer-events: none; filter: none !important; image-rendering: auto;
-  opacity: 0; transition: opacity .05s ease-out;
+  opacity: 1; transition: opacity .05s ease-out;
 }
-.erii-companion__sprite[data-visible="true"] { opacity: 1; }
+/* .erii-companion__sprite[data-visible="true"] { opacity: 1; } */
 /* Hình ảnh của Nai Dan đến từ cơ sở dữ liệu, gần như lấp đầy khung hình: thu nhỏ lại một chút để gót chân bằng với hai cô gái; hình ló đầu xoay về cạnh tương ứng. */
 .erii-companion[data-character="naidan"] .erii-companion__sprite { transform: translateY(-2%) scale(.9); transform-origin: 50% 100%; }
 .erii-companion[data-character="naidan"][data-edge="bottom"] .erii-companion__sprite,
@@ -95,7 +95,7 @@
 .pet-icon { display: inline-grid; place-items: center; width: 1.15em; height: 1.15em; flex: 0 0 auto; line-height: 0; }
 .pet-icon svg { width: 100%; height: 100%; }
 .pet-grip { display: none; }
-.pet-meter { display: grid; grid-template-columns: auto auto 1fr 2.2em; align-items: center; gap: 6px; font-size: 11px; color: var(--pet-muted); }
+.pet-meter { display: grid; grid-template-columns: auto auto minmax(0, 1fr) 2.2em; align-items: center; gap: 6px; font-size: 11px; color: var(--pet-muted); }
 .pet-meter .pet-icon { color: var(--pet-accent); width: 15px; height: 15px; }
 .pet-meter__bar { position: relative; height: 7px; border-radius: 99px; background: color-mix(in srgb, var(--pet-line) 70%, transparent); overflow: hidden; box-shadow: inset 0 1px 1px rgba(0,0,0,.06); }
 .pet-meter__bar i { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: inherit;
@@ -117,21 +117,21 @@
 }
 
 :is(.erii-companion, .erii-life, .erii-house, .erii-chat) ::-webkit-scrollbar,
-:is(.erii-companion__notebook, .erii-life__scroll, .erii-house__scroll, .erii-chat__scroll)::-webkit-scrollbar {
+:is(.erii-companion__notebook, .erii-life__scroll, .erii-house__scroll, .erii-chat__scroll) ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 :is(.erii-companion, .erii-life, .erii-house, .erii-chat) ::-webkit-scrollbar-track,
-:is(.erii-companion__notebook, .erii-life__scroll, .erii-house__scroll, .erii-chat__scroll)::-webkit-scrollbar-track {
+:is(.erii-companion__notebook, .erii-life__scroll, .erii-house__scroll, .erii-chat__scroll) ::-webkit-scrollbar-track {
   background: transparent;
 }
 :is(.erii-companion, .erii-life, .erii-house, .erii-chat) ::-webkit-scrollbar-thumb,
-:is(.erii-companion__notebook, .erii-life__scroll, .erii-house__scroll, .erii-chat__scroll)::-webkit-scrollbar-thumb {
+:is(.erii-companion__notebook, .erii-life__scroll, .erii-house__scroll, .erii-chat__scroll) ::-webkit-scrollbar-thumb {
   background: color-mix(in srgb, var(--pet-muted) 40%, transparent);
   border-radius: 6px;
 }
 :is(.erii-companion, .erii-life, .erii-house, .erii-chat) ::-webkit-scrollbar-thumb:hover,
-:is(.erii-companion__notebook, .erii-life__scroll, .erii-house__scroll, .erii-chat__scroll)::-webkit-scrollbar-thumb:hover {
+:is(.erii-companion__notebook, .erii-life__scroll, .erii-house__scroll, .erii-chat__scroll) ::-webkit-scrollbar-thumb:hover {
   background: var(--pet-muted);
 }
 
@@ -405,7 +405,7 @@
 .erii-chat [data-kind="success"] { color: var(--pet-good); }
 .erii-chat__composer { flex: 0 0 auto; padding: 10px 12px 12px; border-top: 1px solid var(--pet-line); background: var(--pet-grain), var(--pet-paper-2); }
 .erii-chat__edit-bar { display: flex; gap: 8px; align-items: center; font-size: 10px; color: var(--pet-muted); padding: 0 0 7px; }
-.erii-chat__edit-bar span { flex: 1; }
+.erii-chat__edit-bar span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .erii-chat__edit-bar button { min-height: 27px; font-size: 10px; padding: 3px 7px; }
 .erii-chat textarea, .erii-chat input:not([type="checkbox"]), .erii-chat select {
   display: block; width: 100%; max-width: 100%; border: 1px solid var(--pet-line) !important; border-radius: 12px;
@@ -415,7 +415,7 @@
 .erii-chat textarea { resize: none; min-height: 48px; max-height: 110px; line-height: 1.5; }
 .erii-chat textarea::placeholder, .erii-chat input::placeholder { color: var(--pet-faint); opacity: 1; }
 .erii-chat__actions { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
-.erii-chat__actions span { flex: 1 1 auto; font-size: 10px; color: var(--pet-muted); }
+.erii-chat__actions span { flex: 1 1 auto; min-width: 0; font-size: 10px; color: var(--pet-muted); }
 .erii-chat .erii-chat__send { background: linear-gradient(180deg, var(--pet-accent-2), var(--pet-accent)) !important; border-color: var(--pet-accent-ink) !important; color: #fffaf6 !important; padding-right: 20px; padding-left: 20px; font-weight: 700; }
 .erii-chat .erii-chat__send:hover:not(:disabled) { background: var(--pet-accent-ink) !important; }
 .erii-chat__settings { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 4px 16px 16px; }
