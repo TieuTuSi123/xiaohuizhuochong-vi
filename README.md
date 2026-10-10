@@ -30,7 +30,7 @@ Phiên bản hiển thị trong danh sách tiện ích của Tavern là phiên b
 ## Cài đặt trực tiếp trong Tavern
 
 1. Mở phần **Tiện ích mở rộng** → **Cài đặt tiện ích mở rộng** ở thanh trên cùng của Tavern.
-2. Dán địa chỉ kho lưu trữ: `https://github.com/dzsks/xiaohuizhuochong`.
+2. Dán địa chỉ kho lưu trữ: `https://github.com/TieuTuSi123/xiaohuizhuochong-vi`.
 3. Sau khi cài đặt hoặc cập nhật xong, hãy làm mới trang Tavern.
 4. Trong danh sách tiện ích, xác nhận phiên bản của **Tiểu Erii · Pet màn hình cơ sở dữ liệu** là `0.9.0`.
 5. Nhấp chuột phải vào pet màn hình trên máy tính, hoặc nhấn giữ khoảng 1.4 giây trên điện thoại để mở cuốn sổ nhỏ; nếu thấy "Đã kết nối cơ sở dữ liệu" hoặc "Cơ sở dữ liệu đang xử lý nhiệm vụ", điều đó có nghĩa là đã tìm thấy nguồn dữ liệu của cơ sở dữ liệu.

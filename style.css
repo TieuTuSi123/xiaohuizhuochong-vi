@@ -105,6 +105,34 @@
 .pet-meter__value { font: italic 600 11px/1 var(--pet-serif); color: var(--pet-ink); text-align: right; font-variant-numeric: tabular-nums; }
 @keyframes pet-nudge { 0%, 86%, 100% { transform: none; } 90% { transform: rotate(-12deg); } 95% { transform: rotate(10deg); } }
 
+/* ---------- Thanh cuộn (Scrollbar) chung cho toàn bộ giao diện ---------- */
+.erii-companion ::-webkit-scrollbar,
+.erii-chat ::-webkit-scrollbar,
+.erii-life ::-webkit-scrollbar,
+.erii-house ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.erii-companion ::-webkit-scrollbar-track,
+.erii-chat ::-webkit-scrollbar-track,
+.erii-life ::-webkit-scrollbar-track,
+.erii-house ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.erii-companion ::-webkit-scrollbar-thumb,
+.erii-chat ::-webkit-scrollbar-thumb,
+.erii-life ::-webkit-scrollbar-thumb,
+.erii-house ::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--pet-muted) 40%, transparent);
+  border-radius: 6px;
+}
+.erii-companion ::-webkit-scrollbar-thumb:hover,
+.erii-chat ::-webkit-scrollbar-thumb:hover,
+.erii-life ::-webkit-scrollbar-thumb:hover,
+.erii-house ::-webkit-scrollbar-thumb:hover {
+  background: var(--pet-muted);
+}
+
 /* ---------- Cuốn sổ nhỏ ---------- */
 .erii-companion__notebook {
   position: fixed; width: var(--erii-page-width, 330px); max-height: var(--erii-page-height, 460px);
