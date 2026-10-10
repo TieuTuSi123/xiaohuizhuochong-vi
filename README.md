@@ -1,3 +1,5 @@
+Link Gốc: https://github.com/dzsks/xiaohuizhuochong
+
 # Tiểu Erii · Pet màn hình cơ sở dữ liệu
 
 Đây là một tiện ích mở rộng pet màn hình độc lập được cài đặt vào SillyTavern. Nó đọc trạng thái nhiệm vụ và thông báo kết quả đã được hiển thị bởi "Long Huyết Huyền Hoàng · Cơ sở dữ liệu", sau đó để pet màn hình phản ứng lại bằng hành động, tương tác nhấp chuột, bong bóng nhiệm vụ và lời thoại của riêng mình. Bạn có thể chuyển đổi pet màn hình giữa Tiểu Erii, Zero và Nai Dan, mỗi nhân vật có tính cách, lời thoại, hồ sơ nuôi dưỡng và lịch sử trò chuyện riêng. Bạn cũng có thể mở một cửa sổ độc lập để trò chuyện với pet màn hình bằng API hiện tại của Tavern hoặc API được cấu hình riêng.
