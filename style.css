@@ -163,7 +163,7 @@
 .erii-nb__avatar img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; transform: scale(1.5) translateY(12%); }
 .erii-companion[data-character="naidan"] .erii-nb__avatar img, .erii-nb[data-character="naidan"] .erii-nb__avatar img { transform: scale(1.12) translateY(6%); }
 .erii-nb__who { flex: 1 1 auto; min-width: 0; display: grid; gap: 1px; }
-.erii-nb__title { font: 600 17px/1.25 var(--pet-hand); color: var(--pet-accent-ink); letter-spacing: 1px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-break: break-word; }
+.erii-nb__title { font: 600 17px/1.25 var(--pet-hand); color: var(--pet-accent-ink); letter-spacing: 1px; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; word-break: break-word; }
 .erii-nb__subtitle { font-size: 10.5px; color: var(--pet-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .erii-nb__hearts, .erii-house__hearts { display: inline-flex; gap: 2px; color: var(--pet-line); }
 .erii-nb__hearts .pet-icon { width: 13px; height: 13px; }
