@@ -3,7 +3,7 @@ import { PROTOCOL } from './model.js';
 const clean = value => typeof value === 'string' ? value.slice(0, 600) : '';
 const tone = value => ['info', 'success', 'warning', 'error'].includes(value) ? value : 'info';
 
-// Read the existing renderer's props. Never invoke its handlers or alter its data.
+// Đọc props của renderer hiện có. Tuyệt đối không gọi các handler hoặc sửa đổi dữ liệu của nó.
 export function findComponent(root, name) {
   const queue = [root];
   const seen = new Set();
@@ -36,7 +36,7 @@ export function readDatabaseView(doc) {
   const current = props.task;
   const task = current && typeof current.id === 'string' ? {
     id: clean(current.id), feature: clean(current.feature), detail: typeof current.detail === 'string' ? current.detail : '',
-    kind: tone(current.kind), busy: current.busy === true, dismissible: current.dismissible === true, action: current.action && typeof current.action.run === 'function' ? { label: clean(current.action.label || '停止'), variant: current.action.variant === 'danger' ? 'danger' : 'default', run: current.action.run } : null,
+    kind: tone(current.kind), busy: current.busy === true, dismissible: current.dismissible === true, action: current.action && typeof current.action.run === 'function' ? { label: clean(current.action.label || 'Dừng'), variant: current.action.variant === 'danger' ? 'danger' : 'default', run: current.action.run } : null,
   } : null;
   const incoming = props.slide?.type === 'notice' ? props.slide.notice : null;
   const notice = incoming && typeof incoming.id === 'string' ? {
@@ -51,8 +51,8 @@ export function readDatabaseView(doc) {
   };
 }
 
-// 奶蛋的图：读数据库桌宠组件自己用的那份图片表（运行时内存里的地址），只读、不复制进仓库。
-// 读不到（数据库没运行、关了桌宠或结构变了）返回 null，调用方退回让数据库原桌宠出来。
+// Ảnh của Naidan: Đọc bảng hình ảnh do chính component pet màn hình cơ sở dữ liệu sử dụng (địa chỉ trong bộ nhớ runtime), chỉ đọc, không sao chép vào kho tài nguyên.
+// Khi không đọc được (cơ sở dữ liệu không chạy, đã tắt pet màn hình hoặc cấu trúc bị thay đổi) thì trả về null, bên gọi sẽ lùi về để pet màn hình gốc của cơ sở dữ liệu hiện ra.
 export function readDeskPetImages(doc) {
   try {
     const tree = doc.getElementById('acu-app-v2')?._vnode;
@@ -63,7 +63,7 @@ export function readDeskPetImages(doc) {
     const images = {};
     const usable = url => typeof url === 'string' && /^(data:image\/|blob:|https?:|\/)/.test(url);
     for (const [name, url] of Object.entries(table)) if (usable(url)) images[name] = url;
-    // 探头图不在姿势表里，由组件按当前样式算出（peekSrc）。
+    // Ảnh ló đầu không nằm trong bảng tư thế, do component tính toán theo kiểu dáng hiện tại (peekSrc).
     if (usable(pet.setupState.peekSrc)) images.peek = pet.setupState.peekSrc;
     return images.idle ? images : null;
   } catch { return null; }
@@ -83,20 +83,20 @@ export function createDatabaseObserver(host, { now = () => Date.now(), interval 
     if (!view.connected || !view.busy) observed.clear();
     if (view.task) observed.set(view.task.id, { task: view.task, seenAt: now() });
     for (const [id, record] of observed) if (now() - record.seenAt > 15000) observed.delete(id);
-    // Only report tasks actually observed in the database's carousel, not a made-up total.
+    // Chỉ báo cáo các nhiệm vụ thực sự quan sát được trong carousel của cơ sở dữ liệu, không tự bịa ra tổng số.
     const tasks = view.busy ? [...observed.values()].map(record => record.task).slice(-20) : view.task ? [view.task] : [];
     const next = { protocol: PROTOCOL, connected: view.connected, source: view.source,
       busy: view.busy, activityKnown: view.activityKnown, tasks,
       activeTaskId: view.busy && view.task?.busy ? view.task.id : '',
       notices: view.notice ? [view.notice] : [], silent: false };
     const key = JSON.stringify(next);
-    // JSON omits functions. A new native stop handler must still reach the UI.
+    // JSON bỏ qua các hàm. Một stop handler native mới vẫn phải được chuyển tới UI.
     const actionChanged = tasks.some((task, index) => task.action?.run !== snapshot.tasks[index]?.action?.run);
     if (key === signature && !actionChanged) return;
     signature = key;
     snapshot = { ...next, version: snapshot.version + 1 };
     for (const listener of subscribers) {
-      try { listener(snapshot); } catch { /* isolate the companion UI */ }
+      try { listener(snapshot); } catch { /* cô lập UI của pet đồng hành */ }
     }
   }
   sample();
@@ -107,10 +107,9 @@ export function createDatabaseObserver(host, { now = () => Date.now(), interval 
     subscribe(listener) {
       if (typeof listener !== 'function' || destroyed) return () => {};
       subscribers.add(listener);
-      try { listener(snapshot); } catch { /* isolate the companion UI */ }
+      try { listener(snapshot); } catch { /* cô lập UI của pet đồng hành */ }
       return () => subscribers.delete(listener);
     },
     destroy() { destroyed = true; host.clearInterval(timer); subscribers.clear(); observed.clear(); },
   };
 }
-

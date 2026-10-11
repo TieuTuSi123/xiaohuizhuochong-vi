@@ -1,27 +1,27 @@
-// 换装（皮肤）：用家里钱包里的金币或花票购买，按角色各自拥有和穿着。纯逻辑，保存交给调用方。
-// 约定：每个角色自带一套「默认装扮」，免费、永远拥有、不能卖掉；买过的皮肤不会消失，随时可以换回默认。
-// 以后加皮肤：在下面的 CATALOG 里加一条，currency 不写时仍使用金币，写 tickets 使用花票。
-// 把图放进 assets/skins/<皮肤 id>/，别的代码不用改。
+// Thay đổi trang phục (Skin): Mua bằng xu vàng hoặc vé hoa trong ví gia đình, sở hữu và mặc riêng theo từng nhân vật. Logic thuần túy, việc lưu trữ giao cho phía gọi hàm.
+// Quy ước: Mỗi nhân vật đều có sẵn một bộ "Trang phục mặc định", miễn phí, vĩnh viễn sở hữu, không thể bán; skin đã mua sẽ không biến mất, có thể đổi lại trang phục mặc định bất kỳ lúc nào.
+// Thêm skin sau này: Thêm một mục vào CATALOG bên dưới, khi không ghi currency thì mặc định dùng xu vàng, ghi tickets sẽ dùng vé hoa.
+// Đặt ảnh vào assets/skins/<id skin>/, code khác không cần sửa.
 export const DEFAULT_SKIN = 'default';
 export const SKIN_ID = /^[a-z][a-z0-9-]{0,39}$/;
 const MAX_OWNED = 200;
 
-// 皮肤条目的写法（示例，没有真正上架）：
+// Cách viết một mục skin (ví dụ minh họa, chưa lên kệ thực tế):
 // {
-//   id: 'erii-yukata',                        // 唯一 id：小写字母开头，只用小写字母、数字、连字符
-//   name: '夏日浴衣',                          // 界面上显示的名字
-//   description: '夏夜祭典穿的浴衣，手里多了一把团扇。',
-//   price: 120,                               // 金币；0 表示免费（仍要“买”一次才算拥有）
-//   characters: ['erii'],                     // 哪些角色可以穿；写 '*' 表示所有角色
-//   assets: {                                 // 只写有图的姿势，没写的姿势沿用角色原来的图
-//     base: 'assets/skins/erii-yukata/',      // 相对扩展根目录
+//   id: 'erii-yukata',                        // ID duy nhất: Bắt đầu bằng chữ thường, chỉ dùng chữ thường, số, dấu gạch nối
+//   name: 'Yukata Mùa Hè',                    // Tên hiển thị trên giao diện
+//   description: 'Bộ yukata mặc đi lễ hội đêm hè, trên tay cầm thêm một chiếc quạt tròn.',
+//   price: 120,                               // Xu vàng; 0 nghĩa là miễn phí (vẫn cần "mua" một lần để tính là sở hữu)
+//   characters: ['erii'],                     // Nhân vật nào có thể mặc; viết '*' để áp dụng cho mọi nhân vật
+//   assets: {                                 // Chỉ khai báo các tư thế có ảnh, tư thế không khai báo sẽ kế thừa ảnh gốc của nhân vật
+//     base: 'assets/skins/erii-yukata/',      // Đường dẫn tương đối từ thư mục gốc tiện ích
 //     poses: { idle: 'idle.webp', wave: 'wave.webp', 'edge-left': 'edge-left.webp', 'eat-pudding': 'eat-pudding.webp' },
 //   },
-//   theme: { colors: ['#6fb1d8', '#dff1fb', '#ffffff'] },   // 可选：覆盖粒子颜色；界面配色用 [data-skin="erii-yukata"] 写 CSS
+//   theme: { colors: ['#6fb1d8', '#dff1fb', '#ffffff'] },   // Tùy chọn: Ghi đè màu hạt hiệu ứng; phối màu giao diện dùng [data-skin="erii-yukata"] để viết CSS
 // }
 const CATALOG = [{
-  id: 'erii-purple-night', name: '月读命·紫夜礼裙',
-  description: '红发与黑紫礼裙，手丝、珍珠与花饰。打工攒金币，兑换花票后买下。',
+  id: 'erii-purple-night', name: 'Tsukuyomi · Lễ Phục Dạ Tím',
+  description: 'Mái tóc đỏ cùng bộ lễ phục tím đen, găng lụa mỏng, ngọc trai và hoa cài. Chăm chỉ làm thêm tích lũy xu vàng, đổi lấy vé hoa để sở hữu.',
   price: 10320, currency: 'tickets', characters: ['erii'],
   assets: { base: 'assets/skins/erii-purple-night/', poses: Object.fromEntries([
     'idle', 'received', 'writing', 'complete', 'error', 'tea', 'reading', 'origami', 'duck',
@@ -36,7 +36,7 @@ const integer = value => Math.min(1000000000, Math.max(0, Math.floor(Number(valu
 const validWho = who => typeof who === 'string' && /^[a-z][a-z0-9-]{0,19}$/.test(who);
 const validId = id => typeof id === 'string' && SKIN_ID.test(id) && id !== DEFAULT_SKIN;
 
-// 目录里的条目不合规时跳过并提示，不让一条写错的皮肤拖垮整个扩展。
+// Bỏ qua và cảnh báo nếu mục trong danh mục không hợp lệ, tránh để một skin viết sai làm lỗi toàn bộ tiện ích.
 export function validSkin(skin) {
   if (!skin || typeof skin !== 'object' || !validId(skin.id)) return false;
   if (typeof skin.name !== 'string' || !skin.name.trim()) return false;
@@ -62,10 +62,10 @@ export function normalizeCatalog(list, warn = () => {}) {
   return Object.freeze(result);
 }
 
-export const SKINS = normalizeCatalog(CATALOG, skin => console.warn('[数据库桌宠] 皮肤目录里有一条写法不对，已跳过：', skin));
+export const SKINS = normalizeCatalog(CATALOG, skin => console.warn('[Pet cơ sở dữ liệu] Danh mục trang phục có một mục cấu hình không hợp lệ, đã bỏ qua:', skin));
 
 export const fits = (skin, who) => Boolean(skin) && (skin.characters === '*' || skin.characters.includes(who));
-export const defaultEntry = () => ({ id: DEFAULT_SKIN, name: '默认装扮', description: '平时的样子。免费，随时可以换回来。', price: 0, currency: 'coins', characters: '*', assets: null, theme: null });
+export const defaultEntry = () => ({ id: DEFAULT_SKIN, name: 'Trang phục mặc định', description: 'Diện mạo thường ngày. Miễn phí, có thể đổi lại bất cứ lúc nào.', price: 0, currency: 'coins', characters: '*', assets: null, theme: null });
 
 export function normalizeSkins(saved = {}) {
   const owned = {}, equipped = {};
@@ -79,7 +79,7 @@ export function normalizeSkins(saved = {}) {
   return { schema: 2, owned, equipped, bought: integer(saved?.bought), spent: integer(saved?.spent), spentTickets: integer(saved?.spentTickets) };
 }
 
-// 买过的皮肤即使暂时不在目录里（比如退回旧版、或者维护者先下架了）也留在存档里，重新上架就能继续穿。
+// Skin đã mua dù tạm thời không còn trong danh mục (ví dụ về bản cũ hoặc người bảo trì tạm gỡ xuống) vẫn được lưu trong bộ nhớ, khi mở bán lại có thể tiếp tục mặc.
 export class SkinModel {
   constructor(saved, { persist = () => {}, catalog = SKINS } = {}) {
     this.state = normalizeSkins(saved); this.persist = persist; this.catalog = catalog;
@@ -89,7 +89,7 @@ export class SkinModel {
   available(who) { return this.catalog.filter(skin => fits(skin, who)); }
   ownedIds(who) { return this.state.owned[who] || []; }
   owns(who, id) { return id === DEFAULT_SKIN || this.ownedIds(who).includes(id); }
-  // 当前穿着的皮肤对象；默认装扮、或者穿着的皮肤已不在目录里时返回 null，调用方按默认处理。
+  // Đối tượng skin đang mặc; trả về null nếu là trang phục mặc định hoặc skin đang mặc không còn trong danh mục, phía gọi sẽ xử lý theo mặc định.
   equipped(who) {
     const id = this.state.equipped[who];
     if (!id || !this.owns(who, id)) return null;
@@ -97,7 +97,7 @@ export class SkinModel {
     return skin && fits(skin, who) ? skin : null;
   }
   equippedId(who) { return this.equipped(who)?.id || DEFAULT_SKIN; }
-  // 给界面用的目录：默认装扮永远排第一；affordable 表示买得起（已拥有的也算）。
+  // Danh mục phục vụ giao diện: Trang phục mặc định luôn xếp đầu tiên; affordable thể hiện đủ tiền mua (đã sở hữu cũng tính là thỏa mãn).
   list(who, { coins = 0, tickets = 0 } = {}) {
     const current = this.equippedId(who);
     return [defaultEntry(), ...this.available(who)].map(skin => {
@@ -106,7 +106,7 @@ export class SkinModel {
       return { id: skin.id, skin, price: skin.price, currency, balance, owned, equipped: skin.id === current, affordable: owned || balance >= skin.price };
     });
   }
-  // pay(price, skin) 负责真正扣钱并返回是否成功（例如 LifeModel.spend）；这里只管“能不能买”和记账。
+  // pay(price, skin) phụ trách trừ tiền thực tế và trả về trạng thái thành công (ví dụ LifeModel.spend); tại đây chỉ kiểm tra "có thể mua hay không" và ghi nhận giao dịch.
   buy(who, id, pay) {
     if (!validWho(who)) return { ok: false, reason: 'who' };
     const skin = this.find(id);
@@ -120,7 +120,7 @@ export class SkinModel {
     else this.state.spent = integer(this.state.spent + skin.price);
     this.save(); return { ok: true, skin };
   }
-  // 换上已拥有的皮肤；传 DEFAULT_SKIN 换回默认。没有变化时返回 false。
+  // Mặc skin đã sở hữu; truyền DEFAULT_SKIN để đổi về mặc định. Trả về false nếu không có thay đổi.
   equip(who, id) {
     if (!validWho(who)) return false;
     if (id === DEFAULT_SKIN) {

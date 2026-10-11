@@ -1,4 +1,4 @@
-// 窗口外形：电脑上是可拖动的浮窗；手机（可见宽度 < 640）上是从底部拉起的面板，按住顶部往下拉即可关闭。
+// Kiểu dáng cửa sổ: Trên máy tính là cửa sổ nổi có thể kéo thả; trên điện thoại (độ rộng hiển thị < 640) là bảng trượt từ đáy màn hình, nhấn giữ phần đỉnh rồi kéo xuống dưới là có thể đóng.
 export const MOBILE_WIDTH = 640;
 const INTERACTIVE = 'button, input, textarea, select, a, label, [role="tab"], [contenteditable="true"]';
 
@@ -69,7 +69,7 @@ export function createSheet(host, root, { grip = null, drag = [], desktop = null
   };
 }
 
-// 关闭前播放离场动画（减少动态效果时直接关闭）。
+// Phát hoạt ảnh kết thúc trước khi đóng (khi bật tùy chọn giảm chuyển động thì đóng trực tiếp).
 export function leave(host, root, done) {
   const reduced = host.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   if (reduced || root.hidden || typeof root.animate !== 'function') { done(); return; }

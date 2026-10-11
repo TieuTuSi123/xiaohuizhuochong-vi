@@ -1,19 +1,19 @@
-// Original miniature stories; entirely local, with no API calls or database writes.
+// Những mẩu chuyện ngắn nguyên tác; hoàn toàn xử lý cục bộ, không gọi API hay ghi vào cơ sở dữ liệu.
 export const IDLE_STORY_MS = 5 * 60 * 1000;
 export const STORY_READ_MS = 30000;
 export const stories = [
-  { title: '给晚归的人', text: '街角的面包店快关门了，老板却留下最后一盏灯。一个淋雨的人走进来，说今天什么也没做好。老板递给他一只温热的面包：“你把自己平安带回来了。”那个人捧着纸袋，慢慢走完了剩下的路。' },
-  { title: '小小的船', text: '一只纸船卡在水洼边，小女孩蹲下来，把旁边的落叶轻轻拨开。纸船只漂了很短的一段，她却看了很久。回家时，鞋尖湿了一点，口袋里多了一片很好看的叶子。今天也有值得带回去的东西。' },
-  { title: '留一把椅子', text: '小熊的茶摊每天都摆两把椅子，有时整天也没有客人。傍晚，小狐狸跑得满头是汗，在空椅子上坐下。小熊倒了一杯茶，谁也没急着说话。原来，一把空椅子也可以是在等一个人休息。' },
-  { title: '窗台的种子', text: '种子埋进花盆后，好几天都没有动静。小兔每天给它浇一点水，顺手擦干净窗台。某个早晨，两片小叶子终于顶开泥土。它们很小，小兔却把花盆转了个方向，让它们一起晒到太阳。' },
-  { title: '雨停以后', text: '雨下了整整一下午，小猫一直坐在屋檐下。雨停时，它没有立刻走，先看了看水洼里的天空。云从水面慢慢游过去。小猫伸了个懒腰，绕开水洼，回家吃晚饭。等一等，也不会错过所有东西。' },
-  { title: '不整齐的围巾', text: '奶奶第一次织围巾，边缘有些歪，还漏了一针。小鹿戴上后，把长出来的一截绕在脖子上，刚好挡住风。它跑到窗前给奶奶看。奶奶笑着拿起针：“下次我再织好一点。”这条也已经很暖了。' },
-  { title: '给月亮的信', text: '小女孩在信纸上写下今天的烦恼，折好放在窗边。夜里起了风，她找了颗圆圆的石子压住它。第二天，信还在，天已经亮了。她给自己煮了一个鸡蛋，决定先把早餐吃完，再去处理信里的事。' },
-  { title: '一口热汤', text: '小狗想做一桌丰盛的晚饭，最后只煮好了一锅汤。朋友们到了，挨着坐下，一人捧着一只碗。有人添了盐，有人掰开面包。汤很快喝光了，屋子里却一直热热闹闹。小狗又往锅里加了水。' },
-  { title: '慢一点的蜗牛', text: '蜗牛赶去看花，路上遇到一颗很圆的露珠，又遇到一片有香味的叶子。它到达时，花园已经安静下来。最里面的一朵小白花还开着。蜗牛停在旁边，带着一路收集来的好心情，陪它看了一会儿夕阳。' },
-  { title: '口袋里的糖', text: '小狐狸买了两颗糖，打算一颗送人，一颗留给自己。路上没有碰见熟人，它就把两颗都带回了家。第二天，小熊来借伞，小狐狸想起口袋里的糖。原来，没送出去的温柔，可以再等一个合适的时候。' },
-  { title: '修好的小碗', text: '小兔舍不得扔掉磕缺角的小碗，又怕用它盛汤会烫手。它把碗洗干净，放上泥土，种了一株薄荷。窗边渐渐多了一点绿色。后来每次泡茶，小兔都会摘一片叶子，放进另一只完好的杯子里。' },
-  { title: '一起数星星', text: '小熊数星星，数到十七颗就忘了前面的。小狐狸也数错了。它们干脆躺在草地上，指给对方看最亮的那一颗。夜风吹得有点凉，小熊把毯子往朋友那边拉了拉。今晚的星星，不数清楚也很好看。' },
+  { title: 'Dành cho người về muộn', text: 'Tiệm bánh mì ở góc phố sắp đóng cửa, nhưng ông chủ vẫn để lại ngọn đèn cuối cùng. Một người ướt đẫm nước mưa bước vào, nói rằng hôm nay chẳng làm được việc gì ra hồn. Ông chủ đưa cho anh một chiếc bánh mì ấm nóng: "Cậu đã đưa được bản thân bình an trở về rồi." Người đó ôm túi giấy, chậm rãi bước hết đoạn đường còn lại.' },
+  { title: 'Con thuyền bé nhỏ', text: 'Một chiếc thuyền giấy mắc kẹt bên mép vũng nước, cô bé ngồi xổm xuống, nhẹ nhàng gạt những chiếc lá rụng bên cạnh ra. Thuyền giấy chỉ trôi được một đoạn rất ngắn, nhưng cô bé đã ngắm nhìn thật lâu. Khi về nhà, mũi giày bị ướt một chút, trong túi áo có thêm một chiếc lá rất đẹp. Hôm nay cũng có điều đáng để mang về.' },
+  { title: 'Để lại một chiếc ghế', text: 'Quầy trà của gấu nhỏ ngày nào cũng đặt hai chiếc ghế, đôi khi cả ngày chẳng có lấy một vị khách. Chiều muộn, cáo nhỏ chạy mồ hôi nhễ nhại, ngồi xuống chiếc ghế trống. Gấu nhỏ rót một chén trà, chẳng ai vội vã lên tiếng. Hóa ra, một chiếc ghế trống cũng có thể là đang đợi một ai đó dừng chân nghỉ ngơi.' },
+  { title: 'Hạt mầm bên bậu cửa sổ', text: 'Hạt giống sau khi gieo vào chậu hoa, mấy ngày liền đều không có động tĩnh gì. Thỏ con mỗi ngày đều tưới cho nó một chút nước, tiện tay lau sạch bậu cửa sổ. Vào một buổi sáng nọ, hai chiếc lá non cuối cùng cũng đội đất nhô lên. Chúng rất nhỏ bé, nhưng thỏ con vẫn xoay chậu hoa sang hướng khác, để cả hai cùng được đón ánh mặt trời.' },
+  { title: 'Sau khi mưa tạnh', text: 'Mưa rơi suốt cả buổi chiều, mèo con cứ ngồi mãi dưới hiên nhà. Lúc mưa tạnh, nó không rời đi ngay mà ngắm nhìn bầu trời in bóng trong vũng nước trước. Mây chầm chậm trôi qua mặt nước. Mèo con vươn vai một cái, đi vòng qua vũng nước rồi về nhà ăn bữa tối. Chờ đợi một chút, cũng sẽ chẳng bỏ lỡ hết thảy mọi điều.' },
+  { title: 'Chiếc khăn choàng không đều mũi', text: 'Lần đầu tiên bà đan khăn choàng, mép khăn hơi lệch, lại còn sót mất một mũi. Hươu con quàng vào, đem phần thừa quấn quanh cổ, vừa vặn chắn gió. Nó chạy tới bên cửa sổ khoe với bà. Bà cười rồi cầm que đan lên: "Lần tới bà sẽ đan khéo hơn." Chiếc khăn này vốn đã rất ấm áp rồi.' },
+  { title: 'Lá thư gửi mặt trăng', text: 'Cô bé viết những phiền muộn hôm nay lên giấy thư, gấp lại rồi đặt bên khung cửa sổ. Đêm xuống nổi gió, cô bé tìm một viên sỏi tròn chặn lên trên. Ngày hôm sau, lá thư vẫn còn đó, trời đã sáng rõ. Cô bé luộc cho mình một quả trứng gà, quyết định ăn xong bữa sáng rồi mới đi xử lý những chuyện viết trong thư.' },
+  { title: 'Một ngụm canh nóng', text: 'Chó con muốn nấu một bàn ăn thịnh soạn, nhưng cuối cùng chỉ nấu xong một nồi canh. Bạn bè đến nơi, ngồi sát bên nhau, mỗi người bưng một chiếc bát. Người nêm thêm muối, người bẻ bánh mì. Nồi canh nhanh chóng cạn đáy, nhưng gian nhà lúc nào cũng rộn ràng ấm cúng. Chó con lại thêm nước vào nồi.' },
+  { title: 'Chú ốc sên chậm rãi', text: 'Ốc sên vội vã đi ngắm hoa, trên đường gặp một giọt sương rất tròn, lại gặp một chiếc lá ngát hương. Khi nó tới nơi, khu vườn đã trở nên yên ắng. Bông hoa trắng nhỏ nằm ở góc trong cùng vẫn còn hé nở. Ốc sên dừng lại bên cạnh, mang theo tâm trạng vui vẻ thu nhặt suốt dọc đường, cùng hoa ngắm hoàng hôn một lát.' },
+  { title: 'Viên kẹo trong túi áo', text: 'Cáo nhỏ mua hai viên kẹo, định bụng một viên đem tặng, một viên giữ lại cho mình. Trên đường không gặp người quen nào, nó mang cả hai viên về nhà. Hôm sau, gấu nhỏ tới mượn ô, cáo nhỏ sực nhớ tới viên kẹo trong túi áo. Hóa ra, sự dịu dàng chưa kịp trao đi, vẫn có thể chờ một dịp thích hợp hơn.' },
+  { title: 'Chiếc bát nhỏ được sửa lại', text: 'Thỏ con không nỡ vứt chiếc bát nhỏ bị mẻ góc, nhưng lại sợ dùng nó múc canh sẽ bỏng tay. Nó rửa sạch bát, cho đất vào rồi trồng một nhánh bạc hà. Bên khung cửa sổ dần có thêm chút sắc xanh. Về sau mỗi lần pha trà, thỏ con đều hái một chiếc lá, thả vào chiếc tách lành lặn còn lại.' },
+  { title: 'Cùng nhau đếm sao', text: 'Gấu nhỏ đếm sao, đếm tới ngôi thứ mười bảy thì quên mất những ngôi phía trước. Cáo nhỏ cũng đếm nhầm. Cả hai dứt khoát nằm xuống bãi cỏ, chỉ cho nhau xem ngôi sao sáng nhất. Gió đêm thổi qua hơi se lạnh, gấu nhỏ kéo tấm chăn về phía bạn một chút. Bầu trời sao đêm nay, chẳng cần đếm rõ ràng cũng đã rất đẹp.' },
 ];
 
 export class StoryCarousel {

@@ -1,8 +1,8 @@
 # Hướng dẫn tương thích phiên bản SillyTavern
 
-当前扩展版本：**v0.9.3**
+Phiên bản tiện ích mở rộng hiện tại: **v0.9.3**
 
-本文件说明的是 v0.9.3 的宿主兼容范围。它不代表早期 v0.1.x 实验包仍然兼容，也不代表未来数据库界面改动后无需适配。
+Tệp này giải thích phạm vi tương thích host của v0.9.3. Nó không có nghĩa là các gói thử nghiệm ban đầu v0.1.x vẫn còn tương thích, cũng không đồng nghĩa với việc sau này giao diện cơ sở dữ liệu thay đổi sẽ không cần điều chỉnh thích ứng.
 
 Tiện ích mở rộng này nhắm đến việc tương thích với SillyTavern 1.14.0–1.19.0.
 
@@ -26,7 +26,7 @@ Dưới đây là phạm vi kiểm tra thực tế của các phiên bản lịc
 
 Đây là các bản (instance) SillyTavern cách ly sạch sẽ, không phải bản `D:\Jiuguan` của bạn; nhiệm vụ cơ sở dữ liệu sử dụng cấu trúc dữ liệu Vue gốc được mô phỏng dưới dạng chỉ đọc. Việc cài đặt cập nhật thực tế, nhiệm vụ cơ sở dữ liệu thực tế và phần cứng điện thoại thật vẫn cần được xác nhận trên môi trường của bạn.
 
-Nếu plugin cơ sở dữ liệu thay đổi cấu trúc giao diện của `DeskPetLayer`, `DeskPet` hoặc `NoticeBubble` trong tương lai, Tiểu Hội sẽ báo rằng giao diện cơ sở dữ liệu hiện tại không tương thích, đồng thời giữ lại pet màn hình gốc của cơ sở dữ liệu.
+Nếu plugin cơ sở dữ liệu thay đổi cấu trúc giao diện của `DeskPetLayer`, `DeskPet` hoặc `NoticeBubble` trong tương lai, Tiểu Erii sẽ báo rằng giao diện cơ sở dữ liệu hiện tại không tương thích, đồng thời giữ lại pet màn hình gốc của cơ sở dữ liệu.
 
 ## Kiểm tra lịch sử v0.5.11
 
@@ -62,7 +62,6 @@ Báo cáo trong không gian làm việc: `小绘-v0.6.0-聊天-酒馆兼容检�
 
 Yêu cầu đến nhà cung cấp AI thực tế được chặn lại trong quá trình thử nghiệm dưới dạng phản hồi mô phỏng, chưa gửi yêu cầu trả phí. API người dùng thật, nhiệm vụ thực tế của cơ sở dữ liệu v1.2, cập nhật cài đặt `D:\Jiuguan` và bàn phím điện thoại thật vẫn chờ người dùng xác nhận. Chưa cài đặt hay đẩy lên kho lưu trữ của người dùng.
 
-
 ## Kiểm tra lịch sử v0.6.1
 
 Danh sách model sử dụng `POST /api/backends/chat-completions/status`, truyền vào `chat_completion_source: custom`, `custom_url` và `custom_include_headers`. Backend sẽ gọi tới `/models` theo địa chỉ cơ sở đã điền. Giữ lại việc điền thủ công tên model, nếu thất bại không làm thay đổi kết nối toàn cục, khóa trống cũng ghi đè rõ ràng khóa CUSTOM của máy chủ.
@@ -72,7 +71,6 @@ Tại chiều rộng 1280 / 375 / 320, đã kiểm tra việc chọn từ danh s
 Các bản SillyTavern cách ly chính thức từ 1.14.0–1.19.0 giữ nguyên điểm đầu vào danh sách model, chuyển tiếp backend thực, chuyển tiếp có khóa / không khóa và cài đặt toàn cục của SillyTavern, kết quả xem tại không gian làm việc `小绘-v0.6.1-模型列表-酒馆兼容检查.json`. Việc gửi trò chuyện / dừng / thử lại và hiển thị nhiệm vụ được kiểm tra hồi quy trên trang độc lập.
 
 Dịch vụ xem trước chỉ dùng cho quá trình phát triển trên máy cá nhân, không đưa vào gói cài đặt; tiện ích chính thức vẫn dùng backend nguyên bản của SillyTavern. Quyền API của tài khoản thật, tính khả dụng thực tế của model, chất lượng phản hồi và hành vi trên điện thoại thật vẫn chờ người dùng dùng thử.
-
 
 ## Kiểm tra lịch sử v0.6.2
 
@@ -85,7 +83,6 @@ Các tính năng gửi / dừng / thử lại hiện có, chế độ xem nhiệ
 Vòng kiểm tra này chưa gọi tới nhà cung cấp AI thật. Ghi nhớ thủ công và phong cách trò chuyện đã được xác nhận đi vào yêu cầu, nhưng chất lượng phản hồi thực tế, độ trễ và giới hạn của nhà cung cấp vẫn chờ quá trình dùng thử API thật; cập nhật cài đặt trong `D:\Jiuguan`, nhiệm vụ thật của cơ sở dữ liệu và bàn phím điện thoại thật chưa được xác minh. Kết quả thử nghiệm không thể thay thế việc nghiệm thu của người dùng.
 
 Sáu bản SillyTavern cách ly chính thức 1.14.0, 1.15.0, 1.16.0, 1.17.0, 1.18.0, 1.19.0 vòng này đều tải v0.6.2, kiểm tra yêu cầu native của kết nối hiện tại / kết nối riêng, dừng độc lập, giữ nguyên cấu hình trò chuyện gốc và API toàn cục, cùng với việc lưu vào thiết lập native và khôi phục sau khi làm mới đối với bản nháp, phong cách, ghi nhớ thủ công, thời gian tin nhắn. Báo cáo: `小绘-v0.6.2-聊天-酒馆兼容检查.json`. Kết quả từ AI đã được thay bằng phản hồi thử nghiệm phía trình duyệt; đây là bằng chứng hoạt động thực tế trên host, không phải bằng chứng chất lượng AI thực tế.
-
 
 ## Kiểm tra lịch sử v0.7.0
 
@@ -101,7 +98,6 @@ Mục tiêu vẫn là 1.14.0–1.19.0. Các kiểm tra chạy thực tế về p
 
 Vòng này dùng 2 bản (instance) cách ly chính thức là 1.14.0 và 1.19.0, tiến hành tải thực tế v0.7.0, và kiểm tra việc lưu cấu hình native, khôi phục làm mới trạng thái công việc, nhận lương, trừ tiền mua cơm, ăn xong, giữ nguyên các cấu hình API chính văn / toàn cục / trò chuyện độc lập. Báo cáo: `小绘-v0.7.0-生活-酒馆兼容检查.json`. Việc hoàn thành công việc và ăn cơm dùng hiệu chỉnh thời gian thử nghiệm; không sửa thời lượng sản xuất hay gọi tới nhà cung cấp AI thật.
 
-
 ## v0.7.1 Phạm vi sửa đổi và kiểm tra lần này
 
 Lần này chỉ gắn 4 loại ảnh ăn uống, ảnh thu nhỏ gọi món và đổi tên điểm đầu vào, không thêm API SillyTavern nào. Hoạt động tiếp tục được lưu theo kind/id/startedAt/uid gốc, hồ sơ món ăn của phiên bản cũ sẽ tự động lấy ảnh minh họa tương ứng từ cùng bảng danh mục, không cần phải đặt lại tiền vàng hay hoạt động.
@@ -112,20 +108,19 @@ Trình duyệt độc lập ở các kích thước 1280 / 375 / 320 đã kiểm
 
 Quy trình sinh hoạt ban đầu, bánh pudding 8 giây thực tế, khôi phục khi làm mới / ngoại tuyến, ưu tiên nhiệm vụ và dừng cơ sở dữ liệu gốc cũng vượt qua kiểm tra hồi quy trên 3 kích thước chiều rộng: `小绘-v0.7.1-生活界面检查.json`; quy tắc model xem tại `小绘-v0.7.1-生活逻辑检查.json`. Không phát ra yêu cầu API trò chuyện nào. Bốn hình ảnh trong suốt đã được xem qua, kích thước và dung lượng tài nguyên 768×768 xem tại `小绘-v0.7.1-四种吃饭插图检查.json`.
 
-
 ## v0.8.0 Phạm vi sửa đổi và kiểm tra lần này
 
 Lần này không có thêm phụ thuộc API nội bộ nào của SillyTavern, vẫn sử dụng `SillyTavern.getContext()`, `extensionSettings`, `saveSettingsDebounced` và phương thức yêu cầu trò chuyện gốc. Về phía cơ sở dữ liệu, có thêm 3 chỗ đọc hoặc gọi, tất cả đều có phương án dự phòng (fallback):
 
 - Mở cơ sở dữ liệu: Ưu tiên gọi các hàm public `AutoCardUpdaterAPI.openSettings()` / `openVisualizer()`, nếu không có thì lùi về thao tác nhấp vào điểm đầu vào cơ sở dữ liệu trong menu tiện ích mở rộng.
 - Nhảy đến bảng (panel) chỉ định: Gọi thao tác chuyển trang từ repository định tuyến giao diện cơ sở dữ liệu `acu-v2-router`, tương đương với việc nhấp vào thanh bên của nó, chỉ đổi trang; nếu không tìm thấy thì lùi về thao tác bấm nút thanh bên, nếu vẫn không được thì chỉ mở cơ sở dữ liệu và hiện thông báo.
-- Ảnh của Nai Dan: Chỉ đọc bảng hình ảnh hiện đã tải của thành phần (component) pet màn hình cơ sở dữ liệu (`POSE_IMAGES` và ảnh ló đầu `peekSrc`), không sao chép, không phân phối; khi không đọc được thì không thể chuyển sang Nai Dan, nếu đang ở Nai Dan rồi thì cho pet màn hình gốc của cơ sở dữ liệu hiện ra.
+- Ảnh của Naidan: Chỉ đọc bảng hình ảnh hiện đã tải của thành phần (component) pet màn hình cơ sở dữ liệu (`POSE_IMAGES` và ảnh ló đầu `peekSrc`), không sao chép, không phân phối; khi không đọc được thì không thể chuyển sang Naidan, nếu đang ở Naidan rồi thì cho pet màn hình gốc của cơ sở dữ liệu hiện ra.
 
 Kiểm tra:
 
-- Thử nghiệm đơn vị (Unit test) ở không gian làm việc gồm 32 hạng mục: Dữ liệu nhân vật và địa chỉ hình ảnh (địa chỉ của Tiểu Hội giống y hệt từng chữ với bản 0.7.1), chọn lọc lời thoại, quy tắc nuôi dưỡng (giới hạn hàng ngày, thăng cấp, suy giảm và đóng băng giá trị nhu cầu, ưu tiên tâm trạng, quy đổi cho người dùng cũ), lưu trữ sinh hoạt (đọc nguyên bản lưu của 0.7.1, nhiều nhân vật hoạt động cùng lúc, trợ cấp cơ bản, chỉ nhận lương một lần).
+- Thử nghiệm đơn vị (Unit test) ở không gian làm việc gồm 32 hạng mục: Dữ liệu nhân vật và địa chỉ hình ảnh (địa chỉ của Tiểu Erii giống y hệt từng chữ với bản 0.7.1), chọn lọc lời thoại, quy tắc nuôi dưỡng (giới hạn hàng ngày, thăng cấp, suy giảm và đóng băng giá trị nhu cầu, ưu tiên tâm trạng, quy đổi cho người dùng cũ), lưu trữ sinh hoạt (đọc nguyên bản lưu của 0.7.1, nhiều nhân vật hoạt động cùng lúc, trợ cấp cơ bản, chỉ nhận lương một lần).
 - Trang xem trước độc lập (mô phỏng ngữ cảnh SillyTavern và cấu trúc giao diện cơ sở dữ liệu, ở chiều rộng màn hình máy tính và 375): Chuyển đổi qua lại giữa 3 nhân vật, nhà của pet màn hình, sổ tay nhỏ, bong bóng lời thoại nhiệm vụ (nhận được / đang xử lý / thành công / lỗi / dừng), sổ tay sinh hoạt, trò chuyện (API mô phỏng cục bộ), thiết lập tiện ích, thông báo khi không có cơ sở dữ liệu.
-- Host thực tế: Trên chính máy người dùng chạy SillyTavern 1.17.0 mở thêm một bản (instance) cách ly (thư mục dữ liệu riêng, cổng riêng, không đụng đến dữ liệu SillyTavern người dùng đang dùng), dùng global script của trợ lý SillyTavern tải cơ sở dữ liệu naiv1.2.3. Xác nhận tiện ích tải v0.8.0, nhận diện được cơ sở dữ liệu và nhận thông báo thực, đọc được 24 ảnh và ảnh ló đầu của Nai Dan, chuyển sang Nai Dan và ló đầu sát viền màn hình, sử dụng nút tắt mở bảng "Thúc đẩy cốt truyện" và bảng biểu trực quan, chat qua backend SillyTavern chuyển tiếp đến API mô phỏng cục bộ và trả lời theo nhân thiết Nai Dan, hiển thị ngăn kéo phía dưới của sổ tay nhỏ ở chiều rộng điện thoại.
+- Host thực tế: Trên chính máy người dùng chạy SillyTavern 1.17.0 mở thêm một bản (instance) cách ly (thư mục dữ liệu riêng, cổng riêng, không đụng đến dữ liệu SillyTavern người dùng đang dùng), dùng global script của trợ lý SillyTavern tải cơ sở dữ liệu naiv1.2.3. Xác nhận tiện ích tải v0.8.0, nhận diện được cơ sở dữ liệu và nhận thông báo thực, đọc được 24 ảnh và ảnh ló đầu của Naidan, chuyển sang Naidan và ló đầu sát viền màn hình, sử dụng nút tắt mở bảng "Thúc đẩy cốt truyện" và bảng biểu trực quan, chat qua backend SillyTavern chuyển tiếp đến API mô phỏng cục bộ và trả lời theo nhân thiết Naidan, hiển thị ngăn kéo phía dưới của sổ tay nhỏ ở chiều rộng điện thoại.
 
 Chưa xác minh: Nhiệm vụ điền bảng / thúc đẩy cốt truyện do AI điều khiển trong host thật (cần trả phí để gọi, lời thoại nhiệm vụ và nút dừng chỉ được mô phỏng kiểm tra theo cấu trúc dữ liệu của giao diện cơ sở dữ liệu gốc trong phần xem trước); 1.14.0, 1.15.0, 1.16.0, 1.18.0, 1.19.0 không được kiểm tra lại trong vòng này; nhánh chính 1.2.4 của kho cơ sở dữ liệu không được kiểm tra (vì đang dùng 1.2.3); phản hồi xúc giác và khả năng nảy bàn phím trên điện thoại thật.
 
@@ -147,47 +142,46 @@ Kiểm tra:
 - Host thực tế: Cùng một bản (instance) cách ly SillyTavern 1.17.0 + cơ sở dữ liệu naiv1.2.3, API chính văn chính và trò chuyện của pet màn hình đều trỏ đến API mô phỏng cục bộ (không phát sinh yêu cầu trả phí thực tế). Trong cuộc trò chuyện có chứa tầng người dùng và tầng nhân vật: Prompt kiểm tra đã mang theo các bảng biểu thật, preset thật và 3 tầng chính văn gần nhất; sau khi tick chọn 3 mục thì sẽ ghi qua API public (sửa ô, thêm dòng, chuyển preset), sau khi làm mới trang dữ liệu vẫn còn đó; sau khi hoàn tác thì bảng biểu và preset được khôi phục, sau khi làm mới thì vẫn là trạng thái đã khôi phục. Khi đứng xem trò chuyện, sau khi `/send` và `/sendas` có thêm 2 tầng mới, sẽ có bình luận trong khoảng 5 giây, bong bóng hiển thị "Trả lời nó".
 - Hành vi tự thân của cơ sở dữ liệu quan sát được (không liên quan đến tiện ích này, đã tái hiện khi tiện ích này không thực hiện thao tác ghi): Chỉ trong các cuộc trò chuyện mới có lời chào mở đầu, khi cơ sở dữ liệu mở lại trò chuyện sẽ xóa các trường dữ liệu bảng trên tầng lời chào mở đầu rồi mới lưu lại, nội dung bảng biểu nằm lại trong runtime riêng của nó, và sẽ lưu trở lại trong lần ghi tiếp theo. Khuyến nghị thao tác kiểm tra nên dùng trong các cuộc trò chuyện đã có đối thoại.
 
-没有验证：真实模型给出的修改单质量；`manualUpdate` 在真实宿主里的完整重新填表（需要付费调用，只在预览里模拟）；数据库不同存储模式（JSON / SQLite）下的写入，本轮没有区分测试；1.14.0、1.15.0、1.16.0、1.18.0、1.19.0 和数据库 1.2.4；实体手机。
+Chưa xác minh: Chất lượng phiếu chỉnh sửa do mô hình thực tế đưa ra; việc `manualUpdate` điền lại toàn bộ bảng trong host thực tế (cần gọi có phí, chỉ được mô phỏng trong bản xem trước); việc ghi dữ liệu dưới các chế độ lưu trữ khác nhau của cơ sở dữ liệu (JSON / SQLite) chưa được kiểm thử phân tách trong vòng này; các phiên bản 1.14.0, 1.15.0, 1.16.0, 1.18.0, 1.19.0 và cơ sở dữ liệu 1.2.4; điện thoại thật.
 
-## v0.9.1 本次修改与检查范围
+## v0.9.1 Phạm vi sửa đổi và kiểm tra lần này
 
-本次只增加换装框架，没有新增酒馆或数据库接口依赖：仍用 `SillyTavern.getContext()`、`extensionSettings`、`saveSettingsDebounced`。皮肤的拥有和穿着状态写在本扩展设置的 `skins` 字段（`{ schema, owned, equipped, bought, spent }`，按角色分开）；买皮肤的钱走原来的生活钱包（`life.coins`），小账本记录用已有的 `spent` 类型，所以退回 v0.9.0 时 `skins` 字段被忽略、金币与账本照旧，不需要重置。图片地址仍用 `import.meta.url` 相对扩展根目录解析，皮肤图放在 `assets/skins/<皮肤 id>/`。
+Lần này chỉ bổ sung khung thay trang phục (skin), không thêm phụ thuộc mới vào API của SillyTavern hay cơ sở dữ liệu: vẫn sử dụng `SillyTavern.getContext()`, `extensionSettings`, `saveSettingsDebounced`. Trạng thái sở hữu và đang mặc của skin được ghi vào trường `skins` trong cài đặt của tiện ích này (`{ schema, owned, equipped, bought, spent }`, tách riêng theo từng nhân vật); tiền mua skin đi qua ví sinh hoạt ban đầu (`life.coins`), bản ghi sổ tay nhỏ sử dụng loại `spent` sẵn có, do đó khi hạ cấp về v0.9.0 thì trường `skins` sẽ bị bỏ qua, tiền vàng và sổ tay vẫn giữ nguyên như cũ mà không cần phải đặt lại. Đường dẫn hình ảnh vẫn dùng `import.meta.url` để phân giải tương đối từ thư mục gốc của tiện ích, ảnh skin được đặt trong `assets/skins/<id skin>/`.
 
-检查：
+Kiểm tra:
 
-- Node 22 下对改动过的模块逐个做语法检查，另有 7 组纯逻辑检查：空目录时只有默认装扮；目录条目校验（id 格式、价格、角色范围、重复、写错跳过）；买（余额不足不扣、成功记账、重复购买拒绝、角色专属皮肤别人买不了、标“所有角色”的皮肤谁都能买）；换上 / 换回默认与“没有变化返回 false”；存档清洗（脏数据、下架皮肤保留、穿着下架皮肤时按默认显示）；皮肤只覆盖有图的姿势、主题部分覆盖；`LifeModel.spend` 余额不足不扣。
-- 无头 Chromium（1280 和 375 两种宽度）加载真实 `index.js`、模拟酒馆上下文：扩展版本 0.9.1；生活手帐四个页签，换装页默认装扮卡片“使用中”且按钮禁用，空目录提示文案；注入两条测试皮肤后走完整流程——价格与“还差多少”提示、买下后钱包从 130 变 10、小账本出现“花 120 金币买了皮肤「夏日浴衣」”、设置里写入 `skins.owned`；换上后桌宠和生活手帐的 `data-skin`、浮动桌宠图、手帐插图都切到皮肤图，台词气泡出现，`skins.equipped` 写入；换回默认后图和属性恢复；切到零只看到默认装扮和标“所有角色”的那条；桌宠小屋的“给她换装”按钮打开该角色的换装页；销毁后没有残留节点。控制台只有无头环境软件 WebGL 的性能警告（来自小屋流光，与本次改动无关）。
+- Kiểm tra cú pháp từng module đã chỉnh sửa trên Node 22, cùng với 7 nhóm kiểm tra thuần logic: Khi thư mục trống chỉ hiển thị trang phục mặc định; xác thực các mục trong danh mục (định dạng id, giá cả, phạm vi nhân vật, trùng lặp, bỏ qua mục bị lỗi chính tả); mua (số dư không đủ thì không trừ, ghi sổ thành công, từ chối mua trùng lặp, skin độc quyền thì người khác không mua được, skin đánh dấu "Tất cả nhân vật" thì ai cũng mua được); mặc vào / đổi về mặc định cùng với điều kiện "trả về false khi không có thay đổi"; làm sạch dữ liệu lưu (dữ liệu rác, giữ lại skin đã gỡ khỏi kệ, hiển thị theo mặc định khi đang mặc skin đã gỡ); skin chỉ ghi đè lên các tư thế có ảnh, ghi đè một phần chủ đề giao diện; `LifeModel.spend` không trừ tiền khi số dư không đủ.
+- Trình duyệt Chromium không đầu (headless) ở cả hai độ rộng 1280 và 375 tải tệp `index.js` thực tế, mô phỏng ngữ cảnh SillyTavern: Tiện ích mở rộng phiên bản 0.9.1; sổ tay sinh hoạt có 4 tab, thẻ trang phục mặc định ở tab thay đồ hiển thị "Đang sử dụng" và nút bị vô hiệu hóa, hiển thị văn bản nhắc nhở khi danh mục trống; chèn 2 skin thử nghiệm rồi chạy toàn bộ quy trình — hiển thị giá và lời nhắc "Còn thiếu bao nhiêu", sau khi mua ví đổi từ 130 thành 10, sổ tay nhỏ xuất hiện dòng "Đã tiêu 120 tiền vàng mua skin「Yukata Mùa Hè」", ghi `skins.owned` vào cài đặt; sau khi mặc vào, thuộc tính `data-skin` của pet màn hình và sổ tay sinh hoạt, ảnh pet màn hình trôi nổi, ảnh minh họa sổ tay đều chuyển sang ảnh của skin, bong bóng lời thoại xuất hiện, ghi `skins.equipped`; sau khi đổi về mặc định thì ảnh và các thuộc tính được khôi phục; chuyển sang Zero chỉ nhìn thấy trang phục mặc định và trang phục đánh dấu "Tất cả nhân vật"; nút "Thay đồ cho cô ấy" trong phòng nhỏ của pet màn hình mở đúng trang thay đồ của nhân vật đó; không còn node DOM rác sau khi hủy (destroy). Bảng điều khiển console chỉ ghi nhận cảnh báo hiệu năng WebGL phần mềm của môi trường không đầu (từ hiệu ứng luồng sáng của phòng nhỏ, không liên quan đến thay đổi lần này).
 
-没有验证：真实酒馆宿主（1.14.0–1.19.0 本轮都没有加载）、真实数据库、实体手机；目录里还没有真正的皮肤，所以带完整素材的皮肤（含探头、打工、吃饭姿势）的实际显示效果未实测。
+Chưa xác minh: Host SillyTavern thực tế (vòng này không tải trên bất kỳ bản nào từ 1.14.0–1.19.0), cơ sở dữ liệu thực tế, điện thoại thật; trong danh mục chưa có skin thực sự hoàn chỉnh nên hiệu ứng hiển thị thực tế của skin có đủ asset (gồm tư thế ló đầu, làm việc, ăn uống) chưa được kiểm thử thực tế.
 
-## v0.9.2 修复与本次检查范围
+## v0.9.2 Bản vá lỗi và phạm vi kiểm tra lần này
 
-目标仍为 SillyTavern 1.14.0–1.19.0。使用既有的聊天标识、CHAT_CHANGED 事件、设置与 AbortController，没有新增酒馆内部模块或依赖。
+Mục tiêu vẫn là SillyTavern 1.14.0–1.19.0. Tiếp tục sử dụng định danh cuộc trò chuyện hiện có, sự kiện CHAT_CHANGED, hệ thống cài đặt và AbortController, không thêm module nội bộ hay phụ thuộc mới của SillyTavern.
 
-修复：检修请求固定资料快照，聊天切换使旧请求失效；备份等待后和逐条写入前复查归属/忙状态，撤销核对备份聊天；删行核对完整行和表头，切预设核对原预设；需求值关闭时正确结算；忙时禁止普通/强制撤销；旁观评论关闭或切聊天后丢弃晚响应。
+Khắc phục: Yêu cầu kiểm tu cố định ảnh chụp nhanh dữ liệu (snapshot), chuyển đổi cuộc trò chuyện sẽ vô hiệu hóa yêu cầu cũ; kiểm tra lại quyền sở hữu / trạng thái bận sau khi chờ sao lưu và trước khi ghi từng mục, hoàn tác đối chiếu đúng cuộc trò chuyện đã sao lưu; xóa dòng đối chiếu toàn bộ dòng và tiêu đề bảng, đổi preset đối chiếu preset gốc; quyết toán chính xác khi các giá trị nhu cầu bị tắt; cấm hoàn tác thông thường / cưỡng chế khi đang bận; loại bỏ phản hồi trễ của bình luận quan sát sau khi đóng hoặc chuyển đổi cuộc trò chuyện.
 
-本轮证据：
+Bằng chứng vòng này:
 
-- Node 下 25 组纯逻辑检查：聊天切换、等待备份、批次中断、并发拒绝、来源替换、备份归属、正常应用/撤销、原值冲突、长行末尾变更、旧删行单拒绝、需求值冻结/开启/重启，以及生活钱包/活动、换装存档、故事换篇、模型列表与消息参数等既有行为。
-- Edge 隔离测试页加载实际扩展模块，15 组场景：请求切聊天及切回、行重排与原值变化、忙时撤销/强制撤销、关陪聊后晚响应（包括忽略取消信号）、关后重开、切聊天、正常评论与普通聊天相互独立、设置开关的实际执行顺序；拖动、原地 7 秒坐标保持、原任务停止；1280/375/320 宽度下右键开关、触摸长按、浮窗边界、历史上下文、清理。页面错误为 0。
-- 29 个 JavaScript 语法检查、扩展清单检查通过；53 张 WebP 可解码且含透明度，54 个本地姿势绑定存在。素材字节没有改动，没有逐张重新做人体/抠图审查。
+- 25 nhóm kiểm tra thuần logic trên Node: Chuyển đổi cuộc trò chuyện, chờ sao lưu, ngắt quãng hàng loạt, từ chối khi đồng thời xử lý, thay thế nguồn, quyền sở hữu bản sao lưu, áp dụng / hoàn tác bình thường, xung đột giá trị gốc, thay đổi ở cuối dòng dài, từ chối phiếu xóa dòng cũ, đóng băng / kích hoạt / khởi động lại giá trị nhu cầu, cũng như các hành vi sẵn có như ví / hoạt động sinh hoạt, dữ liệu lưu thay trang phục, đổi câu chuyện, danh sách model và tham số tin nhắn.
+- Trang thử nghiệm cách ly trên Edge tải các module tiện ích mở rộng thực tế, kiểm tra 15 kịch bản: Yêu cầu chuyển đổi cuộc trò chuyện và chuyển ngược lại, sắp xếp lại dòng và biến động giá trị gốc, hoàn tác / hoàn tác cưỡng chế khi bận, phản hồi trễ sau khi tắt tính năng bầu bạn (bao gồm cả việc bỏ qua tín hiệu hủy bỏ), mở lại sau khi đóng, chuyển cuộc trò chuyện, bình luận bình thường và trò chuyện thông thường độc lập với nhau, thứ tự thực thi thực tế của các công tắc cài đặt; kéo thả, giữ nguyên tọa độ 7 giây tại chỗ, dừng nhiệm vụ gốc; bật tắt chuột phải, nhấn giữ cảm ứng, biên giới cửa sổ nổi, ngữ cảnh lịch sử, dọn dẹp ở các độ rộng 1280 / 375 / 320. Số lỗi trang bằng 0.
+- Vượt qua 29 bài kiểm tra cú pháp JavaScript và kiểm tra tệp kê khai tiện ích mở rộng; 53 ảnh WebP giải mã được và giữ nguyên độ trong suốt, 54 liên kết tư thế cục bộ tồn tại bình thường. Dung lượng byte của asset không bị thay đổi, không rà soát lại giải phẫu nhân vật hay tách nền cho từng bức ảnh.
 
-未验证：真实 SillyTavern 1.14.0–1.19.0 本轮未重测，真实数据库公开接口内部等待与 JSON/SQLite 持久保存、真实 AI 修改单质量、付费填表、实体手机。前面的真实宿主记录均是对应旧版的历史证据。服务在公开方法调用之前及调用之间复查，无法中断或回滚已由数据库方法内部开始的操作；不声称整批修改是一个不可分割的事务。
+Chưa xác minh: Chưa kiểm tra lại trên SillyTavern 1.14.0–1.19.0 thực tế trong vòng này, cơ chế chờ bên trong các giao diện công khai của cơ sở dữ liệu thực tế và việc lưu trữ vĩnh viễn trên JSON / SQLite, chất lượng phiếu chỉnh sửa của AI thực tế, tác vụ điền bảng trả phí, điện thoại thật. Các bản ghi host thực tế trước đây đều là bằng chứng lịch sử tương ứng của các phiên bản cũ. Dịch vụ thực hiện kiểm tra lại trước và giữa các lần gọi phương thức public, không thể ngắt quãng hoặc khôi phục lại các thao tác đã được khởi chạy bên trong phương thức cơ sở dữ liệu; không tuyên bố toàn bộ đợt sửa đổi là một transaction không thể phân tách.
 
-旧版删行修改单缺原行字段时会拒绝应用并提示重新生成；已有生活/养成/换装/聊天存档继续读取。未推送 GitHub，未修改用户 D:\Jiuguan 安装，未由自动化代替用户验收。
+Phiếu sửa đổi xóa dòng của phiên bản cũ khi thiếu các trường của dòng gốc sẽ từ chối áp dụng và nhắc tạo lại; dữ liệu đã lưu về sinh hoạt / nuôi dưỡng / trang phục / trò chuyện tiếp tục được đọc bình thường. Chưa đẩy lên GitHub, chưa chỉnh sửa bản cài đặt `D:\Jiuguan` của người dùng, không để quá trình tự động hóa thay thế việc nghiệm thu của người dùng.
 
+## v0.9.3 Trang phục và vé hoa: Phạm vi kiểm tra lần này
 
-## v0.9.3 皮肤与花票：本次检查范围
+Mục tiêu vẫn là SillyTavern 1.14.0–1.19.0. Vòng này tiếp tục kế thừa `extensionSettings`, `saveSettingsDebounced` cùng cơ chế phân giải hình ảnh, cửa sổ và tương tác sẵn có, không bổ sung thêm API của host hay phụ thuộc từ bên thứ ba.
 
-目标仍为 SillyTavern 1.14.0–1.19.0。本轮沿用 `extensionSettings`、`saveSettingsDebounced` 与既有图片解析、窗口和互动机制，没有新增宿主 API 或第三方依赖。
+Di chuyển dữ liệu lưu về trước: Các bản ghi tiền vàng gốc, công việc / ăn uống, nhật ký và quyền sở hữu trang phục tiếp tục được đọc bình thường. `life.schema=3` bổ sung 3 trường vé hoa, `skins.schema=2` bổ sung chi tiêu vé hoa; các trường mới trong dữ liệu lưu cũ mặc định mang giá trị 0. Phiên bản cũ không nhận diện vé hoa, nếu quay về phiên bản cũ rồi lưu lại có thể làm mất các trường mới và nhật ký mới này, cần sao lưu trước khi thực hiện.
 
-存档向前迁移：原金币、工作/吃饭、日记和服装拥有记录继续读取。`life.schema=3` 新增花票三字段，`skins.schema=2` 新增花票支出；旧存档新字段为 0。旧版不认识花票，退回旧版再保存可能丢掉这些新字段和新日志，应先备份。
+Bằng chứng vòng này:
 
-本轮证据：
+- 9 nhóm kiểm tra mô hình thay trang phục: Giá cả / tỷ lệ quy đổi, trạng thái ban đầu chưa sở hữu, di chuyển dữ liệu lưu cũ, bảo vệ khi không đủ số dư / số lượng không hợp lệ / tràn số, mua trùng lặp, mặc vào và khôi phục, trang phục tiền vàng gốc, tương thích công việc / thức ăn, ánh xạ 27 động tác.
+- Edge tải các module chính thức, kiểm tra 10 nhóm kịch bản thay trang phục: Nhấp chuột thực tế để quy đổi / mua / mặc, điền số không trừ tiền, quy đổi từng phần, số vé hoa còn lại, làm mới để lưu, cách ly giữa các nhân vật, giải mã lần lượt 27 hình ảnh, ảnh minh họa tiền lương làm việc và 4 bữa ăn, không tràn màn hình theo chiều ngang ở độ rộng 1280 / 375 / 320, dọn dẹp tài nguyên, kéo thả khi mặc trang phục mới và dừng cơ sở dữ liệu gốc. Lỗi trang và thiếu ảnh đều bằng 0.
+- 25 nhóm kiểm tra mô hình và 15 nhóm kiểm tra hồi quy trình duyệt hiện có được kiểm tra lại trên mã nguồn vòng này, bao phủ 6 hạng mục sửa đổi của v0.9.2, nhấn giữ trên điện thoại, nhấp chuột phải trên máy tính, giữ nguyên tọa độ 7 giây tại chỗ, dừng nhiệm vụ và dọn dẹp cửa sổ. API mô phỏng và cơ sở dữ liệu mô phỏng, không đại diện cho các lệnh gọi giao diện thực tế.
+- Kiểm tra cú pháp JavaScript, tệp kê khai tiện ích mở rộng, danh mục tệp đa phương tiện của trang phục / mã băm, kích thước và độ trong suốt của 27 ảnh WebP mới, bảo toàn nguyên vẹn dung lượng byte của 53 ảnh WebP cũ và kiểm tra độ khớp giữa tệp nén với tệp nguồn. Ảnh mới có kích thước 960×960, tổng dung lượng 6.766.248 byte; 8 động tác thường dùng được tải trước (preload), các ảnh còn lại tải theo nhu cầu (on-demand).
 
-- 9 组换装模型检查：价格/兑换率、初始未拥有、旧存档迁移、余额不足/非法数量/溢出保护、重复购买、穿着和恢复、原金币皮肤、工作/食物兼容、27 动作映射。
-- Edge 加载正式模块，10 组换装场景：实际点击兑换/购买/穿着、填入不扣款、部分兑换、剩余花票、刷新保存、角色隔离、27 图逐一解码、工作工资和四餐配图、1280/375/320 无横向溢出、清理、穿新衣拖动和数据库原停止。页面错误和缺图均为 0。
-- 既有 25 组模型与 15 组浏览器回归在本轮源码复测，覆盖 v0.9.2 六项修复、手机长按、电脑右键、7 秒原地坐标保持、任务停止和窗口清理。模拟 API 与模拟数据库，不代表真实接口调用。
-- JavaScript 语法、扩展清单、皮肤媒体清单/哈希、27 新 WebP 的尺寸与透明度、旧 53 张 WebP 字节保留及压缩包与源文件匹配检查。新图片 960×960，合计 6766248 字节；常用 8 动作预加载，其余按需。
-
-未验证：本轮没有在真实 SillyTavern 1.14.0–1.19.0 逐版加载，也没有更新用户 D:\Jiuguan、连接真实数据库或 API、测试实体手机、跨设备并发钱包或私密模式持久存储。前述宿主测试保留为对应版本的历史证据。当前预览的钱包是独立的测试数据，正式扩展不会赠送测试余额。GitHub 未推送，安装与用户验收尚未完成。
+Chưa xác minh: Vòng này chưa tải từng bản trên SillyTavern 1.14.0–1.19.0 thực tế, cũng chưa cập nhật thư mục `D:\Jiuguan` của người dùng, chưa kết nối cơ sở dữ liệu hoặc API thật, chưa kiểm tra điện thoại thật, ví tiền xử lý đồng thời trên nhiều thiết bị hay lưu trữ bền vững ở chế độ ẩn danh. Các thử nghiệm host nêu trên được giữ lại làm bằng chứng lịch sử cho phiên bản tương ứng. Ví tiền trong bản xem trước hiện tại là dữ liệu thử nghiệm độc lập, tiện ích mở rộng chính thức sẽ không tặng số dư thử nghiệm. Chưa đẩy lên GitHub, quá trình cài đặt và nghiệm thu của người dùng vẫn chưa hoàn thành.

@@ -1,8 +1,8 @@
-// 台词挑选：按亲密度档和心情过滤，同一处最近说过的几句不重复。纯本地，不调用 API。
+// Chọn lọc lời thoại: Lọc theo cấp độ thân mật và tâm trạng, không lặp lại vài câu vừa nói gần nhất tại cùng một vị trí. Hoàn toàn xử lý cục bộ, không gọi API.
 export function taskKind(feature) {
   const text = String(feature || '');
-  if (/填表|追平|表格/.test(text)) return 'fill';
-  if (/规划|剧情|推进/.test(text)) return 'plot';
+  if (/điền bảng|bắt kịp|đồng bộ|bảng/i.test(text)) return 'fill';
+  if (/kế hoạch|cốt truyện|tiến triển|thúc đẩy/i.test(text)) return 'plot';
   return 'other';
 }
 

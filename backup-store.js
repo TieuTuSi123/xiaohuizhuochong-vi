@@ -1,5 +1,5 @@
-// 检修写入前的整份表格备份：存在这台设备、这个浏览器的 IndexedDB 里，只留最近 10 份。
-// IndexedDB 用不了时只留在内存里（刷新页面就没了），durable 变成 false，界面据此提示用户先下载一份。
+// Bản sao lưu toàn bộ bảng trước khi ghi đè sửa chữa: lưu trong IndexedDB của thiết bị và trình duyệt này, chỉ giữ lại 10 bản gần nhất.
+// Khi IndexedDB không khả dụng, dữ liệu chỉ lưu trong bộ nhớ RAM (làm mới trang sẽ mất), durable chuyển thành false, giao diện dựa vào đây để nhắc người dùng tải về một bản trước.
 const NAME = 'erii-database-pet';
 const STORE = 'repair-backups';
 export const KEEP_BACKUPS = 10;

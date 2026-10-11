@@ -1,5 +1,5 @@
-// 特效：一块全屏粒子画布（Canvas2D）+ 桌宠小屋的流光（手写 WebGL）。
-// 只在有粒子或小屋打开时才跑动画；系统要求减少动态效果时一律关闭。
+// Hiệu ứng: Một canvas hạt toàn màn hình (Canvas2D) + luồng sáng trong nhà nhỏ của pet màn hình (WebGL viết tay).
+// Chỉ chạy hoạt ảnh khi có hạt hoặc khi nhà nhỏ đang mở; đóng toàn bộ khi hệ thống yêu cầu giảm hiệu ứng động.
 const TAU = Math.PI * 2;
 const LIMIT = { simple: 14, fancy: 46 };
 
@@ -130,7 +130,7 @@ export function createEffects(host, { tier = () => 'off', random = Math.random }
   return {
     burst(kind, x, y, colors, count = 14) { spawn(kind, x, y, colors, count, kind === 'confetti' ? .9 : .75); },
     ring(kind, x, y, colors, count = 12) { spawn(kind, x, y, colors, count, 1, false); },
-    // 升级庆祝：从屏幕上缘撒下一阵。
+    // Chúc mừng thăng cấp: Rải một đợt hạt từ viền trên màn hình xuống.
     shower(kind, colors, count = 40) {
       const width = host.innerWidth;
       for (let i = 0; i < 4; i++) host.setTimeout(() => spawn(kind, width * (.15 + .7 * random()), -10, colors, count / 4, .35, false), i * 160);
@@ -145,7 +145,7 @@ export function createEffects(host, { tier = () => 'off', random = Math.random }
   };
 }
 
-// 桌宠小屋图鉴页的流光。只在“华丽”档、小屋打开且页面可见时渲染，约 30 帧。
+// Luồng sáng trang minh họa (gallery) trong nhà nhỏ của pet màn hình. Chỉ kết xuất ở mức "Hoa mỹ", khi nhà nhỏ đang mở và trang hiển thị, khoảng 30 fps.
 const VERTEX = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
 const FRAGMENT = `precision mediump float;
 uniform vec2 r;uniform float t;uniform vec3 a;uniform vec3 b;uniform vec3 c;

@@ -1,13 +1,13 @@
-# 月读命·紫夜礼裙 · 非官方绘梨衣同人皮肤
+# Tsukuyomi · Lễ Phục Dạ Tím · Skin Đồng Nhân Erii Phi Chính Thức
 
-角色：上杉绘梨衣，《龙族》。皮肤 ID：`erii-purple-night`。
+Nhân vật: Uesugi Erii, tác phẩm "Long Tộc". ID skin: `erii-purple-night`.
 
-服装依据用户提供的两张月读命绘梨衣图片，画风参考本项目现有桌宠。27 张独立动作/生活图片由 Codex 内置 ImageGen 生成，完整原图、提示词和生成记录保存在维护工作区 `Erii-Skin-Purple-Night` 素材目录。
+Trang phục dựa trên hai hình ảnh Tsukuyomi Erii do người dùng cung cấp, phong cách vẽ đối chiếu theo desktop pet hiện tại của dự án. 27 hình ảnh động tác / sinh hoạt độc lập được tạo bởi công cụ ImageGen tích hợp trong Codex; toàn bộ ảnh gốc đầy đủ, prompt và lịch sử tạo được lưu trữ tại thư mục tài nguyên `Erii-Skin-Purple-Night` trong workspace bảo trì.
 
-本套造型保留黑色半透明手丝、脖颈与鞋子的紫色蝴蝶结、帽饰与珍珠，减少手臂/手腕/腰部的小蝴蝶结。抱鸭动作仅保留怀里的鸭子；其他动作保留头顶小黄鸭。
+Bộ tạo hình này giữ lại găng tay tơ đen bán trong suốt, nơ bướm tím ở cổ và giày, phụ kiện mũ kèm ngọc trai; lược bớt các nơ nhỏ ở cánh tay, cổ tay và eo. Động tác ôm vịt chỉ giữ lại con vịt trong lòng; các động tác khác giữ lại vịt vàng nhỏ trên đỉnh đầu.
 
-发布版从 1254×1254 透明 PNG 等比例缩小到 960×960 WebP（质量 92，透明通道质量 100）。这是格式与尺寸压缩，没有再次改画或抠图。原 PNG 保留。上方探头原件正向，由运行时旋转 180 度显示。新皮肤不含跑步或自主走路。
+Bản phát hành được thu nhỏ theo tỷ lệ từ PNG nền trong suốt 1254×1254 xuống WebP 960×960 (chất lượng 92, chất lượng kênh alpha 100). Đây thuần túy là nén kích thước và định dạng, không vẽ lại hay tách nền lần hai. File PNG gốc vẫn được giữ nguyên. Tệp gốc cho động tác nhô đầu từ mép trên để chiều thuận, được xoay 180 độ khi hiển thị lúc runtime. Skin mới không bao gồm động tác chạy hoặc tự bước đi.
 
-本项目仅提供非商业同人用途；角色、服装和商标归原权利人所有，没有获得官方授权。用户参考图片的另行许可未核验，AI 生成不会转移原作权利；不得把本说明当成商业授权。程序代码 MIT 许可不覆盖这些美术素材。原默认皮肤的署名和许可另见上级 `assets/NOTICE.md`。
+Dự án này chỉ phục vụ mục đích đồng nhân phi thương mại; bản quyền nhân vật, trang phục và thương hiệu thuộc về chủ sở hữu quyền gốc, không có ủy quyền chính thức. Giấy phép riêng của các ảnh tham khảo do người dùng cung cấp chưa được kiểm chứng; nội dung do AI tạo ra không chuyển giao quyền tác phẩm gốc; không được xem phần mô tả này là cấp phép thương mại. Giấy phép MIT của mã nguồn chương trình không bao gồm các tài nguyên mỹ thuật này. Ghi nhận tác quyền và giấy phép của skin mặc định ban đầu xem tại thư mục cấp trên: `assets/NOTICE.md`.
 
-本目录媒体清单记录每张发布图的大小、SHA-256 和预加载方式。加载失败沿用插件原有处理：保留最后成功的图并提示缺图，探头失败时退出探头；不承诺自动生成或下载备用图。清单用于维护检查，不代表图片已在用户酒馆安装或验收。
+Danh mục phương tiện trong thư mục này ghi lại dung lượng, mã băm SHA-256 và cơ chế preload của từng ảnh phát hành. Khi tải thất bại, hệ thống áp dụng cơ chế xử lý mặc định của plugin: giữ lại ảnh thành công gần nhất và hiển thị cảnh báo thiếu ảnh, thoát trạng thái nhô đầu nếu hành động này tải lỗi; không cam kết tự động tạo hoặc tải ảnh dự phòng. Danh mục này phục vụ mục đích kiểm tra bảo trì, không đại diện cho việc ảnh đã được cài đặt hoặc kiểm thử thành công trên SillyTavern của người dùng.

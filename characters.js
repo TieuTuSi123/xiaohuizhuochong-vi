@@ -1,5 +1,5 @@
-// 角色注册表。桌宠本体、聊天窗、生活手帐和桌宠小屋都只从角色对象取名字、台词和图片。
-// 放在仓库根目录：这里的 import.meta.url 与 index.js 同基准，绘梨衣的图片地址与 0.7.1 逐字相同。
+// Bảng đăng ký nhân vật. Thể thân desktop pet, cửa sổ chat, sổ tay sinh hoạt và phòng nhỏ desktop pet đều chỉ lấy tên, lời thoại và hình ảnh từ đối tượng nhân vật.
+// Đặt tại thư mục gốc của kho lưu trữ: import.meta.url ở đây cùng mốc quy chiếu với index.js, đường dẫn hình ảnh của Erii giống hệt từng chữ với bản 0.7.1.
 import erii from './characters/erii.js';
 import zero from './characters/zero.js';
 import naidan from './characters/naidan.js';
@@ -15,15 +15,15 @@ export const LIFE_POSES = Object.freeze(['work-bookshop', 'work-bakery', 'work-f
 export const resolveCharacter = id => CHARACTERS[id] || CHARACTERS[DEFAULT_CHARACTER];
 export const usesDatabaseArt = character => character.assets.source === 'database';
 
-// 皮肤只写有图的姿势；没写的姿势沿用角色原来的图。地址相对扩展根目录（和 index.js 同基准）。
+// Skin chỉ khai báo những tư thế có ảnh; các tư thế không khai báo sẽ kế thừa ảnh gốc của nhân vật. Đường dẫn tương đối tính từ thư mục gốc của tiện ích mở rộng (cùng mốc quy chiếu với index.js).
 export function skinAssetUrl(skin, pose) {
   const file = skin?.assets?.poses?.[pose];
   if (typeof file !== 'string' || !file) return null;
   return new URL(`${skin.assets.base || ''}${file}`, import.meta.url).href;
 }
 
-// 返回一个姿势的图片地址。奶蛋这类取自数据库的角色需要运行时读到的图片表，读不到返回 null。
-// 传了 skin（见 skin-model.js）时，皮肤里有图的姿势优先。
+// Trả về đường dẫn hình ảnh của một tư thế. Các nhân vật lấy từ cơ sở dữ liệu như Naidan cần bảng ảnh đọc được lúc runtime, không đọc được sẽ trả về null.
+// Khi truyền vào skin (xem skin-model.js), tư thế nào có ảnh trong skin sẽ được ưu tiên.
 export function assetUrl(character, pose, runtimeImages = null, skin = null) {
   const skinned = skinAssetUrl(skin, pose);
   if (skinned) return skinned;
@@ -40,11 +40,11 @@ export function imageUrls(character, runtimeImages = null, skin = null) {
   return urls;
 }
 
-// 粒子颜色等主题：皮肤可以覆盖其中一部分，没写的沿用角色自己的。
+// Chủ đề như màu hạt hạt: Skin có thể ghi đè một phần trong đó, phần không ghi đè sẽ giữ nguyên từ nhân vật gốc.
 export const themeOf = (character, skin = null) => skin?.theme ? { ...character.theme, ...skin.theme } : character.theme;
 
 export function poseLabel(character, pose) {
-  if (pose.startsWith('eat-')) return '慢慢吃一顿饭';
-  if (pose.startsWith('work-')) return '认真做好今天的小工作';
+  if (pose.startsWith('eat-')) return 'Thong thả ăn một bữa cơm';
+  if (pose.startsWith('work-')) return 'Chăm chú hoàn thành công việc nhỏ hôm nay';
   return character.labels[pose] || character.labels.idle;
 }
