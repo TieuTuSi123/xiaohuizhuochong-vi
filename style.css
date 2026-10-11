@@ -13,9 +13,9 @@
   --pet-gold: #c79a3e; --pet-gold-hi: #f3dc9a; --pet-gold-lo: #9c7426;
   --pet-tape: rgba(214, 72, 86, .52); --pet-tape-dot: rgba(255, 255, 255, .7);
   --pet-shadow: rgba(110, 40, 30, .2); --pet-good: #4f7a52; --pet-warn: #b0662a; --pet-bad: #b23a33;
-  --pet-hand: "LXGW WenKai", "LXGW WenKai Screen", "KaiTi", "STKaiti", "Kaiti SC", serif;
-  --pet-body: "HarmonyOS Sans SC", "MiSans", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-  --pet-serif: "Palatino Linotype", "Book Antiqua", Palatino, "Iowan Old Style", Georgia, serif;
+  --pet-hand: "Patrick Hand", "Comfortaa", "Segoe UI", "Be Vietnam Pro", "LXGW WenKai", "LXGW WenKai Screen", "KaiTi", cursive, serif;
+  --pet-body: system-ui, -apple-system, "Segoe UI", Roboto, "Be Vietnam Pro", "HarmonyOS Sans SC", "Noto Sans", sans-serif;
+  --pet-serif: "Palatino Linotype", "Book Antiqua", Palatino, "Iowan Old Style", Georgia, "Times New Roman", serif;
   --pet-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .3  0 0 0 0 .2  0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   --pet-ease: cubic-bezier(.2, .8, .2, 1);
   --pet-spring: cubic-bezier(.34, 1.56, .64, 1);
@@ -72,7 +72,10 @@
 .erii-companion[data-dragging="true"] .erii-companion__portrait { cursor: grabbing !important; }
 .erii-companion__portrait:hover { background: transparent !important; opacity: 1; }
 .erii-companion__portrait:focus-visible { outline: 2px dashed color-mix(in srgb, var(--pet-accent) 55%, transparent); outline-offset: 2px; border-radius: 40%; }
-.erii-companion__edge-frame, .erii-companion__sway, .erii-companion__breath, .erii-companion__stage { position: relative; display: block; width: 100%; height: 100%; pointer-events: none; }
+.erii-companion__edge-frame, .erii-companion__sway, .erii-companion__breath, .erii-companion__stage {
+  position: relative; display: block; width: 100%; height: 100%; pointer-events: none;
+  transform: translateZ(0); backface-visibility: hidden;
+}
 .erii-companion__edge-frame { transition: transform .16s ease; }
 .erii-companion[data-edge="left"] .erii-companion__edge-frame { transform: translateX(-16px); }
 .erii-companion[data-edge="right"] .erii-companion__edge-frame { transform: translateX(16px); }
@@ -92,6 +95,7 @@
   position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain;
   user-select: none; pointer-events: none; filter: none !important; image-rendering: auto;
   opacity: 0; transition: opacity .05s ease-out;
+  transform: translateZ(0); backface-visibility: hidden;
 }
 .erii-companion__sprite[data-visible="true"] { opacity: 1; }
 /* Ảnh của Naidan lấy từ cơ sở dữ liệu, gần như choán hết khung tranh: thu nhỏ một chút để chân thẳng hàng với hai cô gái; ảnh ló đầu xoay theo cạnh tương ứng. */
@@ -118,8 +122,10 @@
 /* ---------- Cuốn sổ nhỏ ---------- */
 .erii-companion__notebook {
   position: fixed; width: var(--erii-page-width, 330px); max-height: var(--erii-page-height, 460px);
-  overflow: auto; overscroll-behavior: contain; pointer-events: auto; scrollbar-width: thin;
-  padding: 14px 14px 12px 24px; color: var(--pet-ink);
+  overflow: auto; overscroll-behavior: contain; pointer-events: auto;
+  -webkit-overflow-scrolling: touch; contain: paint;
+  scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--pet-muted) 40%, transparent) transparent;
+  padding: 14px 12px 12px 24px; color: var(--pet-ink);
   background:
     linear-gradient(90deg, var(--pet-accent-ink) 0 9px, color-mix(in srgb, var(--pet-accent-ink) 30%, transparent) 9px 11px, transparent 11px),
     repeating-linear-gradient(180deg, transparent 0 25px, color-mix(in srgb, var(--pet-accent) 6%, transparent) 25px 26px),
@@ -173,9 +179,64 @@
 .erii-companion__connection { color: var(--pet-muted); font-size: 11px; padding-bottom: 6px; }
 .erii-companion__help { color: var(--pet-faint); font-size: 10.5px; margin-top: 12px !important; line-height: 1.6; }
 .erii-nb__shortcuts { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 2px 0 8px; }
+.erii-companion__notebook::-webkit-scrollbar,
+.erii-chat__log::-webkit-scrollbar,
+.erii-chat__settings::-webkit-scrollbar,
+.erii-life__scroll::-webkit-scrollbar,
+.erii-house__page::-webkit-scrollbar,
+.erii-companion__story::-webkit-scrollbar,
+.erii-companion__message-text::-webkit-scrollbar {
+  width: 5px; height: 5px;
+}
+.erii-companion__notebook::-webkit-scrollbar-track,
+.erii-chat__log::-webkit-scrollbar-track,
+.erii-chat__settings::-webkit-scrollbar-track,
+.erii-life__scroll::-webkit-scrollbar-track,
+.erii-house__page::-webkit-scrollbar-track,
+.erii-companion__story::-webkit-scrollbar-track,
+.erii-companion__message-text::-webkit-scrollbar-track {
+  background: transparent;
+}
+.erii-companion__notebook::-webkit-scrollbar-thumb,
+.erii-chat__log::-webkit-scrollbar-thumb,
+.erii-chat__settings::-webkit-scrollbar-thumb,
+.erii-life__scroll::-webkit-scrollbar-thumb,
+.erii-house__page::-webkit-scrollbar-thumb,
+.erii-companion__story::-webkit-scrollbar-thumb,
+.erii-companion__message-text::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--pet-muted) 38%, transparent);
+  border-radius: 99px;
+}
+.erii-companion__notebook::-webkit-scrollbar-thumb:hover,
+.erii-chat__log::-webkit-scrollbar-thumb:hover,
+.erii-chat__settings::-webkit-scrollbar-thumb:hover,
+.erii-life__scroll::-webkit-scrollbar-thumb:hover,
+.erii-house__page::-webkit-scrollbar-thumb:hover,
+.erii-companion__story::-webkit-scrollbar-thumb:hover,
+.erii-companion__message-text::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--pet-accent) 65%, var(--pet-muted));
+}
+.erii-chat__log, .erii-life__scroll, .erii-house__page {
+  contain: paint; -webkit-overflow-scrolling: touch;
+}
+
+/* =========================================================================
+   Tối ưu hóa hiệu năng cho thiết bị cấu hình yếu (Low-end Hardware)
+   Tự động kích hoạt khi bật chế độ tiết kiệm pin hoặc giảm chuyển động hệ thống
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .erii-companion__breath { animation: none !important; }
+  .pet-meter[data-low="true"] .pet-icon { animation: none !important; }
+  .erii-companion, .erii-companion__notebook, .erii-chat, .erii-life, .erii-house {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 .erii-nb__shortcut {
   grid-column: span 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-  min-height: 52px; padding: 6px 4px; border-radius: 10px; font-size: 11px !important; line-height: 1.25;
+  min-height: 52px; padding: 6px 3px; border-radius: 10px; font-size: 11px !important; line-height: 1.25;
+  word-break: break-word; text-align: center;
   border: 1px solid var(--pet-line) !important; background: var(--pet-card) !important; color: var(--pet-ink) !important;
   transition: transform .18s var(--pet-ease), box-shadow .18s, border-color .18s;
 }
@@ -294,7 +355,7 @@
 .pet-sheet.is-leaving { animation: pet-sheet-out .22s ease-in forwards !important; }
 .pet-sheet > .pet-grip { display: block; flex: 0 0 auto; position: relative; height: 18px; margin: 0 0 -4px; cursor: grab; touch-action: none; }
 .pet-sheet > .pet-grip::before { content: ""; position: absolute; left: 50%; top: 7px; width: 42px; height: 5px; margin-left: -21px; border-radius: 99px; background: color-mix(in srgb, var(--pet-muted) 55%, transparent); }
-.erii-companion__notebook.pet-sheet { position: fixed; padding: 6px 16px 18px; max-height: none; border-left: 1px solid var(--pet-line);
+.erii-companion__notebook.pet-sheet { position: fixed; padding: 6px 16px calc(18px + env(safe-area-inset-bottom, 0px)); max-height: none; border-left: 1px solid var(--pet-line);
   background: repeating-linear-gradient(180deg, transparent 0 25px, color-mix(in srgb, var(--pet-accent) 6%, transparent) 25px 26px), var(--pet-grain), var(--pet-paper); }
 .erii-companion__notebook.pet-sheet::before { display: none; }
 .erii-companion__notebook.pet-sheet::after { right: 22px; top: -6px; }
@@ -471,7 +532,8 @@
 .erii-repair__receipt span, .erii-repair__confirm span { flex: 1 1 180px; min-width: 0; }
 .erii-chat .erii-repair__receipt button, .erii-chat .erii-repair__confirm button { min-height: 26px; padding: 2px 10px; font-size: 11px; }
 .erii-chat__tag { margin-left: 6px; padding: 0 6px; border-radius: 99px; font: normal 10px/1.6 var(--pet-body); color: var(--pet-accent-ink); background: var(--pet-soft); border: 1px solid var(--pet-line); }
-.erii-chat__row--assistant .erii-chat__bubble:has(.erii-repair__ticket) { width: 100%; }
+.erii-chat__row--assistant .erii-chat__bubble:has(.erii-repair__ticket),
+.erii-chat__row--assistant .erii-chat__bubble--ticket { width: 100%; }
 .erii-chat .erii-chat__message-tools button[data-action="reply"] { color: var(--pet-accent) !important; font-weight: 700; }
 @media (max-width: 640px) {
   .erii-chat__mode, .erii-repair__scope { margin-inline: 10px; }
@@ -623,7 +685,7 @@
 .erii-house button { cursor: pointer; }
 .erii-house__header { flex: 0 0 auto; position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 14px 6px 8px; cursor: move; touch-action: none; }
 .erii-house__eyebrow { display: block; font: italic 11px/1.4 var(--pet-serif); letter-spacing: 4px; color: color-mix(in srgb, var(--pet-gold-hi) 70%, transparent); }
-.erii-house h2 { margin: 0; font: 700 26px/1.25 var(--pet-hand); letter-spacing: 4px;
+.erii-house h2 { margin: 0; font: 700 24px/1.25 var(--pet-hand); letter-spacing: 1.5px;
   background: linear-gradient(100deg, var(--pet-gold-lo), var(--pet-gold-hi) 35%, var(--pet-gold) 55%, var(--pet-gold-hi) 75%, var(--pet-gold-lo));
   background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: pet-foil 7s linear infinite; }
 @keyframes pet-foil { to { background-position: -220% 0; } }
@@ -642,7 +704,7 @@
 .erii-house__ribbon-no { font: italic 600 11px/1 var(--pet-serif); opacity: .75; }
 .erii-house__ribbon img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; object-position: 50% 12%; background: rgba(255,255,255,.85); }
 .erii-house__ribbon[data-character="naidan"] img { object-fit: contain; }
-.erii-house__ribbon-name { font: 600 14px/1 var(--pet-hand); letter-spacing: 1px; }
+.erii-house__ribbon-name { font: 600 13px/1.25 var(--pet-hand); letter-spacing: 0.5px; }
 .erii-house__ribbon-badge { display: none; font-size: 10px; padding: 0 6px; border-radius: 99px; background: rgba(255,255,255,.25); }
 .erii-house__ribbon[data-current="true"] .erii-house__ribbon-badge { display: inline-block; }
 .erii-house__book {
