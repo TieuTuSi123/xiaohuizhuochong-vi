@@ -1,0 +1,412 @@
+{
+  "schemaVersion": 1,
+  "cardId": "erii-purple-night",
+  "assets": [
+    {
+      "id": "idle",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "idle.webp"
+      },
+      "bytes": 239204,
+      "sha256": "f77482559177f24aab0b6ebcffc2e80ed4fcdf3129075c8d38f4d844be0bbb86",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "received",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "received.webp"
+      },
+      "bytes": 247576,
+      "sha256": "dc5db3d1da60b2e86e0b1222e29c008387aacef7c6106811d4818c6f88db6928",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "writing",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "writing.webp"
+      },
+      "bytes": 258266,
+      "sha256": "c6f4a0a151221729874f845e9e0a3af47146483d93a3c2d99ce260e6da49b1a8",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "complete",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "complete.webp"
+      },
+      "bytes": 250838,
+      "sha256": "b79942a1bc8f7971ae0ec2523bbf067fde260ade9b1bd16fabbf2ce8aa39d309",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "error",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "error.webp"
+      },
+      "bytes": 252106,
+      "sha256": "f345c32e4e4a446fe861afc4f2c8d63b0a84e8f833a604c9aca3b41b3ca19978",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "tea",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "tea.webp"
+      },
+      "bytes": 252842,
+      "sha256": "45bc94585d1a17290f80d1480b0e47935261301e7a7cb322c041302c89895200",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "reading",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "reading.webp"
+      },
+      "bytes": 259076,
+      "sha256": "000a8ba9de9b371cc0d7226c266acef4f22f9d22e385932ea1cbbf0d60ab3da8",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "origami",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "origami.webp"
+      },
+      "bytes": 259902,
+      "sha256": "515fa6094fd13dd4d9a307d87821cfded60b9ca0c79e39b9b6d2c4c8634a2417",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "duck",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "duck.webp"
+      },
+      "bytes": 241974,
+      "sha256": "497b72f123c7f47daa2e8f0c75ae054839dffd7049b1a75f3438dcfc2dd5104c",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "stretch",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "stretch.webp"
+      },
+      "bytes": 249728,
+      "sha256": "6c6a2bb3efe18312092d4bff605f4095d9c865ced22753c61264681415ab75dc",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "rest",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "rest.webp"
+      },
+      "bytes": 251692,
+      "sha256": "136b782f299672c51e6d8dfa7339ae7fd3ad92115c6ae4b312b9abbfa60f994b",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "gift",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "gift.webp"
+      },
+      "bytes": 250154,
+      "sha256": "c430de2a0a5ac1546d7a838f68efc2a3f561d6a52ee1e722f5f47dd03a5749ce",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "lifted",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "lifted.webp"
+      },
+      "bytes": 267354,
+      "sha256": "fc14f22c8e1a26c664125f78b22c925748a5d7389ee1eb3ad2681fe3b8bbd58a",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "land",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "land.webp"
+      },
+      "bytes": 252028,
+      "sha256": "6d6568b5a528f10671ea20cb64948a0a2cf66bf124d7aaca66b4fcf93abb5398",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "wave",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "wave.webp"
+      },
+      "bytes": 252964,
+      "sha256": "98c941b4242f9675de56c7ef724eb8ecb3d218233a4718a1e4bb44e12300a501",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "peek",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "peek.webp"
+      },
+      "bytes": 257646,
+      "sha256": "6c4a96c29b8fb050cbbd47a9c2322c6c093449e9722ed0af8842f6d4ae7a661d",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "edge-left",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "edge-left.webp"
+      },
+      "bytes": 260952,
+      "sha256": "fef932b7bd9525fc9c7bb1d7d349142f2f98446fd050b59ae558935268e76c0a",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "edge-right",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "edge-right.webp"
+      },
+      "bytes": 229802,
+      "sha256": "3b80ad5997670b3b6953d875c944e08b91ef085352d2678c28e5c4eb5364bcf9",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "edge-bottom",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "edge-bottom.webp"
+      },
+      "bytes": 231400,
+      "sha256": "a16c0a6fa1b716d5c1a4a8de4fd0f28572551135e03f6e38d2d5a044731722b4",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "edge-top",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "edge-top.webp"
+      },
+      "bytes": 217128,
+      "sha256": "b82a6e412abc837be25145b245e87a31af48a6e24b199b39155075c8dedf1401",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "work-bookshop",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "work-bookshop.webp"
+      },
+      "bytes": 247294,
+      "sha256": "eee1a08007d8055df8fe71300bd3724fe6f23a3f1adef34dd354473e3d4f35cf",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "work-bakery",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "work-bakery.webp"
+      },
+      "bytes": 251348,
+      "sha256": "e8ca2f03da3582aceff34d409f2374c3e20e86c68e243e92cf7d68e5d346f867",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "work-florist",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "work-florist.webp"
+      },
+      "bytes": 257976,
+      "sha256": "4824cadcf5e5a4230ac7195ab6f240b7ac6a7c527f9668d216b07e5ee9be0b66",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "eat-pudding",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "eat-pudding.webp"
+      },
+      "bytes": 271796,
+      "sha256": "f1a63c112a859637b69a7502926f0a5852a1e0fb432273222060504da39a56f5",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "eat-riceball",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "eat-riceball.webp"
+      },
+      "bytes": 245750,
+      "sha256": "fa3e63cbafd1a895eeb7de2010f117e68bf83f81c34dea54329e724869ddbf26",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "eat-omurice",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "eat-omurice.webp"
+      },
+      "bytes": 248036,
+      "sha256": "3d6bdccd4c80bcb9a92e5b7d661e30200fd36c87cb3cfa057a0d06e42c54e1db",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "eat-ramen",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "eat-ramen.webp"
+      },
+      "bytes": 261416,
+      "sha256": "f6ea36ea4e43cf7404f276e854adda5db88a589e04a834b3975dd9fef4ece1df",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    }
+  ],
+  "runtimeFailureBehavior": "Keep last decoded sprite and existing missing-image notice; failed edge pose exits edge mode. This manifest is maintenance metadata, not a runtime loader."
+}

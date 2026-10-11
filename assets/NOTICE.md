@@ -22,3 +22,6 @@ v0.7.1 新增 assets/life/eat-pudding.webp、eat-riceball.webp、eat-omurice.web
 
 
 v0.8.0 新增的零的动作图在 assets/zero/，署名与许可见 assets/zero/NOTICE.md。奶蛋的图属于龙血玄黄·数据库，本扩展只在运行时读取数据库已经加载的图片，不在本包内。
+
+
+v0.9.3 新增月读命·紫夜礼裙，27 张透明动作/生活图在 `assets/skins/erii-purple-night/`。服装参考用户提供图片，由 ImageGen 生成，发布版仅等比例缩小压缩为 960×960 WebP。新皮肤保留手丝；抱鸭图只有怀中鸭子，其他图保留头顶鸭子。新皮肤的来源与使用边界见 [单独说明](skins/erii-purple-night/NOTICE.md)。原默认皮肤图片字节未变。
