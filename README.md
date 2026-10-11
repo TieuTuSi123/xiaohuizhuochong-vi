@@ -1,3 +1,5 @@
+Link Gốc: https://github.com/dzsks/xiaohuizhuochong
+
 # Tiểu Erii · Pet màn hình cơ sở dữ liệu
 
 ## Phiên bản hiện tại: v0.9.3
