@@ -43,6 +43,7 @@ function normalizeCharacter(saved = {}, now) {
 export class CareModel {
   constructor(saved, { now = () => Date.now(), persist = () => {}, needsEnabled = () => true } = {}) {
     this.now = now; this.persist = persist; this.needsEnabled = needsEnabled;
+    this.activeNeeds = needsEnabled();
     const current = this.now();
     this.characters = {};
     for (const [id, value] of Object.entries(saved?.characters || {})) this.characters[id] = normalizeCharacter(value, current);
@@ -55,9 +56,9 @@ export class CareModel {
     state.diary.length = Math.min(120, state.diary.length);
   }
   // 需求值按时间衰减；关闭需求值时冻结在关闭那一刻（setNeedsEnabled 负责结算）。
-  needs(id) {
+  needs(id, enabled = this.needsEnabled()) {
     const state = this.state(id);
-    if (!this.needsEnabled()) return { fullness: state.fullness, cleanliness: state.cleanliness };
+    if (!enabled) return { fullness: state.fullness, cleanliness: state.cleanliness };
     const elapsed = Math.max(0, this.now() - state.needsAt);
     return { fullness: Math.max(0, state.fullness - elapsed * DECAY.fullness), cleanliness: Math.max(0, state.cleanliness - elapsed * DECAY.cleanliness) };
   }
@@ -67,9 +68,11 @@ export class CareModel {
   }
   setNeedsEnabled(enabled) {
     for (const [id, state] of Object.entries(this.characters)) {
-      if (!enabled) { const values = this.needs(id); state.fullness = values.fullness; state.cleanliness = values.cleanliness; }
+      const values = this.needs(id, this.activeNeeds);
+      state.fullness = values.fullness; state.cleanliness = values.cleanliness;
       state.needsAt = this.now();
     }
+    this.activeNeeds = enabled;
     this.save();
   }
   tier(id) { return tierOf(this.state(id).affection); }

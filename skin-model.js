@@ -1,6 +1,6 @@
-// 换装（皮肤）：用家里钱包里的金币购买，按角色各自拥有和穿着。纯逻辑，保存交给调用方。
+// 换装（皮肤）：用家里钱包里的金币或花票购买，按角色各自拥有和穿着。纯逻辑，保存交给调用方。
 // 约定：每个角色自带一套「默认装扮」，免费、永远拥有、不能卖掉；买过的皮肤不会消失，随时可以换回默认。
-// 现在目录里还没有上架任何皮肤，只先把接口、存档和界面搭好。以后加皮肤：在下面的 CATALOG 里加一条，
+// 以后加皮肤：在下面的 CATALOG 里加一条，currency 不写时仍使用金币，写 tickets 使用花票。
 // 把图放进 assets/skins/<皮肤 id>/，别的代码不用改。
 export const DEFAULT_SKIN = 'default';
 export const SKIN_ID = /^[a-z][a-z0-9-]{0,39}$/;
@@ -19,7 +19,18 @@ const MAX_OWNED = 200;
 //   },
 //   theme: { colors: ['#6fb1d8', '#dff1fb', '#ffffff'] },   // 可选：覆盖粒子颜色；界面配色用 [data-skin="erii-yukata"] 写 CSS
 // }
-const CATALOG = [];
+const CATALOG = [{
+  id: 'erii-purple-night', name: '月读命·紫夜礼裙',
+  description: '红发与黑紫礼裙，手丝、珍珠与花饰。打工攒金币，兑换花票后买下。',
+  price: 10320, currency: 'tickets', characters: ['erii'],
+  assets: { base: 'assets/skins/erii-purple-night/', poses: Object.fromEntries([
+    'idle', 'received', 'writing', 'complete', 'error', 'tea', 'reading', 'origami', 'duck',
+    'stretch', 'rest', 'gift', 'lifted', 'land', 'wave', 'peek',
+    'edge-left', 'edge-right', 'edge-bottom', 'edge-top',
+    'work-bookshop', 'work-bakery', 'work-florist', 'eat-pudding', 'eat-riceball', 'eat-omurice', 'eat-ramen',
+  ].map(pose => [pose, `${pose}.webp`])) },
+  theme: { colors: ['#b892e5', '#eadcfa', '#ceaeed'] },
+}];
 
 const integer = value => Math.min(1000000000, Math.max(0, Math.floor(Number(value) || 0)));
 const validWho = who => typeof who === 'string' && /^[a-z][a-z0-9-]{0,19}$/.test(who);
@@ -30,6 +41,7 @@ export function validSkin(skin) {
   if (!skin || typeof skin !== 'object' || !validId(skin.id)) return false;
   if (typeof skin.name !== 'string' || !skin.name.trim()) return false;
   if (!Number.isInteger(skin.price) || skin.price < 0) return false;
+  if (skin.currency !== undefined && !['coins', 'tickets'].includes(skin.currency)) return false;
   if (!(skin.characters === '*' || (Array.isArray(skin.characters) && skin.characters.length > 0 && skin.characters.every(validWho)))) return false;
   if (skin.assets !== undefined && skin.assets !== null) {
     if (typeof skin.assets !== 'object') return false;
@@ -45,7 +57,7 @@ export function normalizeCatalog(list, warn = () => {}) {
   for (const skin of Array.isArray(list) ? list : []) {
     if (!validSkin(skin)) { warn(skin); continue; }
     if (seen.has(skin.id)) { warn(skin); continue; }
-    seen.add(skin.id); result.push(Object.freeze({ ...skin, description: typeof skin.description === 'string' ? skin.description : '' }));
+    seen.add(skin.id); result.push(Object.freeze({ ...skin, currency: skin.currency || 'coins', description: typeof skin.description === 'string' ? skin.description : '' }));
   }
   return Object.freeze(result);
 }
@@ -53,7 +65,7 @@ export function normalizeCatalog(list, warn = () => {}) {
 export const SKINS = normalizeCatalog(CATALOG, skin => console.warn('[数据库桌宠] 皮肤目录里有一条写法不对，已跳过：', skin));
 
 export const fits = (skin, who) => Boolean(skin) && (skin.characters === '*' || skin.characters.includes(who));
-export const defaultEntry = () => ({ id: DEFAULT_SKIN, name: '默认装扮', description: '平时的样子。免费，随时可以换回来。', price: 0, characters: '*', assets: null, theme: null });
+export const defaultEntry = () => ({ id: DEFAULT_SKIN, name: '默认装扮', description: '平时的样子。免费，随时可以换回来。', price: 0, currency: 'coins', characters: '*', assets: null, theme: null });
 
 export function normalizeSkins(saved = {}) {
   const owned = {}, equipped = {};
@@ -64,7 +76,7 @@ export function normalizeSkins(saved = {}) {
   }
   for (const [who, id] of Object.entries(saved?.equipped && typeof saved.equipped === 'object' ? saved.equipped : {}))
     if (validWho(who) && validId(id)) equipped[who] = id;
-  return { schema: 1, owned, equipped, bought: integer(saved?.bought), spent: integer(saved?.spent) };
+  return { schema: 2, owned, equipped, bought: integer(saved?.bought), spent: integer(saved?.spent), spentTickets: integer(saved?.spentTickets) };
 }
 
 // 买过的皮肤即使暂时不在目录里（比如退回旧版、或者维护者先下架了）也留在存档里，重新上架就能继续穿。
@@ -86,11 +98,12 @@ export class SkinModel {
   }
   equippedId(who) { return this.equipped(who)?.id || DEFAULT_SKIN; }
   // 给界面用的目录：默认装扮永远排第一；affordable 表示买得起（已拥有的也算）。
-  list(who, { coins = 0 } = {}) {
+  list(who, { coins = 0, tickets = 0 } = {}) {
     const current = this.equippedId(who);
     return [defaultEntry(), ...this.available(who)].map(skin => {
       const owned = this.owns(who, skin.id);
-      return { id: skin.id, skin, price: skin.price, owned, equipped: skin.id === current, affordable: owned || integer(coins) >= skin.price };
+      const currency = skin.currency || 'coins', balance = integer(currency === 'tickets' ? tickets : coins);
+      return { id: skin.id, skin, price: skin.price, currency, balance, owned, equipped: skin.id === current, affordable: owned || balance >= skin.price };
     });
   }
   // pay(price, skin) 负责真正扣钱并返回是否成功（例如 LifeModel.spend）；这里只管“能不能买”和记账。
@@ -100,9 +113,11 @@ export class SkinModel {
     if (!skin || !fits(skin, who)) return { ok: false, reason: 'missing' };
     if (this.owns(who, id)) return { ok: false, reason: 'owned' };
     if (this.ownedIds(who).length >= MAX_OWNED) return { ok: false, reason: 'full' };
-    if (typeof pay !== 'function' || pay(skin.price, skin) !== true) return { ok: false, reason: 'coins' };
+    if (typeof pay !== 'function' || pay(skin.price, skin) !== true) return { ok: false, reason: skin.currency === 'tickets' ? 'tickets' : 'coins' };
     (this.state.owned[who] ||= []).push(id);
-    this.state.bought = integer(this.state.bought + 1); this.state.spent = integer(this.state.spent + skin.price);
+    this.state.bought = integer(this.state.bought + 1);
+    if (skin.currency === 'tickets') this.state.spentTickets = integer(this.state.spentTickets + skin.price);
+    else this.state.spent = integer(this.state.spent + skin.price);
     this.save(); return { ok: true, skin };
   }
   // 换上已拥有的皮肤；传 DEFAULT_SKIN 换回默认。没有变化时返回 false。

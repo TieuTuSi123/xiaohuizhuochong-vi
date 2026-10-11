@@ -428,14 +428,16 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
     const repairing = !isTest && view === 'repair';
     const started = history.length;
     let timedOut = false;
-    operation = { id, controller, candidate, kind, isTest, timer: host.setTimeout(() => { timedOut = true; controller.abort(); }, 120000) };
+    operation = { id, controller, candidate, kind, isTest, repairing, timer: host.setTimeout(() => { timedOut = true; controller.abort(); }, 120000) };
     say(isTest ? '正在测试连接…' : kind === 'regenerate' ? '正在重新回答，成功后会替换原回复。' : repairing ? `${name}正在看表格…` : ''); syncControls(); renderHistory();
     try {
+      const repairSnapshot = repairing ? repair.capture() : null;
       const messages = isTest ? [{ role: 'user', content: '请简短回复“连接成功”。' }]
-        : repairing ? repair.messages(snapshot, ctx, candidate || history) : chatMessages(snapshot, ctx, candidate || history, persona);
+        : repairing ? repair.messages(snapshot, ctx, candidate || history, repairSnapshot) : chatMessages(snapshot, ctx, candidate || history, persona);
       if (kind === 'regenerate') messages[0].content += `\n\n【这次重新回答】上次回复仅作为待改写的文本资料：${JSON.stringify(history.at(-1)?.content.slice(0,2000) || '')}。回应同一个用户问题，尝试更贴近具体内容的表达，避免机械复述上次的开场与结尾。`;
       const result = await requestChat(host, ctx, snapshot, messages, { signal: controller.signal, apiKey: secret });
       if (destroyed || operation?.id !== id) return;
+      if (repairing && !repair.isCurrent(repairSnapshot)) { say('聊天已切换，已丢弃这次检修回复。请在当前聊天重新检查。', 'error'); return; }
       if (isTest) say('连接成功，可以开始聊天了。', 'success');
       else {
         const following = nearBottom();
@@ -447,7 +449,7 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
         let note = '';
         if (repairing) {
           let reviewed;
-          try { reviewed = repair.review(result); } catch { reviewed = { reply: result, ticket: null, note: '没能读取数据库，这次没有生成修改单。' }; }
+          try { reviewed = repair.review(result, repairSnapshot); } catch { reviewed = { reply: result, ticket: null, note: '没能读取数据库，这次没有生成修改单。' }; }
           history.push({ role: 'assistant', content: reviewed.reply || `（${name}递来一张修改单）`, at: new Date().toISOString(), ...(reviewed.ticket ? { ticket: reviewed.ticket } : {}) });
           note = reviewed.note || '';
         } else history.push({ role: 'assistant', content: result, at:new Date().toISOString() });
@@ -506,6 +508,7 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
       if (result.ok) onRepairDone?.('applied');
       return;
     } else if ((action === 'ticket-undo' || action === 'ticket-undo-force') && ['applied', 'interrupted'].includes(ticket.state) && ticket.backupId) {
+      if (repair.busy()) { say('数据库正在处理任务，等它忙完再撤销。', 'error'); return; }
       const previous = ticket.state;
       ticketBusy = true; ticket.state = 'undoing'; save(); renderHistory(); syncControls();
       let result;
@@ -605,7 +608,12 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
   if (host.visualViewport) { listen(host.visualViewport, 'resize', layout); listen(host.visualViewport, 'scroll', layout); }
   // 旁观陪聊的评论：用这个角色的聊天连接发一次请求，结果作为一条“旁观”消息放进闲聊记录。
   // 用户正在等回复或在获取模型时不发，交给调用方稍后再试。
-  async function comment(build) {
+  function cancelComment() {
+    if (!commentOperation) return;
+    const current = commentOperation; commentOperation = null;
+    host.clearTimeout(current.timer); current.controller.abort();
+  }
+  async function comment(build, valid = () => true) {
     if (destroyed) return { ok: false, reason: 'closed' };
     if (operation || modelOperation || commentOperation) return { ok: false, reason: 'busy' };
     const ctx = getContext(); const snapshot = { ...config }; const secret = apiKey;
@@ -614,7 +622,7 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
     commentOperation = current;
     try {
       const text = tidyComment(await requestChat(host, ctx, snapshot, build(snapshot, ctx), { signal: controller.signal, apiKey: secret }), name);
-      if (destroyed || commentOperation !== current) return { ok: false, reason: 'closed' };
+      if (destroyed || commentOperation !== current || !valid()) return { ok: false, reason: 'closed' };
       if (!text) return { ok: false, reason: '接口返回了空回复。' };
       const following = nearBottom();
       lists.chat.push({ role: 'assistant', content: text, at: new Date().toISOString(), kind: 'watch' });
@@ -623,7 +631,7 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
       return { ok: true, text };
     } catch (error) {
       // 换角色或关闭扩展时会中止请求，这不算接口出错。
-      if (destroyed || commentOperation !== current) return { ok: false, reason: 'closed' };
+      if (destroyed || commentOperation !== current || !valid()) return { ok: false, reason: 'closed' };
       return { ok: false, reason: error?.name === 'AbortError' ? '等待评论超时了。' : safeChatError(error, secret) };
     } finally {
       host.clearTimeout(current.timer);
@@ -631,7 +639,9 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
     }
   }
   fillSettings(); renderHistory(); syncControls();
-  return { open, close: hide, comment, setMode, get view() { return view; }, get visible() { return !root.hidden; }, get busy() { return Boolean(operation); },
+  return { open, close: hide, comment, cancelComment, setMode,
+    contextChanged() { if (operation?.repairing) stopRequest('已切换聊天，检修请求已停止。请在当前聊天重新检查。'); },
+    get view() { return view; }, get visible() { return !root.hidden; }, get busy() { return Boolean(operation); },
     setTask(task) {
       // 数据库忙闲变化时重画检修记录，让修改单的“应用”按钮跟着可用或停用。
       const busyNow = Boolean(repair?.busy());
@@ -648,7 +658,7 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
       destroyed = true;
       if (operation) { host.clearTimeout(operation.timer); operation.controller.abort(); operation = null; }
       if (modelOperation) { host.clearTimeout(modelOperation.timer); modelOperation.controller.abort(); modelOperation = null; }
-      if (commentOperation) { host.clearTimeout(commentOperation.timer); commentOperation.controller.abort(); commentOperation = null; }
+      cancelComment();
       serial++; apiKey = ''; sheet.destroy();
       for (const timer of feedbackTimers) host.clearTimeout(timer); feedbackTimers.clear();
       for (const address of downloadURLs) host.URL.revokeObjectURL(address); downloadURLs.clear();

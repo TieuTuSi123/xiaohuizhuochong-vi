@@ -1,4 +1,4 @@
-import {JOBS, FOODS, WELFARE} from './life-model.js';
+import {JOBS, FOODS, WELFARE, FLOWER_EXCHANGE_RATE} from './life-model.js';
 import {FOOD_CARE} from './care-model.js';
 import {DEFAULT_SKIN} from './skin-model.js';
 import {createSheet, leave} from './sheet.js';
@@ -34,6 +34,10 @@ export function createLifeWindow(host, {model, skins, characters, currentId, art
   const welfare = button(`领低保 +${WELFARE.amount}`,'erii-life__welfare','coin');
   welfare.title = `钱包少于 ${WELFARE.below} 金币时，每天可以领一次`;
   wallet.append(icon(doc,'coin','erii-life__coin'),node('span','家里的钱包'),balance,node('span','金币'),welfare,stats);
+  const ticketRow = node('div',undefined,'erii-life__ticket-balance'), ticketBalance = node('strong','0');
+  ticketBalance.setAttribute('aria-label','花票余额');
+  ticketRow.append(node('span','花票'),ticketBalance,node('span','张 · 用于换装'));
+  wallet.insertBefore(ticketRow,stats);
   const taskBar = node('div',undefined,'erii-life__task'); taskBar.hidden = true;
   const taskText = node('span'), taskOpen = button('打开数据库'), taskStop = button('停止任务');
   taskStop.setAttribute('aria-label','停止数据库任务（生活手帐）'); taskBar.append(taskText,taskOpen,taskStop);
@@ -71,7 +75,20 @@ export function createLifeWindow(host, {model, skins, characters, currentId, art
   }
   panels.food.append(menu,node('p','买好就开饭，8～12 秒后吃完，吃完饱腹会涨。没有饿肚子惩罚，想请谁吃的时候再来。','erii-life__note'));
   const closet = node('div',undefined,'erii-life__closet'), closetNote = node('p','','erii-life__note');
-  panels.skins.append(closet,closetNote);
+  const exchange = node('form',undefined,'erii-life__exchange'); exchange.setAttribute('aria-label','花票兑换');
+  const exchangeHeading = node('div',undefined,'erii-life__exchange-heading');
+  exchangeHeading.append(node('h4','花票兑换'),node('span',`1 金币 = ${FLOWER_EXCHANGE_RATE} 张花票`));
+  const exchangeControls = node('div',undefined,'erii-life__exchange-controls');
+  const exchangeLabel = node('label','使用金币');
+  const exchangeInput = node('input'); exchangeInput.id = 'erii-life-exchange-coins'; exchangeInput.type = 'number';
+  exchangeInput.min = '1'; exchangeInput.step = '1'; exchangeInput.value = '1'; exchangeInput.inputMode = 'numeric';
+  exchangeLabel.htmlFor = exchangeInput.id;
+  const exchangeButton = button('兑换花票','erii-life__primary'); exchangeButton.type = 'submit';
+  const exchangePreview = node('output',undefined,'erii-life__exchange-preview'); exchangePreview.htmlFor = exchangeInput.id;
+  const exchangeFill = button('填入购衣所需金币','erii-life__exchange-fill');
+  const exchangeHint = node('p','','erii-life__note');
+  exchangeControls.append(exchangeLabel,exchangeInput,exchangeButton); exchange.append(exchangeHeading,exchangeControls,exchangePreview,exchangeFill,exchangeHint);
+  panels.skins.append(exchange,closet,closetNote);
   const totals = node('p',undefined,'erii-life__totals'), records = node('ol',undefined,'erii-life__records'); panels.journal.append(totals,records);
   scroll.append(scene,tabs,...Object.values(panels));
   const status = node('p','','erii-life__status'); status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
@@ -85,27 +102,41 @@ export function createLifeWindow(host, {model, skins, characters, currentId, art
   const skinOf = person => skins?.equippedId(person) || DEFAULT_SKIN;
   // 换装页：默认装扮永远在第一张；买过的直接“换上”，没买的显示价格，钱不够时按钮禁用并写明还差多少。
   function renderCloset(view, character, name) {
-    const entries = skins ? skins.list(who, {coins: view.coins}) : [];
-    const key = JSON.stringify([who, entries.map(entry => [entry.id, entry.owned, entry.equipped, entry.affordable])]);
+    const entries = skins ? skins.list(who, {coins: view.coins, tickets: view.tickets}) : [];
+    const key = JSON.stringify([who, view.coins, view.tickets, entries.map(entry => [entry.id, entry.owned, entry.equipped, entry.affordable])]);
     if (key === closetKey) return;
     closetKey = key; closet.replaceChildren();
     for (const entry of entries) {
       const card = node('article',undefined,'erii-life__skin'); card.dataset.skin = entry.id;
       card.dataset.state = entry.equipped ? 'equipped' : entry.owned ? 'owned' : entry.affordable ? 'open' : 'locked';
-      const tag = node('span', entry.equipped ? '使用中' : entry.owned ? '已拥有' : entry.price ? `${entry.price} 金币` : '免费', 'erii-life__skin-tag');
+      const unit = entry.currency === 'tickets' ? '张花票' : '金币', cost = `${entry.price} ${unit}`;
+      const tag = node('span', entry.equipped ? '使用中' : entry.owned ? '已拥有' : entry.price ? cost : '免费', 'erii-life__skin-tag');
       const image = node('img',undefined,'erii-life__skin-image'); image.loading = 'lazy'; image.draggable = false;
       const url = skinArt?.(character, entry.id === DEFAULT_SKIN ? null : entry.skin, 'idle') || null;
       image.hidden = !url; if (url) image.src = url; image.alt = `${name}的${entry.skin.name}`;
-      const control = button(entry.equipped ? '正在穿着' : entry.owned ? '换上' : entry.price ? `买下 · ${entry.price} 金币` : '免费领取', entry.owned && !entry.equipped ? 'erii-life__primary' : undefined, entry.owned ? 'sparkle' : 'coin');
+      const shortage = Math.max(0, entry.price - entry.balance);
+      const availability = node('p', entry.owned ? '买过后可反复换上。' : !shortage ? '余额够了，可以买下。' : `还差 ${shortage} ${unit}`, 'erii-life__skin-shortage');
+      const control = button(entry.equipped ? '正在穿着' : entry.owned ? '换上' : entry.price ? `买下 · ${cost}` : '免费领取', entry.owned && !entry.equipped ? 'erii-life__primary' : undefined, entry.owned ? 'sparkle' : 'coin');
       control.dataset.skin = entry.id; control.dataset.act = entry.owned ? 'equip' : 'buy';
       control.disabled = entry.equipped || !entry.affordable;
-      control.title = entry.equipped ? `${name}现在就穿着这套` : entry.owned ? `让${name}换上${entry.skin.name}` : entry.affordable ? `花 ${entry.price} 金币买下${entry.skin.name}` : `还差 ${entry.price - view.coins} 金币`;
+      control.title = entry.equipped ? `${name}现在就穿着这套` : entry.owned ? `让${name}换上${entry.skin.name}` : entry.affordable ? `花 ${cost}买下${entry.skin.name}` : `还差 ${shortage} ${unit}`;
       control.setAttribute('aria-label', `${control.querySelector('span:last-child').textContent}：${entry.skin.name}`);
-      card.append(tag,image,node('h4',entry.skin.name),node('p',entry.skin.description || ''),control); closet.append(card);
+      card.append(tag,image,node('h4',entry.skin.name),node('p',entry.skin.description || ''),availability,control); closet.append(card);
     }
     closetNote.textContent = entries.length > 1
-      ? '皮肤用家里钱包里的金币购买，买过的按角色各自拥有、不会消失，随时可以换，也可以换回默认装扮。换装不花 API，也不改数据库。'
-      : '现在还没有上架的皮肤。以后上架的皮肤会出现在这里，用家里钱包里的金币购买；买过的按角色各自拥有，随时换，也可以换回默认装扮。';
+      ? '先打工领金币，再手动兑换花票、买下服装。买过的按角色各自拥有，可以反复换上，也可以换回默认装扮。兑换后剩余花票保留，不能换回金币。'
+      : '这个角色暂时没有上架的皮肤；家里的金币和花票共用，已经买到的服装按角色保存。';
+  }
+  function updateExchange(view = model.view(who)) {
+    const coins = exchangeInput.valueAsNumber, tickets = coins * FLOWER_EXCHANGE_RATE;
+    const valid = Number.isSafeInteger(coins) && coins > 0;
+    exchangeButton.disabled = !valid || coins > view.coins || view.tickets + tickets > 1000000000;
+    exchangePreview.textContent = valid ? `可得 ${tickets} 张花票${coins > view.coins ? ' · 金币不足' : ''}` : '请输入正整数金币';
+    const entry = skins?.list(who, {coins:view.coins, tickets:view.tickets}).find(item => !item.owned && item.currency === 'tickets');
+    const needed = entry ? Math.ceil(Math.max(0, entry.price - view.tickets) / FLOWER_EXCHANGE_RATE) : 0;
+    exchangeFill.hidden = !entry; exchangeFill.disabled = !needed;
+    exchangeFill.dataset.coins = String(needed);
+    exchangeHint.textContent = needed ? `买下「${entry.skin.name}」还需 ${Math.max(0,entry.price - view.tickets)} 张花票，兑换需 ${needed} 金币。` : entry ? '花票已经够了，可直接购买。' : '花票可留着购买服装。输入数量后手动兑换，不会自动扣金币。';
   }
   function stateText(view) {
     if (view.ready) return '下班了';
@@ -129,6 +160,7 @@ export function createLifeWindow(host, {model, skins, characters, currentId, art
       control.title = url ? '' : '读不到这个角色的图，暂时不能安排';
     }
     balance.textContent = String(view.coins); stats.textContent = `一起打工 ${view.jobs} 次 · 吃饭 ${view.meals} 次`;
+    ticketBalance.textContent = String(view.tickets); updateExchange(view);
     welfare.hidden = !view.welfare;
     const key = `${who}:${skinOf(who)}:${active ? `${active.uid}:${view.ready}` : 'idle'}`;
     // 插图每次都比对一次地址：换装后 index.js 会重新取图，这里跟着换，不用等别的状态变化。
@@ -167,12 +199,13 @@ export function createLifeWindow(host, {model, skins, characters, currentId, art
       for (const entry of view.journal) {
         const row = node('li'); row.dataset.kind = entry.kind;
         const date = new Date(entry.at), time = node('time',date.toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false})); time.dateTime = date.toISOString();
-        const tag = node('b', entry.who || entry.kind !== 'welfare' ? nameOf(byId(entry.who || 'erii')) : '家里', 'erii-life__who'); tag.dataset.character = entry.who || (entry.kind === 'welfare' ? '' : 'erii');
+        const family = !entry.who && ['welfare','exchange'].includes(entry.kind);
+        const tag = node('b', family ? '家里' : nameOf(byId(entry.who || 'erii')), 'erii-life__who'); tag.dataset.character = family ? '' : entry.who || 'erii';
         row.append(time,tag,node('span',entry.text)); records.append(row);
       }
     }
     renderCloset(view, character, name);
-    totals.textContent = `累计领到 ${view.earned} 金币 · 花了 ${view.spent} 金币`;
+    totals.textContent = `累计领到 ${view.earned} 金币 · 花了 ${view.spent} 金币\n兑换得到 ${view.ticketsEarned} 张花票 · 花了 ${view.ticketsSpent} 张花票`;
     root.dataset.activity = active?.kind || 'idle'; root.dataset.ready = String(view.ready); root.dataset.coins = String(view.coins);
   }
   function action(callback, message, event) {
@@ -196,6 +229,14 @@ export function createLifeWindow(host, {model, skins, characters, currentId, art
   listen(claim,'click',()=>action(()=>model.claim(who),'工资收好啦，可以去挑一份喜欢的饭。',{type:'wage'}));
   listen(cancel,'click',()=> { if (!cancelConfirmed) {cancelConfirmed = true; render(); say('再点一次提前下班，这次不会获得金币。');} else action(()=>model.cancelJob(who),'今天先休息，没有扣金币。'); });
   listen(welfare,'click',()=> { const amount = model.claimWelfare(); if (!amount) { say('今天已经领过了，或者钱包还够用。'); render(); return; } say(`领到 ${amount} 金币的低保。省着点花。`); render(); onChange?.(); onEvent?.('welfare', who, {amount}); });
+  listen(exchangeInput,'input',()=>updateExchange());
+  listen(exchangeFill,'click',()=> { exchangeInput.value = exchangeFill.dataset.coins; updateExchange(); say(`已填入 ${exchangeInput.value} 金币，点“兑换花票”后才会扣款。`); exchangeInput.focus({preventScroll:true}); });
+  listen(exchange,'submit',event=> {
+    event.preventDefault(); if (destroyed) return;
+    const result = model.exchangeTickets(exchangeInput.valueAsNumber);
+    if (!result) { say('兑换失败：请输入正整数，确认金币足够且花票未达到上限。'); render(); return; }
+    say(`已用 ${result.coins} 金币兑换 ${result.tickets} 张花票。`); render(); onChange?.();
+  });
   listen(tabs,'click',event=> {const control = event.target.closest?.('button[data-tab]'); if (control) select(control.dataset.tab);});
   listen(tabs,'keydown',event=> {
     const keys = Object.keys(tabButtons), index = keys.indexOf(selected);
@@ -209,7 +250,7 @@ export function createLifeWindow(host, {model, skins, characters, currentId, art
     if (control.dataset.act === 'buy') {
       const result = skins.buy(who, id);
       if (!result.ok) {
-        say(result.reason === 'coins' ? '金币还不够，先去打一份工吧。' : result.reason === 'owned' ? '已经买过了，直接换上就好。' : '这套皮肤现在买不了。');
+        say(result.reason === 'tickets' ? '花票还不够，先用打工的金币兑换花票吧。' : result.reason === 'coins' ? '金币还不够，先去打一份工吧。' : result.reason === 'owned' ? '已经买过了，直接换上就好。' : '这套皮肤现在买不了。');
         render(); return;
       }
       // 先通知 index.js（它会重新取图、让桌宠说话），再画这边：这样插图和缩略图拿到的已经是新图。

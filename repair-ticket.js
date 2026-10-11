@@ -98,7 +98,7 @@ export function renderTicket(doc, ticket, { index, dbBusy = false, pending = fal
   }[ticket.state] || '';
   receipt.append(node('span', text));
   if (ticket.backupId && ['applied', 'interrupted'].includes(ticket.state) && !ticket.undoConfirm) {
-    const undo = action('撤销', 'ticket-undo'); undo.disabled = busy; receipt.append(undo);
+    const undo = action('撤销', 'ticket-undo'); undo.disabled = busy || dbBusy; receipt.append(undo);
   }
   if (ticket.backupId && ['applied', 'undone', 'interrupted'].includes(ticket.state)) {
     const save = action('下载备份', 'ticket-download'); save.disabled = busy; receipt.append(save);
@@ -106,10 +106,12 @@ export function renderTicket(doc, ticket, { index, dbBusy = false, pending = fal
   card.append(receipt);
   if (ticket.undoConfirm) {
     const confirm = node('div', undefined, 'erii-repair__confirm');
-    const force = action('仍要撤销', 'ticket-undo-force'); force.disabled = busy;
+    const force = action('仍要撤销', 'ticket-undo-force'); force.disabled = busy || dbBusy;
     const keep = action('先不撤销', 'ticket-keep'); keep.disabled = busy;
     confirm.append(node('span', ticket.undoConfirm), force, keep);
     card.append(confirm);
   }
+  if (dbBusy && ticket.backupId && ['applied', 'interrupted'].includes(ticket.state))
+    card.append(node('p', '数据库正在处理任务，等它忙完再撤销。', 'erii-repair__hint'));
   return card;
 }

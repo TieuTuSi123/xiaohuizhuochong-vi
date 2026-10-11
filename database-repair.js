@@ -6,8 +6,9 @@ import { digestTables, executionOrder, locateRow, clip } from './repair.js';
 
 const NEEDED = ['exportTableAsJson', 'importTableAsJson', 'updateCell', 'updateRow', 'insertRow', 'deleteRow'];
 
-export function createRepairService(host, { backups }) {
+export function createRepairService(host, { backups, busy = () => false }) {
   const api = () => host.AutoCardUpdaterAPI;
+  let revision = 0, writing = false;
   function chatKey() {
     try {
       const context = host.SillyTavern?.getContext?.();
@@ -22,12 +23,29 @@ export function createRepairService(host, { backups }) {
     let current = '';
     try { presets = (database.getPlotPresetNames?.() || []).map(String); } catch { /* 预设读不到时只是不能切换 */ }
     try { current = String(database.getCurrentPlotPreset?.() ?? ''); } catch { /* 同上 */ }
-    return { data: tables(), presets, current, chatKey: chatKey() };
+    return { data: tables(), presets, current, chatKey: chatKey(), revision, database };
+  }
+  const isCurrent = captured => Boolean(captured?.chatKey) && captured.chatKey === chatKey() && captured.revision === revision && captured.database === api();
+  function guard(captured) {
+    if (!isCurrent(captured) || captured.database !== api()) return '聊天或数据库已切换，这次操作已停止。请切回原聊天后重新确认。';
+    if (busy()) return '数据库正在处理任务，等它忙完再操作。';
+    return '';
+  }
+  async function exclusive(run) {
+    if (writing) return { ok: false, text: '已有一次检修写入或撤销正在进行，请等它结束。' };
+    writing = true;
+    try { return await run(); } finally { writing = false; }
   }
   const done = text => ({ ok: true, text });
   const failed = text => ({ ok: false, text });
   async function applyOne(database, item) {
-    if (item.kind === 'preset') return await database.switchPlotPreset?.(item.after) ? done('已切换') : failed('数据库没有切换成功。');
+    if (item.kind === 'preset') {
+      if (typeof database.getCurrentPlotPreset !== 'function' || typeof database.switchPlotPreset !== 'function')
+        return failed('这个版本的数据库无法核对并切换预设，没有改。');
+      if (typeof item.before !== 'string' || String(database.getCurrentPlotPreset() ?? '') !== item.before)
+        return failed('确认前剧情推进预设已经变了，请重新生成修改单。');
+      return await database.switchPlotPreset(item.after) ? done('已切换') : failed('数据库没有切换成功。');
+    }
     if (item.kind === 'refill') {
       if (typeof database.manualUpdate !== 'function') return failed('这个版本的数据库没有提供重新填表的接口。');
       return await database.manualUpdate() === false ? failed('数据库没有完成这次填表，可以在数据库里查看原因。') : done('数据库已重新填表');
@@ -43,7 +61,12 @@ export function createRepairService(host, { backups }) {
     if (index < 0) return failed('这一行已经不在了，没有改。');
     const headers = sheet.content[0];
     const now = column => String(sheet.content[index][headers.indexOf(column)] ?? '');
-    if (item.kind === 'delete') return await database.deleteRow(item.table, index) ? done('已删除') : failed('数据库拒绝了删除（这一行可能被锁定）。');
+    if (item.kind === 'delete') {
+      if (!item.beforeRow) return failed('这张旧修改单没有保存完整的删行原值，请重新生成修改单。');
+      if (JSON.stringify([headers.map(cell => String(cell ?? '')), sheet.content[index]]) !== item.beforeRow)
+        return failed('确认前这一行或表头已经变了，没有删除。请重新生成修改单。');
+      return await database.deleteRow(item.table, index) ? done('已删除') : failed('数据库拒绝了删除（这一行可能被锁定）。');
+    }
     if (item.kind === 'cell') {
       if (now(item.column) !== item.before) return failed(`确认前这一格已经变了（现在是「${clip(now(item.column), 40)}」），没有改。`);
       return await database.updateCell(item.table, index, item.column, item.after) ? done('已写入') : failed('数据库拒绝了写入（可能被锁定）。');
@@ -58,46 +81,61 @@ export function createRepairService(host, { backups }) {
   }
   async function apply(ticket, { character = '', onBackup } = {}) {
     if (!available()) return { ok: false, text: '没有检测到数据库，没有写入。' };
-    if (ticket.chatKey && ticket.chatKey !== chatKey()) return { ok: false, text: '现在打开的不是提出这张修改单时的聊天，没有写入。' };
+    const captured = { chatKey: ticket.chatKey, revision, database: api() };
+    let blocked = guard(captured);
+    if (blocked) return failed(blocked);
     const items = executionOrder(ticket.items);
     if (!items.length) return { ok: false, text: '还没有勾选要改的地方。' };
     const database = api();
     let presetBefore = '';
     try { presetBefore = String(database.getCurrentPlotPreset?.() ?? ''); } catch { /* 只影响撤销时切回预设 */ }
     let backupId = '';
-    try { backupId = await backups.put({ chatKey: chatKey(), character, tables: JSON.stringify(database.exportTableAsJson() || {}), presetBefore }); }
+    try { backupId = await backups.put({ chatKey: captured.chatKey, character, tables: JSON.stringify(database.exportTableAsJson() || {}), presetBefore }); }
     catch { backupId = ''; }
     if (!backupId) return { ok: false, text: '备份没有成功，为了安全没有写入。' };
     // 先把备份编号交给调用方存好：万一写到一半页面被关掉，之后仍能找到备份撤销或下载。
     onBackup?.(backupId);
     const results = [];
     for (const item of items) {
+      // 每次等待结束和下一条写入前重新检查；强制撤销也不能绕过归属与忙状态。
+      blocked ||= guard(captured);
       let outcome;
-      try { outcome = await applyOne(database, item); } catch (error) { outcome = failed(`出错了：${clip(error?.message || error, 120)}`); }
+      try { outcome = blocked ? failed(blocked) : await applyOne(database, item); } catch (error) { outcome = failed(`出错了：${clip(error?.message || error, 120)}`); }
       results.push({ id: item.id, ...outcome });
     }
     const written = results.filter(result => result.ok).length;
     let digest = '';
-    try { digest = digestTables(database.exportTableAsJson()); } catch { /* 没有指纹时撤销前一律再确认 */ }
+    try { if (isCurrent(captured) && database === api()) digest = digestTables(database.exportTableAsJson()); } catch { /* 没有指纹时撤销前一律再确认 */ }
     return { ok: written > 0, results, backupId, digest, durable: backups.durable,
       presetChanged: results.some(result => result.ok && items.find(item => item.id === result.id)?.kind === 'preset'),
-      text: written ? `已写入 ${written} 处${written < results.length ? `，${results.length - written} 处没写进去` : ''}。` : '一处都没有写进去，表格没有变化。' };
+      text: written ? `已写入 ${written} 处${written < results.length ? `，${results.length - written} 处没写进去` : ''}。${blocked}` : blocked || '一处都没有写进去。' };
   }
   async function undo(ticket, { force = false } = {}) {
     if (!available()) return { ok: false, text: '没有检测到数据库，没法撤销。' };
-    if (ticket.chatKey && ticket.chatKey !== chatKey()) return { ok: false, text: '现在打开的不是这张修改单所在的聊天。切回那个聊天后再撤销。' };
+    const captured = { chatKey: ticket.chatKey, revision, database: api() };
+    let blocked = guard(captured);
+    if (blocked) return failed(blocked);
     const record = await backups.get(ticket.backupId);
+    blocked = guard(captured);
+    if (blocked) return failed(blocked);
     if (!record?.tables) return { ok: false, text: '找不到这次的备份了（页面刷新过，而且浏览器没能把备份存下来）。' };
+    if (record.chatKey !== captured.chatKey) return failed('备份不属于这张修改单所在的聊天，没有恢复。');
     if (!force && !ticket.digest) return { ok: false, confirm: true, text: '上次写入的结果没有记录完整，没法确认表格之后有没有变过。撤销会把整份表格恢复到写入前。' };
-    if (!force && digestTables(api().exportTableAsJson()) !== ticket.digest)
+    if (!force && digestTables(captured.database.exportTableAsJson()) !== ticket.digest)
       return { ok: false, confirm: true, text: '写入之后表格又有变化（可能是数据库自己填了表）。撤销会把这些变化一起退回到写入前。' };
-    if (!await api().importTableAsJson(record.tables)) return { ok: false, text: '数据库没有接受恢复，表格没有变化。可以下载备份，在数据库里手动导入。' };
+    blocked = guard(captured);
+    if (blocked) return failed(blocked);
+    if (!await captured.database.importTableAsJson(record.tables)) return { ok: false, text: '数据库没有接受恢复，表格没有变化。可以下载备份，在数据库里手动导入。' };
     let tail = '';
     if (ticket.presetChanged) {
-      try { tail = await api().switchPlotPreset?.(record.presetBefore ?? '') ? '，剧情推进预设也切回去了' : '，但剧情推进预设没能切回去'; }
+      blocked = guard(captured);
+      try { tail = blocked ? `，预设未恢复：${blocked.replace(/。$/, '')}` : await captured.database.switchPlotPreset?.(record.presetBefore ?? '') ? '，剧情推进预设也切回去了' : '，但剧情推进预设没能切回去'; }
       catch { tail = '，但剧情推进预设没能切回去'; }
     }
     return { ok: true, text: `已恢复到写入前的表格${tail}。` };
   }
-  return { available, snapshot, apply, undo, chatKey, backup: id => backups.get(id), get durable() { return backups.durable; } };
+  return { available, snapshot, isCurrent, invalidate: () => { revision++; },
+    apply: (ticket, options) => exclusive(() => apply(ticket, options)),
+    undo: (ticket, options) => exclusive(() => undo(ticket, options)),
+    chatKey, backup: id => backups.get(id), get durable() { return backups.durable; } };
 }

@@ -1,5 +1,5 @@
 import { CompanionModel } from './model.js';
-import { createDatabaseObserver, readDeskPetImages } from './database-observer.js';
+import { createDatabaseObserver, readDeskPetImages, readDatabaseView } from './database-observer.js';
 import { readBounds, fromRatio, toRatio, constrain, dockEdge } from './position.js';
 import { createMotion } from './motion.js';
 import { StoryCarousel } from './stories.js';
@@ -22,7 +22,7 @@ import { createTicket, describeErrors, describeFloors, describeTables, recentFlo
 import { WATCH, clampEvery, createFloorCounter, decideWatch, shouldAsk, watchMessages } from './watch.js';
 
 const ID = 'erii-database-pet';
-const VERSION = '0.9.1';
+const VERSION = '0.9.3';
 const defaults = { enabled: true, idleActions: true, edgePeeks: true, healingStories: true, hideOriginal: true, taskDetails: false, size: 88, side: 'right', position: null,
   character: DEFAULT_CHARACTER, taskTalk: true, needs: true, effects: 'auto', watch: false, watchEvery: WATCH.every, repairFloors: 3 };
 const CHAT_CONNECTION = ['mode', 'url', 'model', 'maxTokens', 'rememberKey', 'replyStyle', 'nickname'];
@@ -81,11 +81,16 @@ export function createCompanion(host, context) {
   const effects = createEffects(host, { tier: fxTier });
   // 检修：写入前的备份存在浏览器本地；写入只走数据库公开接口。旁观陪聊：只数开启后新出现的楼层。
   const backups = createBackupStore(host);
-  const repairService = createRepairService(host, { backups });
+  const databaseBusy = () => {
+    try { return readDatabaseView(doc).busy || Boolean(model.snapshot.busy); }
+    catch { return Boolean(model.snapshot.busy); }
+  };
+  const repairService = createRepairService(host, { backups, busy: databaseBusy });
   const floorCounter = createFloorCounter();
   let watchDue = 0;
   let watchWait = 0;
   let watchRunning = false;
+  let watchEpoch = 0;
   let lastCommentAt = 0;
   let unbindChatEvents = null;
   let dataSource = null;
@@ -164,6 +169,11 @@ export function createCompanion(host, context) {
       image.src = url;
     }));
     return loaded.get(pose);
+  }
+  function preloadArt() {
+    // 新皮肤只先准备任务和拖动常用图，其余按需加载，减少手机首屏解码。
+    const poses = skinOf(character.id) ? ['idle','received','writing','complete','error','wave','lifted','land'] : Object.keys(images);
+    for (const pose of poses) loadAsset(pose);
   }
   async function showPose(pose) {
     const version = ++swapVersion;
@@ -308,11 +318,11 @@ export function createCompanion(host, context) {
     if (item.id === character.id) return images;
     return imageUrls(item, usesDatabaseArt(item) ? readArt() : null, skinOf(item.id));
   }
-  // 换了皮肤之后重新取图：和换角色一样清掉已加载的图，再把每个姿势预载一遍；当前姿势会立刻换成新图。
+  // 换装后清掉旧图缓存，再准备常用图；当前姿势会换成新图。
   function refreshArt() {
     images = imageUrls(character, usesDatabaseArt(character) ? readArt(true) : null, skinOf(character.id));
     loaded.clear(); failedEdge = null; assetFailed = false; lastPose = '';
-    for (const pose of Object.keys(images)) loadAsset(pose);
+    preloadArt();
     applyCharacterTexts();
     update();
   }
@@ -516,7 +526,7 @@ export function createCompanion(host, context) {
     const persona = { prompt: who.persona, relationship: who.relationship };
     return {
       available: () => repairService.available(),
-      busy: () => Boolean(model.snapshot.busy),
+      busy: databaseBusy,
       get durable() { return backups.durable; },
       scope() {
         const available = repairService.available();
@@ -525,13 +535,14 @@ export function createCompanion(host, context) {
         return { available, tables, floors: settings.repairFloors, errors: recentErrors().length };
       },
       setFloors(count) { settings.repairFloors = Math.min(REPAIR_LIMITS.floors, Math.max(0, Math.round(Number(count) || 0))); save(); },
-      messages(config, ctx, list) {
-        const snapshot = repairService.snapshot();
+      capture: () => repairService.snapshot(),
+      isCurrent: snapshot => repairService.isCurrent(snapshot),
+      messages(config, ctx, list, snapshot) {
         return repairMessages(config, ctx, list, { persona, name: who.name, material: {
           tables: describeTables(snapshot.data).text, errors: describeErrors(recentErrors()),
           floors: describeFloors(recentFloors(ctx.chat, settings.repairFloors)), presets: snapshot.presets, current: snapshot.current } });
       },
-      review: text => createTicket(text, repairService.snapshot()),
+      review: (text, snapshot) => createTicket(text, snapshot),
       apply: (ticket, options) => repairService.apply(ticket, { ...options, character: who.id }),
       undo: (ticket, force) => repairService.undo(ticket, { force }),
       backup: id => backups.get(id),
@@ -545,9 +556,14 @@ export function createCompanion(host, context) {
     const ctx = host.SillyTavern?.getContext?.();
     if (!ctx) return;
     floorCounter.observe(chatKeyOf(ctx), ctx.chat);
-    if (kind === 'changed') watchDue = 0;
+    if (kind === 'changed') { repairService.invalidate(); chat?.contextChanged(); cancelWatch(); }
     // 只在角色回复写完后考虑评论，用户刚发出消息时正文还不完整。
     if (kind === 'received' && settings.watch && floorCounter.pending >= settings.watchEvery) watchDue ||= Date.now() + WATCH.settle;
+  }
+  function cancelWatch() {
+    watchEpoch++; watchDue = 0; watchWait = 0;
+    chat?.cancelComment();
+    if (speech?.watch) speech = null;
   }
   function bindChatEvents() {
     if (unbindChatEvents) return;
@@ -574,6 +590,9 @@ export function createCompanion(host, context) {
     const who = character;
     const current = chat;
     if (!ctx || !current) return;
+    const epoch = watchEpoch, key = chatKeyOf(ctx);
+    const valid = () => !destroyed && settings.watch && settings.enabled !== false && epoch === watchEpoch
+      && current === chat && who.id === character.id && key === chatKeyOf(host.SillyTavern?.getContext?.());
     const count = Math.min(floorCounter.take(), WATCH.floors);
     const floors = recentFloors(ctx.chat, count);
     if (!floors.length) return;
@@ -584,10 +603,10 @@ export function createCompanion(host, context) {
     let result;
     try {
       result = await current.comment((config, context) => watchMessages(config, context, floors,
-        { persona: { prompt: who.persona, relationship: who.relationship }, name: who.name, unanswered: state.unanswered, ask }));
+        { persona: { prompt: who.persona, relationship: who.relationship }, name: who.name, unanswered: state.unanswered, ask }), valid);
     } catch (error) { result = { ok: false, reason: String(error?.message || error) }; }
     finally { watchRunning = false; }
-    if (destroyed) return;
+    if (!valid()) return;
     if (result.reason === 'busy') { floorCounter.restore(count); watchDue = Date.now() + 5000; return; }
     if (result.reason === 'closed') return;
     lastCommentAt = Date.now();
@@ -597,7 +616,7 @@ export function createCompanion(host, context) {
     persistStore(); settingsControls?.sync();
     if (who.id === character.id && !switching && settings.enabled !== false) {
       storyteller.dismiss();
-      speech = { text: result.text, until: Date.now() + 9000, reply: true };
+      speech = { text: result.text, until: Date.now() + 9000, reply: true, watch: true };
       update();
     }
   }
@@ -776,7 +795,7 @@ export function createCompanion(host, context) {
       character = next; settings.character = next.id;
       images = imageUrls(character, usesDatabaseArt(character) ? readArt(true) : null, skinOf(character.id));
       loaded.clear(); failedEdge = null; assetFailed = false; lastPose = ''; speech = null; yielded = false;
-      for (const pose of Object.keys(images)) loadAsset(pose);
+      preloadArt();
       applyCharacterTexts();
       chat?.destroy(); chat = makeChat(); if (chatWasOpen) chat.open();
       life?.setCharacter(character.id);
@@ -848,7 +867,7 @@ export function createCompanion(host, context) {
       fields.push([key, input]);
     };
     const display = group('桌宠');
-    toggle(display, 'enabled', '显示桌宠');
+    toggle(display, 'enabled', '显示桌宠', () => { if (!settings.enabled) cancelWatch(); });
     toggle(display, 'idleActions', '空闲时做小动作、偶尔说说话');
     toggle(display, 'edgePeeks', '拖到边缘后探头');
     toggle(display, 'healingStories', '空闲时讲治愈小故事');
@@ -881,7 +900,7 @@ export function createCompanion(host, context) {
     listen(fxMode, 'change', () => { settings.effects = fxMode.value; save(); house?.refreshEffects(); });
     const companion = group('陪聊与检修');
     // 开启时重新起算：只评论开启之后新出现的楼层。
-    toggle(companion, 'watch', '旁观陪聊：隔几层看看正文，说说感想', () => { watchDue = 0; observeChat('toggle'); floorCounter.reset(); });
+    toggle(companion, 'watch', '旁观陪聊：隔几层看看正文，说说感想', () => { cancelWatch(); observeChat('toggle'); floorCounter.reset(); });
     const select = (box, label, options, value, change) => {
       const row = el(doc, 'label', undefined, 'pet-settings__select');
       const control = el(doc, 'select'); control.setAttribute('aria-label', label);
@@ -1154,7 +1173,9 @@ export function createCompanion(host, context) {
   const skinBridge = {
     list: (who, options) => skinModel.list(who, options),
     equippedId: who => skinModel.equippedId(who),
-    buy: (who, id) => skinModel.buy(who, id, (price, skin) => lifeModel.spend(price, `花 ${price} 金币买了皮肤「${skin.name}」。`, who)),
+    buy: (who, id) => skinModel.buy(who, id, (price, skin) => skin.currency === 'tickets'
+      ? lifeModel.spendTickets(price, `花 ${price} 张花票买了皮肤「${skin.name}」。`, who)
+      : lifeModel.spend(price, `花 ${price} 金币买了皮肤「${skin.name}」。`, who)),
     equip: (who, id) => skinModel.equip(who, id),
   };
   life = createLifeWindow(host, {
@@ -1215,7 +1236,7 @@ export function createCompanion(host, context) {
     update();
   });
   applyCharacterTexts();
-  for (const pose of Object.keys(images)) loadAsset(pose);
+  preloadArt();
   connect(); mountSettings(); watchInput(); bindChatEvents(); position(); scheduleLeisure();
   // Establish the saved location before enabling movement easing (no fly-in from 0,0).
   root.getBoundingClientRect();
@@ -1234,6 +1255,7 @@ export function createCompanion(host, context) {
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      repairService.invalidate();
       chat?.destroy();
       life.destroy();
       house.destroy();

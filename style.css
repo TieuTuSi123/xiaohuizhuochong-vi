@@ -37,6 +37,15 @@
   --pet-tape: rgba(255, 186, 52, .62); --pet-tape-dot: rgba(255, 120, 40, .45);
   --pet-shadow: rgba(120, 80, 10, .22);
 }
+/* 紫夜礼裙的手帐与桌宠气泡；换回默认后恢复角色原来的配色。 */
+.erii-companion[data-character="erii"][data-skin="erii-purple-night"],
+.erii-life[data-character="erii"][data-skin="erii-purple-night"] {
+  --pet-accent: #805399; --pet-accent-2: #a177b7; --pet-accent-ink: #523362;
+  --pet-ink: #403146; --pet-muted: #806d89; --pet-faint: #96839d;
+  --pet-paper: #fbf7fd; --pet-paper-2: #f1e8f5; --pet-card: #fffdfd;
+  --pet-line: #dfcee8; --pet-soft: #eee2f5; --pet-cover: #302139; --pet-cover-2: #4a305c;
+  --pet-tape: rgba(157, 111, 183, .46); --pet-shadow: rgba(70, 40, 90, .18);
+}
 
 /* ---------- 桌宠本体 ---------- */
 .erii-companion {
@@ -504,6 +513,9 @@
 .erii-life__coin { width: 22px; height: 22px; color: var(--pet-gold-lo); }
 .erii-life__wallet strong { color: var(--pet-gold-lo); font: italic 700 30px/1.05 var(--pet-serif); margin-left: auto; }
 .erii-life__wallet > span:last-child { flex-basis: 100%; color: var(--pet-muted); font-size: 11px; }
+.erii-life__ticket-balance { flex-basis: 100%; display: flex; align-items: baseline; gap: 7px; color: var(--pet-accent-ink); font-size: 12px; }
+.erii-life__ticket-balance strong { font: 700 19px/1.3 var(--pet-serif); color: var(--pet-accent-ink); margin: 0; }
+.erii-life__ticket-balance span:last-child { color: var(--pet-muted); font-size: 11px; }
 .erii-life .erii-life__welfare { min-height: 28px; padding: 3px 10px; font-size: 11px; color: #4a3204 !important; background: linear-gradient(180deg, var(--pet-gold-hi), var(--pet-gold)) !important; border-color: var(--pet-gold-lo) !important; font-weight: 700; }
 .erii-life__scroll { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 14px 20px 12px; scrollbar-width: thin; }
 .erii-life__scene { display: flex; align-items: center; gap: 16px; min-height: 160px; margin-bottom: 14px; }
@@ -540,8 +552,18 @@
 .erii-life__food button { margin-top: 7px; width: 100%; font-size: 12px; }
 /* 换装页：和点餐卡片同一套版式；左上角的小纸签写价格 / 已拥有 / 使用中。皮肤的界面配色用 [data-skin="皮肤 id"] 另写。 */
 .erii-life__closet { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.erii-life__skin { position: relative; padding: 14px 10px 12px; text-align: center; border: 1px solid var(--pet-line); border-radius: 16px; background: var(--pet-card); transition: transform .18s var(--pet-ease), box-shadow .18s; }
-.erii-life__skin:hover { transform: translateY(-2px) rotate(.5deg); box-shadow: 0 10px 18px -14px var(--pet-shadow); }
+.erii-life__exchange { padding: 12px; margin-bottom: 14px; border: 1px solid var(--pet-line); border-radius: 14px; background: var(--pet-card); }
+.erii-life__exchange-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.erii-life__exchange-heading span { color: var(--pet-muted); font-size: 11px; }
+.erii-life__exchange-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+.erii-life__exchange-controls label { font-size: 12px; color: var(--pet-ink); }
+.erii-life .erii-life__exchange-controls input { flex: 1; width: 80px; min-width: 56px; min-height: 36px; padding: 6px 9px; border: 1px solid var(--pet-line); border-radius: 8px; background: var(--pet-paper); color: var(--pet-ink); box-sizing: border-box; }
+.erii-life .erii-life__exchange-controls button { padding: 8px 10px; min-height: 36px; font-size: 12px; }
+.erii-life__exchange-preview { display: block; margin: 8px 0; color: var(--pet-accent-ink); font-size: 12px; overflow-wrap: anywhere; }
+.erii-life .erii-life__exchange-fill { font-size: 11px; padding: 5px 9px; }
+.erii-life .erii-life__skin-shortage { min-height: 0; color: var(--pet-gold-lo); font-size: 11px; }
+.erii-life__skin { position: relative; min-width: 0; padding: 14px 10px 12px; text-align: center; border: 1px solid var(--pet-line); border-radius: 16px; background: var(--pet-card); transition: transform .18s var(--pet-ease), box-shadow .18s; }
+.erii-life__skin:hover { transform: translateY(-2px); box-shadow: 0 10px 18px -14px var(--pet-shadow); }
 .erii-life__skin[data-state="equipped"] { border-color: var(--pet-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pet-accent) 22%, transparent); }
 .erii-life__skin[data-state="locked"] { background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--pet-line) 45%, transparent) 6px 7px), var(--pet-paper); }
 .erii-life__skin[data-state="locked"] .erii-life__skin-image { filter: grayscale(.6) opacity(.75); }

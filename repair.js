@@ -244,6 +244,7 @@ export function reviewEntries(entries, data, { presets = [], current = '' } = {}
     if (!item.rowId) { item.problem = '这一行没有编号（row_id），没法安全地定位，请在数据库里直接修改。'; return; }
     const valueAt = column => String(row[sheet.headers.indexOf(column)] ?? '');
     if (kind === 'delete') {
+      item.beforeRow = JSON.stringify([sheet.headers, row]);
       item.preview = clip(sheet.headers.slice(1).map((header, i) => row[i + 1] ? `${header}=${row[i + 1]}` : '').filter(Boolean).join(' · '), 240);
       claim(item, [`${sheet.key}|${item.rowId}|*`]);
       return;

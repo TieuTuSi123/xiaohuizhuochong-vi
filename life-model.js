@@ -11,6 +11,9 @@ export const FOODS = Object.freeze([
 ]);
 // 低保：家里的钱包快见底时可领一小笔，每天一次，不能拿来刷钱。
 export const WELFARE = Object.freeze({below:5, amount:8});
+// 花票用于换装：整数金币单向兑换，用户手动操作，不自动扣款。
+export const FLOWER_EXCHANGE_RATE = 40;
+const MAX_BALANCE = 1000000000;
 const OWNER = 'erii';
 const integer = value => Math.min(1000000000, Math.max(0, Math.floor(Number(value) || 0)));
 const catalog = activity => (activity?.kind === 'job' ? JOBS : activity?.kind === 'food' ? FOODS : []).find(item => item.id === activity.id);
@@ -23,17 +26,19 @@ function normalizeActivity(activity) {
   return valid ? {kind:activity.kind, id:activity.id, startedAt:activity.startedAt, uid:activity.uid.slice(0,100)} : null;
 }
 
-// 存档兼容 0.7.1：绘梨衣的活动仍写在 active，其他角色的写在 activeBy；退回旧版只会丢掉别的角色正在进行的活动。
+// 继续读取旧存档：绘梨衣的活动写在 active，其他角色写在 activeBy；
+// 退回不认识这些字段的旧版再保存，可能丢掉新增花票/日志或其他角色活动，需先备份。
 export function normalizeLife(saved = {}) {
   const activeBy = {};
   for (const [who, activity] of Object.entries(saved?.activeBy && typeof saved.activeBy === 'object' ? saved.activeBy : {}))
     if (validWho(who) && who !== OWNER) activeBy[who] = normalizeActivity(activity);
-  return {schema:2, coins:integer(saved?.coins), earned:integer(saved?.earned), spent:integer(saved?.spent),
+  return {schema:3, coins:integer(saved?.coins), earned:integer(saved?.earned), spent:integer(saved?.spent),
+    tickets:integer(saved?.tickets), ticketsEarned:integer(saved?.ticketsEarned), ticketsSpent:integer(saved?.ticketsSpent),
     jobs:integer(saved?.jobs), meals:integer(saved?.meals),
     active:normalizeActivity(saved?.active), activeBy,
     welfareDate:typeof saved?.welfareDate === 'string' ? saved.welfareDate.slice(0,10) : '',
     journal:Array.isArray(saved?.journal) ? saved.journal.filter(item => item && typeof item.text === 'string'
-      && Number.isFinite(item.at) && Number.isFinite(new Date(item.at).getTime()) && ['earned','spent','meal','cancel','welfare'].includes(item.kind)).slice(0,20)
+      && Number.isFinite(item.at) && Number.isFinite(new Date(item.at).getTime()) && ['earned','spent','meal','cancel','welfare','exchange','tickets'].includes(item.kind)).slice(0,20)
       .map(item => ({text:item.text.slice(0,160), at:item.at, kind:item.kind, ...(validWho(item.who) ? {who:item.who} : {})})) : []};
 }
 
@@ -84,6 +89,19 @@ export class LifeModel {
     if (this.state.coins < price) return false;
     this.state.coins -= price; this.state.spent = integer(this.state.spent + price);
     this.record('spent', String(text || `花了 ${price} 金币。`).slice(0, 160), who); this.save(); return true;
+  }
+  exchangeTickets(coins) {
+    if (!Number.isSafeInteger(coins) || coins <= 0 || coins > this.state.coins) return false;
+    const tickets = coins * FLOWER_EXCHANGE_RATE;
+    if (!Number.isSafeInteger(tickets) || this.state.tickets + tickets > MAX_BALANCE) return false;
+    this.state.coins -= coins; this.state.spent = integer(this.state.spent + coins);
+    this.state.tickets += tickets; this.state.ticketsEarned = integer(this.state.ticketsEarned + tickets);
+    this.record('exchange', `用 ${coins} 金币兑换了 ${tickets} 张花票。`); this.save(); return {coins, tickets};
+  }
+  spendTickets(amount, text, who = OWNER) {
+    if (!Number.isSafeInteger(amount) || amount < 0 || this.state.tickets < amount) return false;
+    this.state.tickets -= amount; this.state.ticketsSpent = integer(this.state.ticketsSpent + amount);
+    this.record('tickets', String(text || `花了 ${amount} 张花票。`).slice(0, 160), who); this.save(); return true;
   }
   welfareAvailable() { return this.state.coins < WELFARE.below && this.state.welfareDate !== today(this.now()); }
   claimWelfare() {
