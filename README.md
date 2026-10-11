@@ -2,13 +2,31 @@ Link Gốc: https://github.com/dzsks/xiaohuizhuochong
 
 # Tiểu Erii · Pet màn hình cơ sở dữ liệu
 
-Đây là một tiện ích mở rộng pet màn hình độc lập được cài đặt vào SillyTavern. Nó đọc trạng thái nhiệm vụ và thông báo kết quả đã được hiển thị bởi "Long Huyết Huyền Hoàng · Cơ sở dữ liệu", sau đó để pet màn hình phản ứng lại bằng hành động, tương tác nhấp chuột, bong bóng nhiệm vụ và lời thoại của riêng mình. Bạn có thể chuyển đổi pet màn hình giữa Tiểu Erii, Zero và Nai Dan, mỗi nhân vật có tính cách, lời thoại, hồ sơ nuôi dưỡng và lịch sử trò chuyện riêng. Bạn cũng có thể mở một cửa sổ độc lập để trò chuyện với pet màn hình bằng API hiện tại của Tavern hoặc API được cấu hình riêng.
+## 当前版本：v0.9.3
 
-## Phiên bản hiện tại: v0.9.0
+**v0.9.3：上架小绘的「月读命·紫夜礼裙」，10320 张花票购买；1 金币兑换 40 张花票，258 金币可换够一套。衣服不是初始赠送，需要自己打工攒钱。27 个动作和生活配图已接入，旧金币、活动与存档继续使用。**
 
-**v0.9.0: Cửa sổ trò chuyện được bổ sung thêm chế độ "Bảo trì cơ sở dữ liệu" —— pet màn hình sẽ xem bảng biểu, các lỗi gần đây và vài tầng văn bản trò chuyện gần đây, liệt kê những chỗ cần sửa thành một danh sách sửa đổi; sau khi bạn kiểm tra và xác nhận từng mục, nó mới ghi vào thông qua giao diện công khai của cơ sở dữ liệu. Trước khi ghi, nó sẽ tự động sao lưu toàn bộ bảng và có thể hoàn tác bằng một nút bấm. Bổ sung "Quan sát trò chuyện" (mặc định tắt): Cứ cách vài tầng trò chuyện, pet màn hình sẽ xem văn bản mới xuất hiện và nói một hai câu cảm nghĩ vào lịch sử trò chuyện, bạn có thể trả lời trực tiếp; nếu liên tục vài lần không ai để ý, nó sẽ cảm thấy hơi tủi thân.**
+生活手帐 → **换装** → 输入金币数量 → **兑换花票** → **买下** → **换上**。填入数量不会扣款，只有点兑换才扣金币；买过后反复换装免费。
 
-Ba pet màn hình (Tiểu Erii / Zero / Nai Dan) của v0.8.0, nhà pet màn hình, hệ thống nuôi dưỡng, lời thoại nhiệm vụ, phím tắt mở bảng cơ sở dữ liệu và giao diện sổ tay bìa cứng đều được giữ nguyên.
+v0.9.2 的六项修复继续保留：
+
+- 检修建议按发出请求时的表格生成；等待回复时切换聊天，旧请求作废。同一聊天只是插入/重排行，仍按原来的 `row_id` 找到原行，原值变了就拒绝写入。
+- 等备份结束后、每条写入前、撤销导入前，重新检查聊天、数据库来源和忙状态；同一页面一次只执行一项检修写入/撤销。部分成功时保留每条结果及备份。
+- 删除前核对完整行内容和表头，切换预设前核对原预设。旧版生成的删行建议缺完整原值，会提示重新生成；升级后建议把未应用的旧建议重新检查一次。
+- 数据库忙时，普通撤销和“仍要撤销”都暂时停用；强制撤销只能跳过“表格后来变过”的确认，不能跳过聊天归属和忙状态检查。
+- 关闭需求值时冻结关闭那一刻的饱腹/清洁，重新开启后从新时刻计时。
+- 关闭旁观陪聊、隐藏桌宠或切换聊天时取消等待中的旁观评论；即使接口晚返回，也不存入记录、不冒旧气泡。普通聊天请求保持独立。
+
+v0.9.1 的换装框架继续保留；绘梨衣新增紫夜礼裙，零和奶蛋目前仍只有默认装扮。
+
+v0.9.0 的检修数据库与旁观陪聊、v0.8.0 的三个桌宠（绘梨衣 / 零 / 奶蛋）、桌宠小屋、养成、任务台词、一键打开数据库版面和精装手帐界面全部保留。
+
+- 只有两种情况会读酒馆正文，而且都要你自己打开：检修模式（每次发消息时附上最近 0～10 层，可调）和旁观陪聊（开启后只看新出现的楼层）。读到的内容只发给桌宠聊天用的那个接口。
+- 只有检修模式会改数据库：每一条都要你勾选、点 **应用所选** 才写；写入只走数据库公开的 `AutoCardUpdaterAPI`，写前整份备份，可以撤销。没有自动应用。
+- 除此之外仍是只读同步：不复制、不替换数据库，平时不读写表格。
+- 只有用户手动拖动时，桌宠位置才会改变；没有恢复自主移动。
+- 奶蛋的图在运行时从正在运行的数据库读取，不随本扩展分发；数据库没开时不能换成奶蛋。
+- 花票由生活手帐的金币手动兑换，买衣服扣花票。生活玩法不调用 API，也不读写数据库和酒馆正文。
 
 - Chỉ có hai trường hợp tiện ích sẽ đọc văn bản trò chuyện của Tavern, và cả hai đều phải do bạn tự mở: chế độ bảo trì (mỗi lần gửi tin nhắn sẽ đính kèm từ 0～10 tầng trò chuyện gần đây, có thể điều chỉnh) và quan sát trò chuyện (sau khi bật, chỉ xem các tầng mới xuất hiện). Nội dung đọc được chỉ gửi đến API dùng để trò chuyện của pet màn hình.
 - Chỉ có chế độ bảo trì mới sửa cơ sở dữ liệu: mỗi mục đều cần bạn đánh dấu chọn, nhấn **Áp dụng mục đã chọn** mới ghi; việc ghi chỉ đi qua `AutoCardUpdaterAPI` công khai của cơ sở dữ liệu, sao lưu toàn bộ trước khi ghi và có thể hoàn tác. Không có tính năng tự động áp dụng.
@@ -18,9 +36,12 @@ Ba pet màn hình (Tiểu Erii / Zero / Nai Dan) của v0.8.0, nhà pet màn hì
 
 Các phiên bản cũ từng thêm tính năng tự động di chuyển, chạy bộ và đi dạo. Những logic đó đã được hoàn tác từ **v0.5.8**, không nên nhầm lẫn hành vi của phiên bản cũ với phiên bản hiện tại.
 
-## Cách kiểm tra kho lưu trữ GitHub đã là bản mới nhất chưa
+按下面四处核对，全部显示 `0.9.3` 才算当前维护源已经更新完整：
 
-Hãy đối chiếu bốn điểm dưới đây, tất cả đều hiển thị `0.9.0` thì mới xem là mã nguồn bảo trì hiện tại đã được cập nhật đầy đủ:
+1. 打开仓库根目录的 [`manifest.json`](manifest.json)，查看 `version` 是否为 `0.9.3`。
+2. 查看本 README 顶部的“当前版本”是否为 **v0.9.3**。
+3. 查看 GitHub 最近一次提交是否包含本次修改文件；v0.9.3 必须有更新后的 `life-model.js`、`life-window.js`、`skin-model.js`、`index.js`、`style.css`，以及 `assets/skins/erii-purple-night/` 下的 **27 张 WebP、素材说明和媒体清单**，并且同时保留 v0.9.0 的 `repair.js`、`repair-ticket.js`、`database-repair.js`、`backup-store.js`、`watch.js`，v0.8.0 的 `characters/` 文件夹、`characters.js`、`care-model.js`、`lines.js`、`notebook.js`、`pet-house.js`、`sheet.js`、`effects.js`、`icons.js`、`database-shortcuts.js`，以及 `assets/zero/` 下的 19 张、`assets/zero/life/` 下的 7 张 WebP；`assets/run-*.webp` 已删除。
+4. 如果使用压缩包，文件名应为 `绘梨衣桌宠-独立扩展-v0.9.3.zip`，解压后 `manifest.json` 仍应为 `0.9.3`。
 
 1. Mở [`manifest.json`](manifest.json) ở thư mục gốc của kho lưu trữ, kiểm tra xem `version` có phải là `0.9.0` không.
 2. Kiểm tra phần "Phiên bản hiện tại" ở đầu README này xem có phải là **v0.9.0** không.
@@ -29,7 +50,11 @@ Hãy đối chiếu bốn điểm dưới đây, tất cả đều hiển thị 
 
 Phiên bản hiển thị trong danh sách tiện ích của Tavern là phiên bản được tải thực tế. Chỉ nhìn thấy README trên GitHub đã cập nhật không chứng minh được Tavern đã tải bản mới; hãy cập nhật tiện ích và làm mới trang rồi mới đối chiếu lại số phiên bản trong Tavern.
 
-## Cài đặt trực tiếp trong Tavern
+1. 打开酒馆顶部的 **扩展程序** → **安装扩展程序**。
+2. 粘贴仓库地址：`https://github.com/dzsks/xiaohuizhuochong`。
+3. 安装或更新完成后刷新酒馆页面。
+4. 在扩展列表确认 **绘梨衣 · 数据库桌宠** 的版本是 `0.9.3`。
+5. 电脑右键桌宠，或手机长按约 1.4 秒打开小本子；看到“已连接数据库”或“数据库正在处理任务”，说明已经找到数据库的数据来源。
 
 1. Mở phần **Tiện ích mở rộng** → **Cài đặt tiện ích mở rộng** ở thanh trên cùng của Tavern.
 2. Dán địa chỉ kho lưu trữ: `https://github.com/TieuTuSi123/xiaohuizhuochong-vi`.
@@ -41,7 +66,11 @@ Thư mục gốc của kho lưu trữ phải chứa trực tiếp các tệp `ma
 
 ## Cập nhật bản cài đặt hiện có
 
-### Cập nhật qua kho lưu trữ GitHub
+1. 将新版文件覆盖上传到同一个仓库根目录，保留 `assets/` 的文件结构。
+2. 提交 GitHub 更改。
+3. 回到酒馆扩展管理，点击本扩展的更新按钮。
+4. 刷新酒馆页面，确认扩展列表版本为 `0.9.3`。
+5. 如果行为或图片仍是旧的，先重新加载扩展；仍未变化时使用 `Ctrl+F5` 强制刷新浏览器缓存。
 
 1. Ghi đè các tệp phiên bản mới lên cùng một thư mục gốc của kho lưu trữ, giữ nguyên cấu trúc tệp của `assets/`.
 2. Commit các thay đổi lên GitHub.
@@ -49,11 +78,16 @@ Thư mục gốc của kho lưu trữ phải chứa trực tiếp các tệp `ma
 4. Làm mới trang Tavern, xác nhận phiên bản trong danh sách tiện ích là `0.9.0`.
 5. Nếu hành vi hoặc hình ảnh vẫn là của bản cũ, trước tiên hãy tải lại tiện ích; nếu vẫn không thay đổi, dùng `Ctrl+F5` để buộc làm mới bộ nhớ cache của trình duyệt.
 
-### Kiểm tra qua file nén
+当前维护包：`绘梨衣桌宠-独立扩展-v0.9.3.zip`。
 
 Gói bảo trì hiện tại: `绘梨衣桌宠-独立扩展-v0.9.0.zip`.
 
-Kiểm tra sau khi giải nén:
+- `manifest.json` 的 `version` 为 `0.9.3`；
+- `index.js` 中的桌宠版本标记为 `0.9.3`；
+- 根目录有 `skin-model.js`，紫夜礼裙价格为 10320，支付类型为 `tickets`；
+- `assets/skins/erii-purple-night/` 包含 27 张 WebP，缺图时不能只上传代码；
+- `assets/` 中没有左右跑步帧，`assets/zero/` 和 `assets/zero/life/` 都在；
+- README 顶部和版本历史的最新条目都是 `v0.9.3`。
 
 - `version` trong `manifest.json` là `0.9.0`;
 - Dấu phiên bản pet màn hình trong `index.js` là `0.9.0`;
@@ -125,10 +159,10 @@ Cách mở: Mục **Nhà pet màn hình** ở cuối cuốn sổ nhỏ, hoặc t
 
 Sau khi đổi nhân vật:
 
-- **Dùng chung**: Vị trí và kích thước của pet màn hình, các nút bật/tắt, ví tiền chung ở nhà.
-- **Tách biệt riêng**: Lịch sử trò chuyện, cách xưng hô và thiết lập nhân vật, độ thân thiết, chỉ số nhu cầu, nhật ký trưởng thành, biệt danh, công việc làm thêm hoặc bữa ăn đang diễn ra.
-- Trong lần trò chuyện đầu tiên với nhân vật mới, sẽ dùng lại các cài đặt kết nối của Tiểu Erii (địa chỉ API, mô hình, độ dài phản hồi, v.v.), không cần nhập lại; khóa bảo mật đã lưu trên thiết bị cũng được dùng chung.
-- Nhân vật đang đi làm sau khi bị thay ra vẫn sẽ tiếp tục làm việc dưới nền, khi tan làm bong bóng thoại của pet màn hình sẽ nhắc bạn đi nhận lương.
+- **共用**：桌宠的位置和大小、各个开关、家里的钱包。
+- **各自分开**：聊天记录、称呼和人设设定、亲密度、需求值、成长日记、昵称、正在进行的打工或吃饭、拥有和穿着的皮肤。
+- 第一次和新角色聊天时，会沿用小绘的连接设置（接口地址、模型、回复长度等），不用重填；设备上记住的密钥本来就共用。
+- 正在打工的角色换下去后会在后台继续打工，下班时桌宠气泡会提醒你去领工资。
 
 ## Nuôi dưỡng
 
@@ -156,7 +190,7 @@ Giao diện mang phong cách "Sổ tay bìa cứng": vân giấy, viền ép kim
 
 ## Đi làm, Kiếm tiền và Ăn cơm
 
-Nhấp chuột phải trên PC / nhấn giữ trên điện thoại để mở cuốn sổ nhỏ, chọn **Sổ tay sinh hoạt**; cũng có thể mở từ phần cài đặt tiện ích. Trên đỉnh cửa sổ có thể chọn cho ai đi làm: ví tiền là "ví tiền chung của nhà" dùng chung cho mọi nhân vật, còn việc đi làm và ăn cơm thì tính riêng cho từng người, các nhân vật có thể đi đến những chỗ khác nhau cùng một lúc.
+电脑右键 / 手机长按打开小本子，点击 **生活手帐**；也可从扩展设置打开。窗口顶部可以选让哪个角色去：钱包是所有角色共用的“家里的钱包”，打工、吃饭和换装按角色各算各的，不同角色可以同时去不同的地方。手帐有四页：**去打工**、**吃点好的**、**换装**、**小账本**。
 
 ### Công việc và Tiền lương
 
@@ -182,16 +216,41 @@ Tính năng **Tan làm sớm** yêu cầu xác nhận thêm một lần nữa: d
 | Cơm cuộn trứng | 15 Tiền vàng | 10 Giây |
 | Ramen | 20 Tiền vàng | 12 Giây |
 
-Mua đồ trong phần **Ăn chút đồ ngon**, sau khi xác nhận sẽ trừ tiền vàng và bắt đầu ăn, ăn xong độ no sẽ tăng. Nếu số dư không đủ hoặc đang có hoạt động khác diễn ra, nút mua sẽ bị vô hiệu hóa. Ăn xong sẽ được ghi vào cuốn sổ tay nhỏ; bốn món đồ ăn sử dụng bốn ảnh khác nhau: Pudding dùng thìa nhỏ ăn, Cơm nắm cầm bằng tay, Cơm cuộn trứng xúc bằng thìa to, Ramen gắp bằng đũa. Các thẻ gọi món, tranh minh họa trên sổ tay và ảnh pet màn hình nổi đều đồng nhất hình ảnh. Không có chỉ số đói khát, không có hình phạt nếu bị đói hay ép ăn.
+在 **吃点好的** 购买，确认操作后扣金币并开始吃饭，吃完饱腹会涨。余额不足或正在进行其他活动时，购买按钮会禁用。吃完会记入小账本；四种食物各用独立吃饭配图：布丁用小勺吃焦糖布丁，饭团用手拿海苔饭团，蛋包饭用勺子吃金黄蛋包饭，拉面用筷子夹面。点餐卡片、吃饭时的手帐插图和浮动桌宠都使用同一项对应的图片。需求值只影响心情和台词，没有饿肚子惩罚或强制喂饭。
+
+### 换装（皮肤）
+
+生活手帐的第三页是 **换装**；桌宠小屋里的 **给她换装** 也能直接进入。每个角色永远拥有一套免费的默认装扮。
+
+本版小绘的新衣服是 **月读命·紫夜礼裙**，仅绘梨衣可以穿：
+
+| 内容 | 数量 |
+| --- | --- |
+| 服装价格 | 10320 张花票 |
+| 兑换比例 | 1 金币 → 40 张花票 |
+| 从 0 花票攒够一套 | 258 金币 |
+| 初始拥有 | 否，需要购买 |
+
+1. 去打工，结束后手动领取工资。
+2. 在换装页的 **花票兑换** 输入正整数金币。旁边显示能换多少花票；也可点 **填入购衣所需金币**，它只填数字，不扣钱。
+3. 点 **兑换花票**，才会扣金币并增加花票。金币不够或数量无效时不能兑换；花票不能退换成金币，剩余花票保留。
+4. 花票足够后点卡片上的 **买下 · 10320 张花票**。只买一次，不会自动穿上，也不会重复扣款。
+5. 点 **换上**。之后可免费换回默认装扮，再换上这套。
+
+- 新皮肤覆盖 16 个待机/任务/互动动作、4 个边缘探头、3 个打工、4 个独立吃饭配图，共 27 张。桌宠、小本子和聊天头像、生活插图、菜单、小屋立绘都跟着换图；桌宠气泡和生活手帐使用淡紫配色。
+- 造型保留手丝，脖颈与鞋子的紫色蝴蝶结。抱鸭动作只保留怀里的鸭子，其他动作保留头顶小黄鸭；默认装扮的图没有修改。
+- 金币和花票是家里的共用钱包；衣服按角色拥有，给小绘买的不会送给零或奶蛋。换角色、刷新、关闭窗口后继续保留。
+- 换装不占用工作或吃饭活动；数据库忙的时候也可以兑换和换装。没有新增 API 请求或自主走路。
+- 老版按金币支付的皮肤目录仍兼容；目录中的 `currency: 'tickets'` 表示花票支付，未写时继续按金币处理。
 
 ### Lưu trữ và Nhiệm vụ Cơ sở dữ liệu
 
-- Ví tiền khởi điểm có 0 tiền vàng. Công việc do bạn tự tay bắt đầu, sẽ không có chuyện tự động nhận việc tiếp theo hay treo máy kiếm tiền vô hạn; khi sắp hết tiền có thể đi nhận trợ cấp một lần.
-- Tiền vàng, hoạt động hiện tại, tổng số lần đi làm/ăn cơm và 20 bản ghi sổ tay gần nhất sẽ được lưu trong phần cài đặt tiện ích của tài khoản Tavern hiện tại.
-- Công việc đã bắt đầu sẽ tính giờ theo thời gian trên thiết bị. Việc đóng cửa sổ, tải lại trang hay tạm thời rời đi đều không ảnh hưởng, lúc về thời gian vẫn chạy tiếp, hoặc hiện trạng thái chờ nhận lương; khi offline mà ăn xong thì cũng chỉ tính tiền một lần chứ không trừ tiền nhiều lần.
-- Khi nhiệm vụ cơ sở dữ liệu xuất hiện, các hành động, bong bóng thoại và nút dừng của nhiệm vụ gốc được ưu tiên hiển thị trước; sổ tay sinh hoạt cũng cung cấp tính năng dừng cơ sở dữ liệu gốc. Đồng hồ đếm ngược công việc vẫn chạy bình thường, đợi nhiệm vụ cơ sở dữ liệu kết thúc rồi mới bắt đầu công việc mới hoặc mua cơm.
-- Cửa sổ trò chuyện, sổ tay sinh hoạt, nhà pet màn hình và cuốn sổ nhỏ được tách biệt với nhau. Trò chơi sinh hoạt không gọi API, cũng không ghi đè vào cơ sở dữ liệu hay văn bản trò chuyện Tavern. Tính năng tự di chuyển vẫn không được khôi phục.
-- Đây chỉ là lối chơi nhẹ nhàng cho từng tài khoản một để ngăn việc lặp lại nhận lương / trừ tiền trên một trang; không có dịch vụ giao dịch ví tiền xuyên thiết bị.
+- 钱包初始为 0 金币、0 张花票，新衣服未拥有。工作由你手动开始，不会自动接下一份或无限挂机赚钱；钱快花完时可以领一次低保。
+- 金币、花票、兑换与花票支出、当前活动、累计打工 / 吃饭次数和最近 20 条小账本记录保存在当前酒馆账号的扩展设置中；拥有和穿着的皮肤也存在那里（`skins` 字段），按角色分开。
+- 已开始的工作按设备时间计时。关闭窗口、刷新或暂时离开后，回来会继续计时，或者显示待领取；离线时吃完的饭只结算一次，不会重复扣款。
+- 数据库任务出现时，原任务动作、气泡和停止按钮优先；生活手帐也提供原数据库的停止操作。已开始的打工计时照常，数据库任务结束后再开始新工作或买饭。
+- 聊天、生活手帐、桌宠小屋和小本子分别打开。生活玩法不调用 API，也不修改数据库或酒馆正文。没有恢复自主移动。
+- 本版是账号设置中的轻量单人玩法，防止同一页面重复领取 / 扣款；没有跨设备并发的钱包交易服务。
 
 ## Trò chuyện cùng pet màn hình
 
@@ -343,14 +402,44 @@ Cái xem trước trên máy dùng cục bộ này chạy qua `work/erii_preview
 
 Phiên bản được sắp xếp theo thời gian từ mới nhất đến cũ nhất. Hành vi của phiên bản mới nhất sẽ lấy theo mục ở trên cùng.
 
-### v0.9.0 · Chế độ bảo trì & Quan sát trò chuyện (Hiện tại)
+### v0.9.3 · 紫夜礼裙与花票兑换（当前）
 
-- Cửa sổ trò chuyện thêm nút chuyển đổi **Trò chuyện / Bảo trì cơ sở dữ liệu**. Khi bảo trì, pet màn hình đọc bảng, các lỗi gần đây và 0～10 tầng văn bản gần nhất (có thể chỉnh), đưa ra danh sách sửa đổi; người dùng phải đánh dấu và xác nhận từng mục, việc ghi chỉ dùng API công khai của cơ sở dữ liệu, sao lưu trước toàn bộ và có nút hoàn tác nhanh; không tự động áp dụng.
-- Danh sách sửa đổi hỗ trợ chỉnh ô, đổi cả hàng, thêm hàng, xóa hàng, đổi preset cốt truyện, hoặc kêu cơ sở dữ liệu tự điền bảng lại; dựa vào `row_id` để định vị, check lại giá trị cũ trước khi đè vô, nếu đổi đoạn chat, bị lock hoặc xung đột là từ chối thẳng và báo lỗi luôn.
-- Preset thúc đẩy cốt truyện chỉ thực hiện chuyển đổi chứ không đổi ruột: API chèn preset của cơ sở dữ liệu tiện tay gạt đoạn chat hiện tại sang chế độ gọi LLM, mà API mở chả có tính năng xóa preset hoặc vác về chế độ cũ, nên viết xong là vô phương cứu vãn.
-- Thêm tính năng **Quan sát trò chuyện** (Mặc định đóng): Cứ cách N tầng (1～20, mặc định là 4) nó đọc tầng mới xuất hiện, để lại bình luận vào lịch sử chat và cho phép reply thẳng luôn; 3 câu liên tiếp mà không rep là nó sầu não, lần sau nó nói nó sẽ hỏi rụt rè lại, tiếng đồng hồ hỏi 1 lần thôi; khoảng cách mỗi đợt chém gió là 60 giây, lúc cơ sở dữ liệu đang điền là ráng ôm thêm 30 giây nữa.
-- Lời thoại mới: tâm trạng "Tủi thân" của cả 3 đứa, với phản ứng lúc đang ghi dữ liệu bảo trì hoặc hoàn tác.
-- Bổ sung file: `repair.js` (Làm gọn dữ liệu, tháo dỡ rồi đối soát phiếu sửa), `repair-ticket.js` (Khung phiếu sửa), `database-repair.js` (Thực thi ghi vô hoặc rút về), `backup-store.js` (Lưu vô cache của trình duyệt), `watch.js` (Nhẩm tính số tầng với me đúng thời gian để hót).
+- 上架「月读命·紫夜礼裙」：10320 张花票，1 金币兑换 40 张；初始不拥有、不自动购买或穿着。
+- 换装页增加金币/花票余额、兑换数量、预计所得、购衣所需金币、余额不足提示。填入按钮不扣款；兑换、买下、换上是三次明确操作。
+- 钱包保存新增花票余额、累计兑换和花票支出；服装单独统计花票花费，原有金币、活动和服装存档保留。购买一次后免费换装，剩余花票保留。
+- 27 张新透明 WebP 覆盖全部动作与生活配图；发布图为 960×960，约 6.45 MiB。1254×1254 PNG 原件在维护素材目录保留，不进入扩展轻量包。
+- 常用 8 个动作预加载，其余动作按需解码；修复换装卡片旋转导致的横向溢出。穿着时桌宠气泡和生活手帐跟随淡紫配色。
+- 本轮 9 组新逻辑、10 组换装浏览器场景（1280/375/320），以及既有 25 组模型和 15 组浏览器回归通过。真实酒馆和实体手机仍待安装后确认，见 COMPATIBILITY.md。
+- v0.9.2 六项修复继续保留；不恢复自主移动，不修改默认美术，不自动调用聊天 API。
+
+
+
+### v0.9.2 · 六项问题修复（历史版本）
+
+- 检修请求固定发出时的资料快照；切聊天作废旧请求，同一聊天的行重排按原 `row_id` 定位，原值变化拒绝应用。
+- 写入/撤销在等待备份后重新检查归属；批次中切换聊天停止后续条目；备份必须属于当前修改单聊天；一次只执行一项检修操作。
+- 删行比较完整原行和表头，旧版无完整原值的删行单需要重新生成；切预设比较原预设。
+- 数据库正在忙时停用撤销与强制撤销，并在实际调用前再次检查。
+- 修复关闭需求值后饱腹/清洁跳回旧值；关闭期间冻结，重新开启不补算关闭期间的下降。
+- 关闭旁观陪聊、隐藏桌宠、切聊天时取消评论，丢弃晚到的旧回复；取消评论不会取消用户普通聊天。
+- 已通过 25 组纯逻辑回归、15 组隔离浏览器场景（含桌面/375/320 宽度）及语法、清单、素材引用检查。浏览器请求和数据库均为模拟，无付费调用。未在真实数据库或全部酒馆版本重测，详情见 COMPATIBILITY.md。
+- 数据库公开接口内部如果已经开始一次操作，扩展无法保证把它中途回滚；保护覆盖调用前及调用之间。真实数据库内部异步保存与存储模式仍需单独验证。
+- 头顶小黄鸭、裸手、原地互动、手动拖动与原任务停止保留，没有恢复自主走路。
+
+
+版本按时间倒序排列。最新版本的行为以最上方条目为准。
+
+### v0.9.1 · 换装框架（历史版本）
+
+- 生活手帐新增 **换装** 页：皮肤用家里钱包里的金币购买，按角色各自拥有，随时换上或换回默认装扮；钱不够时按钮禁用并写明还差多少；买和换都记进小账本，桌宠会说一句。
+- 换上以后桌宠本体、头像、生活手帐插图、点餐缩略图和桌宠小屋立绘都用皮肤的图；皮肤没画的姿势沿用角色原图；粒子颜色可被皮肤覆盖；桌宠和生活手帐带 `data-skin` 属性，可用来给皮肤写界面配色。
+- 桌宠小屋新增 **给她换装** 按钮，直接打开该角色的换装页。
+- 本版只搭框架，**没有上架任何皮肤**：目录为空，每个角色只有自带的默认装扮。以后在 `skin-model.js` 的目录里加一条、放好图即可，不用改别的代码。
+- 存档：拥有和穿着的皮肤存在扩展设置的 `skins` 字段；买过但暂时不在目录里的皮肤不会丢。退回 v0.9.0 时该字段被忽略，金币和小账本照旧（买皮肤的记录按“花钱”类型保留）。
+- 三个角色各新增两组台词（买到皮肤、换上皮肤）。小账本页的汇总从“买饭花了”改为“花了”，因为钱也可能花在换装上。
+- 新文件：`skin-model.js`（皮肤目录、存档、购买与穿着）。
+
+### v0.9.0 · 检修模式与旁观陪聊（历史版本）
 
 ### v0.8.0 · Ba pet màn hình, Nuôi dưỡng và Phím tắt mở bảng cơ sở dữ liệu (Bản cũ)
 
@@ -587,21 +676,13 @@ Phiên bản được sắp xếp theo thời gian từ mới nhất đến cũ 
 
 Trong phần cài đặt tiện ích của Tavern, bạn có thể điều chỉnh:
 
-- Pet màn hình hiện tại (Tiểu Erii / Zero / Nai Dan) và đường dẫn vào nhà pet màn hình;
-- Công tắc hiển thị pet màn hình;
-- Kích thước pet màn hình;
-- Hành động khi rảnh rỗi;
-- Ló đầu sát mép;
-- Câu chuyện chữa lành tự động (vẫn có thể tự bấm nghe chuyện);
-- Có ẩn Nai Dan và bong bóng thoại gốc đi không;
-- Nội dung nhiệm vụ bản tóm tắt / bản đầy đủ;
-- Nói chuyện khi làm nhiệm vụ;
-- Công tắc chỉ số nhu cầu (độ no, độ sạch);
-- Hiệu ứng: Tự động / Rực rỡ / Đơn giản / Tắt;
-- Bật/tắt "Quan sát trò chuyện" và Tần suất bình luận (Mỗi 1～20 tầng);
-- Số tầng văn bản đính kèm khi bảo trì (0～10 tầng);
-- Mở cuộc trò chuyện và cấu hình kết nối, danh xưng, quan hệ trong cửa sổ trò chuyện;
-- Đặt lại vị trí pet màn hình.
+## 存档升级与退回旧版
+
+v0.9.3 使用 `life.schema = 3`，在原钱包上新增 `tickets`、`ticketsEarned`、`ticketsSpent`；换装使用 `skins.schema = 2`，新增 `spentTickets`。旧存档自动读取，新花票默认 0，不清空金币、活动、聊天、养成或已经拥有的服装。
+
+旧版不认识花票字段，**退回旧版后再次保存，可能丢掉新增花票余额、累计值及兑换日志**。准备退回前请先备份酒馆账号数据。仅关闭本扩展或换回默认衣服不会清空余额和衣服。
+
+## 设置与恢复
 
 Sau khi tắt hoặc gỡ tiện ích này, chỉ cần làm mới trang Tavern là nó sẽ hồi sinh lại cái pet màn hình gốc của cơ sở dữ liệu. Bản thân cơ sở dữ liệu đéo cần phải Rollback đi đâu cả, mà bạn cũng đừng có lôi cái đống thử nghiệm thời cổ đại mà rải lên cái mặt cổng của cơ sở dữ liệu nghen.
 
@@ -622,13 +703,26 @@ Vụ Test file với cái trò cách ly check của Trình duyệt chỉ xì ra 
 
 ## Câu hỏi thường gặp
 
-### Cập nhật xong Tiểu Erii vẫn tự chạy rong
+- 更新 GitHub 后，酒馆是否实际加载到 `0.9.3`；
+- 你的数据库版本是否仍提供兼容的界面状态；
+- 真实剧情推进、填表、成功、错误和停止任务；
+- 用真实模型时，检修给出的修改单是否靠谱（写入前请逐条看清楚再勾选）；
+- 实体手机的触摸手感和键盘弹起效果。
 
 Check ngay coi danh sách tiện ích của Tavern nó đã nhảy đúng Ver mới nhất chưa. Nếu không trúng `0.9.0`, nghĩa là cái Tavern của bạn vẫn đang ôm đống rác rưởi cũ kỹ; nhấp update lại rồi ấn F5 nghen. Phiên bản `v0.5.7` đổ về trước mới chứa cái logic lăng quăng, chứ từ `v0.5.8` là vứt mẹ nó vụ lượn lờ rồi.
 
-### GitHub hiện bản mới, mà Tavern vẫn dở hơi thói cũ
+### 为什么新衣服不能直接穿
 
-File trên GitHub mọc thêm bản mới méo có nghĩa là Tavern của bạn đã nuốt vào đầu. Cứ triển khai y nguyên xì: Update trên trình Extension -> Ấn Refresh Trang -> Đè cái `Ctrl+F5` vỡ phím cho tôi. Xong check lại coi Ver Extension trong Tavern có nhích chưa, đừng bói chữ trên tít cái cuốn sổ; tít nháp từ v0.4.0 là cạo sạch dấu ấn phiên bản rồi.
+它需要购买。去生活手帐 → 换装，兑换花票再买下；从 0 花票开始需要 258 金币。钱包里的金币不直接支付这套衣服，必须先手动兑换花票。买下后点“换上”。
+
+### 更新后没有衣服，或者换装后缺图
+
+确认酒馆加载的是 0.9.3，并检查仓库是否完整上传 `assets/skins/erii-purple-night/` 的 27 张 WebP。只更新 README、manifest 或代码不会自动补齐素材。上传完整后更新扩展并强制刷新。
+
+
+### 更新后小绘还会自己移动
+
+先在酒馆扩展列表确认版本。如果不是最新的 `0.9.3`，说明酒馆仍在运行旧包；重新点击更新并刷新。`v0.5.7` 及更早版本包含主动移动逻辑，`v0.5.8` 起已经回退。
 
 ### Pet lù lù ra đó, mà lại réo chưa kết nối Cơ sở dữ liệu
 
@@ -656,4 +750,8 @@ Kiểu dáng Tiểu Erii đúc theo cái nguồn [Cardwright 绘梨衣桌宠素�
 
 Chùm hình của Zero do ImageGen đẻ theo 2 bảng tạo mẫu Pose, bơm bung bét qua cái Real-ESRGAN (Bơm dòng Anime) xong mới xắn khúc bằng con mã `tools/slice-pose-sheet.py`, Nhãn chữ ký với chứng chỉ ném tuốt tại [`assets/zero/NOTICE.md`](assets/zero/NOTICE.md). Mớ ảnh con Nai Dan của Database, tụi này chỉ húp vớt từ hình phọt đang ngốn, miễn Copy, đéo chôm chĩa phát tán.
 
-Nguồn Database xào nấu: [AlbusKen/shujuku](https://github.com/AlbusKen/shujuku).
+绘梨衣造型参考 [Cardwright 绘梨衣桌宠素材](https://github.com/1798547983tt/Cardwright/tree/359019715afc60813384964b023a09c6dd6ed326/assets/pets/erii)。动作图由 ImageGen 生成并作局部修正，原动作图为透明无损 WebP，v0.7.0 生活插图为保留透明通道的高质量压缩 WebP。美术素材是非官方《龙族》同人内容，按 [`assets/NOTICE.md`](assets/NOTICE.md) 中的署名和非商业条件使用；程序代码使用 MIT 许可，MIT 不覆盖美术素材。紫夜礼裙参考用户提供的《龙族》月读命绘梨衣服装图，由 ImageGen 生成；细节与使用边界见 [`皮肤素材说明`](assets/skins/erii-purple-night/NOTICE.md)。
+
+零的动作图由 ImageGen 按两张姿势表生成，经 Real-ESRGAN（动漫模型）放大后用 `tools/slice-pose-sheet.py` 切分，署名与许可见 [`assets/zero/NOTICE.md`](assets/zero/NOTICE.md)。奶蛋的图属于数据库，本扩展只在运行时读取已加载的图片，不复制、不分发。
+
+数据库参考：[AlbusKen/shujuku](https://github.com/AlbusKen/shujuku)。

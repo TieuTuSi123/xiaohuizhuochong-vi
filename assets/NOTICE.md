@@ -21,4 +21,7 @@ v0.7.0 bổ sung assets/life/work-bookshop.webp, work-bakery.webp, work-florist.
 v0.7.1 bổ sung 4 ảnh ăn uống độc lập: assets/life/eat-pudding.webp, eat-riceball.webp, eat-omurice.webp, eat-ramen.webp. ImageGen tích hợp được dùng để tạo các ảnh này dựa trên tham khảo từ phong cách nhân vật của idle.webp và tư thế ngồi tự nhiên của eating.webp gốc; lần lượt thể hiện cảnh ăn bánh pudding, cơm nắm rong biển, cơm cuộn trứng (omurice), gắp mì ramen bằng đũa, không đeo găng tay, giữ nguyên vịt vàng trên đầu. Bản phát hành chỉ thu nhỏ theo tỷ lệ và nén thành WebP trong suốt kích thước 768×768. Ảnh gốc cùng prompt đầy đủ được lưu trong không gian làm việc ở thư mục outputs/Erii-Food-Art-v0.7.1 và tệp "小绘-v0.7.1-四种吃饭配图提示词.md", không đưa vào gói cài đặt; quy định ghi công và điều kiện phi thương mại áp dụng như trên.
 
 
-v0.8.0 bổ sung các khung hình hành động của Zero tại thư mục assets/zero/, thông tin ghi công và giấy phép xem tại assets/zero/NOTICE.md. Hình ảnh của Nai Dan (Sữa Trứng) thuộc về cơ sở dữ liệu Long Huyết Huyền Hoàng; tiện ích mở rộng này chỉ đọc hình ảnh đã được cơ sở dữ liệu tải lên tại thời điểm chạy (runtime) và không bao gồm chúng trong gói này.
+v0.8.0 新增的零的动作图在 assets/zero/，署名与许可见 assets/zero/NOTICE.md。奶蛋的图属于龙血玄黄·数据库，本扩展只在运行时读取数据库已经加载的图片，不在本包内。
+
+
+v0.9.3 新增月读命·紫夜礼裙，27 张透明动作/生活图在 `assets/skins/erii-purple-night/`。服装参考用户提供图片，由 ImageGen 生成，发布版仅等比例缩小压缩为 960×960 WebP。新皮肤保留手丝；抱鸭图只有怀中鸭子，其他图保留头顶鸭子。新皮肤的来源与使用边界见 [单独说明](skins/erii-purple-night/NOTICE.md)。原默认皮肤图片字节未变。

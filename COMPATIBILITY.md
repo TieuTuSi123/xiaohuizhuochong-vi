@@ -1,8 +1,8 @@
 # Hướng dẫn tương thích phiên bản SillyTavern
 
-Phiên bản tiện ích mở rộng hiện tại: **v0.9.0**
+当前扩展版本：**v0.9.3**
 
-Tệp này giải thích phạm vi tương thích với host của v0.9.0. Điều này không có nghĩa là các gói thử nghiệm v0.1.x cũ vẫn tương thích, cũng không có nghĩa là sẽ không cần tinh chỉnh lại nếu giao diện cơ sở dữ liệu thay đổi trong tương lai.
+本文件说明的是 v0.9.3 的宿主兼容范围。它不代表早期 v0.1.x 实验包仍然兼容，也不代表未来数据库界面改动后无需适配。
 
 Tiện ích mở rộng này nhắm đến việc tương thích với SillyTavern 1.14.0–1.19.0.
 
@@ -147,4 +147,47 @@ Kiểm tra:
 - Host thực tế: Cùng một bản (instance) cách ly SillyTavern 1.17.0 + cơ sở dữ liệu naiv1.2.3, API chính văn chính và trò chuyện của pet màn hình đều trỏ đến API mô phỏng cục bộ (không phát sinh yêu cầu trả phí thực tế). Trong cuộc trò chuyện có chứa tầng người dùng và tầng nhân vật: Prompt kiểm tra đã mang theo các bảng biểu thật, preset thật và 3 tầng chính văn gần nhất; sau khi tick chọn 3 mục thì sẽ ghi qua API public (sửa ô, thêm dòng, chuyển preset), sau khi làm mới trang dữ liệu vẫn còn đó; sau khi hoàn tác thì bảng biểu và preset được khôi phục, sau khi làm mới thì vẫn là trạng thái đã khôi phục. Khi đứng xem trò chuyện, sau khi `/send` và `/sendas` có thêm 2 tầng mới, sẽ có bình luận trong khoảng 5 giây, bong bóng hiển thị "Trả lời nó".
 - Hành vi tự thân của cơ sở dữ liệu quan sát được (không liên quan đến tiện ích này, đã tái hiện khi tiện ích này không thực hiện thao tác ghi): Chỉ trong các cuộc trò chuyện mới có lời chào mở đầu, khi cơ sở dữ liệu mở lại trò chuyện sẽ xóa các trường dữ liệu bảng trên tầng lời chào mở đầu rồi mới lưu lại, nội dung bảng biểu nằm lại trong runtime riêng của nó, và sẽ lưu trở lại trong lần ghi tiếp theo. Khuyến nghị thao tác kiểm tra nên dùng trong các cuộc trò chuyện đã có đối thoại.
 
-Chưa xác minh: Chất lượng của phiếu chỉnh sửa do model thật đưa ra; `manualUpdate` (điền lại toàn bộ bảng) trong host thật (cần yêu cầu trả phí, chỉ được mô phỏng trong xem trước); việc ghi đè lên các chế độ lưu trữ khác nhau của cơ sở dữ liệu (JSON / SQLite), vòng này không phân biệt để kiểm tra; 1.14.0, 1.15.0, 1.16.0, 1.18.0, 1.19.0 và cơ sở dữ liệu 1.2.4; điện thoại thật.
+没有验证：真实模型给出的修改单质量；`manualUpdate` 在真实宿主里的完整重新填表（需要付费调用，只在预览里模拟）；数据库不同存储模式（JSON / SQLite）下的写入，本轮没有区分测试；1.14.0、1.15.0、1.16.0、1.18.0、1.19.0 和数据库 1.2.4；实体手机。
+
+## v0.9.1 本次修改与检查范围
+
+本次只增加换装框架，没有新增酒馆或数据库接口依赖：仍用 `SillyTavern.getContext()`、`extensionSettings`、`saveSettingsDebounced`。皮肤的拥有和穿着状态写在本扩展设置的 `skins` 字段（`{ schema, owned, equipped, bought, spent }`，按角色分开）；买皮肤的钱走原来的生活钱包（`life.coins`），小账本记录用已有的 `spent` 类型，所以退回 v0.9.0 时 `skins` 字段被忽略、金币与账本照旧，不需要重置。图片地址仍用 `import.meta.url` 相对扩展根目录解析，皮肤图放在 `assets/skins/<皮肤 id>/`。
+
+检查：
+
+- Node 22 下对改动过的模块逐个做语法检查，另有 7 组纯逻辑检查：空目录时只有默认装扮；目录条目校验（id 格式、价格、角色范围、重复、写错跳过）；买（余额不足不扣、成功记账、重复购买拒绝、角色专属皮肤别人买不了、标“所有角色”的皮肤谁都能买）；换上 / 换回默认与“没有变化返回 false”；存档清洗（脏数据、下架皮肤保留、穿着下架皮肤时按默认显示）；皮肤只覆盖有图的姿势、主题部分覆盖；`LifeModel.spend` 余额不足不扣。
+- 无头 Chromium（1280 和 375 两种宽度）加载真实 `index.js`、模拟酒馆上下文：扩展版本 0.9.1；生活手帐四个页签，换装页默认装扮卡片“使用中”且按钮禁用，空目录提示文案；注入两条测试皮肤后走完整流程——价格与“还差多少”提示、买下后钱包从 130 变 10、小账本出现“花 120 金币买了皮肤「夏日浴衣」”、设置里写入 `skins.owned`；换上后桌宠和生活手帐的 `data-skin`、浮动桌宠图、手帐插图都切到皮肤图，台词气泡出现，`skins.equipped` 写入；换回默认后图和属性恢复；切到零只看到默认装扮和标“所有角色”的那条；桌宠小屋的“给她换装”按钮打开该角色的换装页；销毁后没有残留节点。控制台只有无头环境软件 WebGL 的性能警告（来自小屋流光，与本次改动无关）。
+
+没有验证：真实酒馆宿主（1.14.0–1.19.0 本轮都没有加载）、真实数据库、实体手机；目录里还没有真正的皮肤，所以带完整素材的皮肤（含探头、打工、吃饭姿势）的实际显示效果未实测。
+
+## v0.9.2 修复与本次检查范围
+
+目标仍为 SillyTavern 1.14.0–1.19.0。使用既有的聊天标识、CHAT_CHANGED 事件、设置与 AbortController，没有新增酒馆内部模块或依赖。
+
+修复：检修请求固定资料快照，聊天切换使旧请求失效；备份等待后和逐条写入前复查归属/忙状态，撤销核对备份聊天；删行核对完整行和表头，切预设核对原预设；需求值关闭时正确结算；忙时禁止普通/强制撤销；旁观评论关闭或切聊天后丢弃晚响应。
+
+本轮证据：
+
+- Node 下 25 组纯逻辑检查：聊天切换、等待备份、批次中断、并发拒绝、来源替换、备份归属、正常应用/撤销、原值冲突、长行末尾变更、旧删行单拒绝、需求值冻结/开启/重启，以及生活钱包/活动、换装存档、故事换篇、模型列表与消息参数等既有行为。
+- Edge 隔离测试页加载实际扩展模块，15 组场景：请求切聊天及切回、行重排与原值变化、忙时撤销/强制撤销、关陪聊后晚响应（包括忽略取消信号）、关后重开、切聊天、正常评论与普通聊天相互独立、设置开关的实际执行顺序；拖动、原地 7 秒坐标保持、原任务停止；1280/375/320 宽度下右键开关、触摸长按、浮窗边界、历史上下文、清理。页面错误为 0。
+- 29 个 JavaScript 语法检查、扩展清单检查通过；53 张 WebP 可解码且含透明度，54 个本地姿势绑定存在。素材字节没有改动，没有逐张重新做人体/抠图审查。
+
+未验证：真实 SillyTavern 1.14.0–1.19.0 本轮未重测，真实数据库公开接口内部等待与 JSON/SQLite 持久保存、真实 AI 修改单质量、付费填表、实体手机。前面的真实宿主记录均是对应旧版的历史证据。服务在公开方法调用之前及调用之间复查，无法中断或回滚已由数据库方法内部开始的操作；不声称整批修改是一个不可分割的事务。
+
+旧版删行修改单缺原行字段时会拒绝应用并提示重新生成；已有生活/养成/换装/聊天存档继续读取。未推送 GitHub，未修改用户 D:\Jiuguan 安装，未由自动化代替用户验收。
+
+
+## v0.9.3 皮肤与花票：本次检查范围
+
+目标仍为 SillyTavern 1.14.0–1.19.0。本轮沿用 `extensionSettings`、`saveSettingsDebounced` 与既有图片解析、窗口和互动机制，没有新增宿主 API 或第三方依赖。
+
+存档向前迁移：原金币、工作/吃饭、日记和服装拥有记录继续读取。`life.schema=3` 新增花票三字段，`skins.schema=2` 新增花票支出；旧存档新字段为 0。旧版不认识花票，退回旧版再保存可能丢掉这些新字段和新日志，应先备份。
+
+本轮证据：
+
+- 9 组换装模型检查：价格/兑换率、初始未拥有、旧存档迁移、余额不足/非法数量/溢出保护、重复购买、穿着和恢复、原金币皮肤、工作/食物兼容、27 动作映射。
+- Edge 加载正式模块，10 组换装场景：实际点击兑换/购买/穿着、填入不扣款、部分兑换、剩余花票、刷新保存、角色隔离、27 图逐一解码、工作工资和四餐配图、1280/375/320 无横向溢出、清理、穿新衣拖动和数据库原停止。页面错误和缺图均为 0。
+- 既有 25 组模型与 15 组浏览器回归在本轮源码复测，覆盖 v0.9.2 六项修复、手机长按、电脑右键、7 秒原地坐标保持、任务停止和窗口清理。模拟 API 与模拟数据库，不代表真实接口调用。
+- JavaScript 语法、扩展清单、皮肤媒体清单/哈希、27 新 WebP 的尺寸与透明度、旧 53 张 WebP 字节保留及压缩包与源文件匹配检查。新图片 960×960，合计 6766248 字节；常用 8 动作预加载，其余按需。
+
+未验证：本轮没有在真实 SillyTavern 1.14.0–1.19.0 逐版加载，也没有更新用户 D:\Jiuguan、连接真实数据库或 API、测试实体手机、跨设备并发钱包或私密模式持久存储。前述宿主测试保留为对应版本的历史证据。当前预览的钱包是独立的测试数据，正式扩展不会赠送测试余额。GitHub 未推送，安装与用户验收尚未完成。

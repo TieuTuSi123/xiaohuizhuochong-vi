@@ -1,12 +1,13 @@
 import { CompanionModel } from './model.js';
-import { createDatabaseObserver, readDeskPetImages } from './database-observer.js';
+import { createDatabaseObserver, readDeskPetImages, readDatabaseView } from './database-observer.js';
 import { readBounds, fromRatio, toRatio, constrain, dockEdge } from './position.js';
 import { createMotion } from './motion.js';
 import { StoryCarousel } from './stories.js';
 import { createChatWindow } from './chat-window.js';
 import { LifeModel } from './life-model.js';
 import { createLifeWindow } from './life-window.js';
-import { CHARACTERS, CHARACTER_IDS, DEFAULT_CHARACTER, resolveCharacter, imageUrls, usesDatabaseArt, poseLabel } from './characters.js';
+import { CHARACTERS, CHARACTER_IDS, DEFAULT_CHARACTER, resolveCharacter, imageUrls, assetUrl, themeOf, usesDatabaseArt, poseLabel } from './characters.js';
+import { SkinModel } from './skin-model.js';
 import { CareModel, MOOD_NAMES, dayKey } from './care-model.js';
 import { createLinePicker, taskKind, timeOfDay } from './lines.js';
 import { createNotebook } from './notebook.js';
@@ -21,7 +22,7 @@ import { createTicket, describeErrors, describeFloors, describeTables, recentFlo
 import { WATCH, clampEvery, createFloorCounter, decideWatch, shouldAsk, watchMessages } from './watch.js';
 
 const ID = 'erii-database-pet';
-const VERSION = '0.9.0';
+const VERSION = '0.9.3';
 const defaults = { enabled: true, idleActions: true, edgePeeks: true, healingStories: true, hideOriginal: true, taskDetails: false, size: 88, side: 'right', position: null,
   character: DEFAULT_CHARACTER, taskTalk: true, needs: true, effects: 'auto', watch: false, watchEvery: WATCH.every, repairFloors: 3 };
 const CHAT_CONNECTION = ['mode', 'url', 'model', 'maxTokens', 'rememberKey', 'replyStyle', 'nickname'];
@@ -54,7 +55,10 @@ export function createCompanion(host, context) {
   let character = resolveCharacter(settings.character);
   let databaseArt = null;
   let artCheckedAt = 0;
-  let images = imageUrls(character);
+  // 换装：买过的皮肤和正在穿的皮肤按角色存在 settings.skins；钱从生活手帐的钱包里扣。
+  const skinModel = new SkinModel(settings.skins, { persist: value => { settings.skins = value; persistStore(); } });
+  const skinOf = id => skinModel.equipped(id);
+  let images = imageUrls(character, null, skinOf(character.id));
   const model = new CompanionModel();
   const storyteller = new StoryCarousel();
   const picker = createLinePicker();
@@ -77,11 +81,16 @@ export function createCompanion(host, context) {
   const effects = createEffects(host, { tier: fxTier });
   // Bảo trì: Bản sao lưu trước khi ghi được lưu tại local của trình duyệt; việc ghi chỉ thông qua API công khai của cơ sở dữ liệu. Quan sát trò chuyện: Chỉ đếm các tầng mới xuất hiện sau khi bật.
   const backups = createBackupStore(host);
-  const repairService = createRepairService(host, { backups });
+  const databaseBusy = () => {
+    try { return readDatabaseView(doc).busy || Boolean(model.snapshot.busy); }
+    catch { return Boolean(model.snapshot.busy); }
+  };
+  const repairService = createRepairService(host, { backups, busy: databaseBusy });
   const floorCounter = createFloorCounter();
   let watchDue = 0;
   let watchWait = 0;
   let watchRunning = false;
+  let watchEpoch = 0;
   let lastCommentAt = 0;
   let unbindChatEvents = null;
   let dataSource = null;
@@ -160,6 +169,11 @@ export function createCompanion(host, context) {
       image.src = url;
     }));
     return loaded.get(pose);
+  }
+  function preloadArt() {
+    // 新皮肤只先准备任务和拖动常用图，其余按需加载，减少手机首屏解码。
+    const poses = skinOf(character.id) ? ['idle','received','writing','complete','error','wave','lifted','land'] : Object.keys(images);
+    for (const pose of poses) loadAsset(pose);
   }
   async function showPose(pose) {
     const version = ++swapVersion;
@@ -282,14 +296,16 @@ export function createCompanion(host, context) {
     const rect = root.getBoundingClientRect();
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height * .35 };
   }
+  const theme = () => themeOf(character, skinOf(character.id));
   function sparkle(kind, count) {
     const { x, y } = petCenter();
-    effects.burst(kind || character.theme.particle, x, y, character.theme.colors, count);
+    const palette = theme();
+    effects.burst(kind || palette.particle, x, y, palette.colors, count);
   }
   function celebrate(tier) {
     if (!tier) return;
     speak(character.lines.care.tierUp[tier] || '', 5600, true);
-    effects.shower('confetti', [...character.theme.colors, '#e8c66a']);
+    effects.shower('confetti', [...theme().colors, '#e8c66a']);
     house?.render();
   }
   function readArt(force = false) {
@@ -300,7 +316,15 @@ export function createCompanion(host, context) {
   }
   function artFor(item) {
     if (item.id === character.id) return images;
-    return imageUrls(item, usesDatabaseArt(item) ? readArt() : null);
+    return imageUrls(item, usesDatabaseArt(item) ? readArt() : null, skinOf(item.id));
+  }
+  // 换装后清掉旧图缓存，再准备常用图；当前姿势会换成新图。
+  function refreshArt() {
+    images = imageUrls(character, usesDatabaseArt(character) ? readArt(true) : null, skinOf(character.id));
+    loaded.clear(); failedEdge = null; assetFailed = false; lastPose = '';
+    preloadArt();
+    applyCharacterTexts();
+    update();
   }
   function setNotebook(open) {
     if (open) { chat?.close(); life?.close(); house?.close(); storyteller.dismiss(); }
@@ -502,7 +526,7 @@ export function createCompanion(host, context) {
     const persona = { prompt: who.persona, relationship: who.relationship };
     return {
       available: () => repairService.available(),
-      busy: () => Boolean(model.snapshot.busy),
+      busy: databaseBusy,
       get durable() { return backups.durable; },
       scope() {
         const available = repairService.available();
@@ -511,13 +535,14 @@ export function createCompanion(host, context) {
         return { available, tables, floors: settings.repairFloors, errors: recentErrors().length };
       },
       setFloors(count) { settings.repairFloors = Math.min(REPAIR_LIMITS.floors, Math.max(0, Math.round(Number(count) || 0))); save(); },
-      messages(config, ctx, list) {
-        const snapshot = repairService.snapshot();
+      capture: () => repairService.snapshot(),
+      isCurrent: snapshot => repairService.isCurrent(snapshot),
+      messages(config, ctx, list, snapshot) {
         return repairMessages(config, ctx, list, { persona, name: who.name, material: {
           tables: describeTables(snapshot.data).text, errors: describeErrors(recentErrors()),
           floors: describeFloors(recentFloors(ctx.chat, settings.repairFloors)), presets: snapshot.presets, current: snapshot.current } });
       },
-      review: text => createTicket(text, repairService.snapshot()),
+      review: (text, snapshot) => createTicket(text, snapshot),
       apply: (ticket, options) => repairService.apply(ticket, { ...options, character: who.id }),
       undo: (ticket, force) => repairService.undo(ticket, { force }),
       backup: id => backups.get(id),
@@ -531,9 +556,14 @@ export function createCompanion(host, context) {
     const ctx = host.SillyTavern?.getContext?.();
     if (!ctx) return;
     floorCounter.observe(chatKeyOf(ctx), ctx.chat);
-    if (kind === 'changed') watchDue = 0;
-    // Chỉ cân nhắc bình luận sau khi nhân vật đã viết xong câu trả lời, khi người dùng vừa gửi tin nhắn thì văn bản vẫn chưa hoàn chỉnh.
+    if (kind === 'changed') { repairService.invalidate(); chat?.contextChanged(); cancelWatch(); }
+    // 只在角色回复写完后考虑评论，用户刚发出消息时正文还不完整。
     if (kind === 'received' && settings.watch && floorCounter.pending >= settings.watchEvery) watchDue ||= Date.now() + WATCH.settle;
+  }
+  function cancelWatch() {
+    watchEpoch++; watchDue = 0; watchWait = 0;
+    chat?.cancelComment();
+    if (speech?.watch) speech = null;
   }
   function bindChatEvents() {
     if (unbindChatEvents) return;
@@ -560,6 +590,9 @@ export function createCompanion(host, context) {
     const who = character;
     const current = chat;
     if (!ctx || !current) return;
+    const epoch = watchEpoch, key = chatKeyOf(ctx);
+    const valid = () => !destroyed && settings.watch && settings.enabled !== false && epoch === watchEpoch
+      && current === chat && who.id === character.id && key === chatKeyOf(host.SillyTavern?.getContext?.());
     const count = Math.min(floorCounter.take(), WATCH.floors);
     const floors = recentFloors(ctx.chat, count);
     if (!floors.length) return;
@@ -570,10 +603,10 @@ export function createCompanion(host, context) {
     let result;
     try {
       result = await current.comment((config, context) => watchMessages(config, context, floors,
-        { persona: { prompt: who.persona, relationship: who.relationship }, name: who.name, unanswered: state.unanswered, ask }));
+        { persona: { prompt: who.persona, relationship: who.relationship }, name: who.name, unanswered: state.unanswered, ask }), valid);
     } catch (error) { result = { ok: false, reason: String(error?.message || error) }; }
     finally { watchRunning = false; }
-    if (destroyed) return;
+    if (!valid()) return;
     if (result.reason === 'busy') { floorCounter.restore(count); watchDue = Date.now() + 5000; return; }
     if (result.reason === 'closed') return;
     lastCommentAt = Date.now();
@@ -583,7 +616,7 @@ export function createCompanion(host, context) {
     persistStore(); settingsControls?.sync();
     if (who.id === character.id && !switching && settings.enabled !== false) {
       storyteller.dismiss();
-      speech = { text: result.text, until: Date.now() + 9000, reply: true };
+      speech = { text: result.text, until: Date.now() + 9000, reply: true, watch: true };
       update();
     }
   }
@@ -593,7 +626,7 @@ export function createCompanion(host, context) {
     if (usesDatabaseArt(character)) {
       const art = readArt();
       const shouldYield = !art;
-      if (art && (yielded || !images.idle)) { images = imageUrls(character, art); loaded.clear(); lastPose = ''; notebook.setCharacter(character, images.idle); }
+      if (art && (yielded || !images.idle)) { images = imageUrls(character, art, skinOf(character.id)); loaded.clear(); lastPose = ''; notebook.setCharacter(character, images.idle); }
       if (shouldYield !== yielded) { yielded = shouldYield; lastPose = ''; }
     } else yielded = false;
     root.hidden = settings.enabled === false || yielded;
@@ -711,10 +744,11 @@ export function createCompanion(host, context) {
   }
   function applyCharacterTexts() {
     root.dataset.character = character.id; overlay.dataset.character = character.id;
-    portrait.setAttribute('aria-label', `${character.fullName}: Nhấp đơn, nhấp đúp hoặc nhấn giữ để tương tác; trên điện thoại nhấn giữ để mở sổ, trên PC nhấp chuột phải xem nhiệm vụ`);
-    portrait.title = 'Chạm nhẹ để tương tác · Nhấp đúp có phản ứng khác · Điện thoại nhấn giữ để mở sổ · Kéo để di chuyển · PC nhấp chuột phải xem sổ';
-    lifeBubble.setAttribute('aria-label', `Tiến độ cuộc sống của ${character.name}`);
-    storyBubble.setAttribute('aria-label', `Câu chuyện chữa lành của ${character.name}`);
+    root.dataset.skin = skinModel.equippedId(character.id); overlay.dataset.skin = root.dataset.skin;
+    portrait.setAttribute('aria-label', `${character.fullName}：单击、连点或长按互动；手机长按打开小本子，电脑右键查看任务`);
+    portrait.title = '轻点互动 · 连点有不同反应 · 手机长按打开小本子 · 拖动移动 · 电脑右键看小本子';
+    lifeBubble.setAttribute('aria-label', `${character.name}的生活进度`);
+    storyBubble.setAttribute('aria-label', `${character.name}的治愈小故事`);
     notebook.setCharacter(character, images.idle);
     settingsControls?.sync();
   }
@@ -759,9 +793,9 @@ export function createCompanion(host, context) {
       const chatWasOpen = chat?.visible;
       const seenToday = care.state(next.id).lastSeen === dayKey(Date.now());
       character = next; settings.character = next.id;
-      images = imageUrls(character, usesDatabaseArt(character) ? readArt(true) : null);
+      images = imageUrls(character, usesDatabaseArt(character) ? readArt(true) : null, skinOf(character.id));
       loaded.clear(); failedEdge = null; assetFailed = false; lastPose = ''; speech = null; yielded = false;
-      for (const pose of Object.keys(images)) loadAsset(pose);
+      preloadArt();
       applyCharacterTexts();
       chat?.destroy(); chat = makeChat(); if (chatWasOpen) chat.open();
       life?.setCharacter(character.id);
@@ -832,11 +866,11 @@ export function createCompanion(host, context) {
       listen(input, 'change', () => { settings[key] = input.checked; after?.(); save(); });
       fields.push([key, input]);
     };
-    const display = group('Pet màn hình');
-    toggle(display, 'enabled', 'Hiển thị pet màn hình');
-    toggle(display, 'idleActions', 'Làm hành động nhỏ lúc rảnh rỗi, thỉnh thoảng nói chuyện');
-    toggle(display, 'edgePeeks', 'Ló đầu ra khi kéo sát mép màn hình');
-    toggle(display, 'healingStories', 'Kể chuyện chữa lành lúc rảnh rỗi');
+    const display = group('桌宠');
+    toggle(display, 'enabled', '显示桌宠', () => { if (!settings.enabled) cancelWatch(); });
+    toggle(display, 'idleActions', '空闲时做小动作、偶尔说说话');
+    toggle(display, 'edgePeeks', '拖到边缘后探头');
+    toggle(display, 'healingStories', '空闲时讲治愈小故事');
     const sizeRow = el(doc, 'label', undefined, 'pet-settings__range');
     const range = el(doc, 'input');
     range.type = 'range'; range.min = '56'; range.max = '112'; range.step = '4'; range.value = String(settings.size);
@@ -864,9 +898,9 @@ export function createCompanion(host, context) {
     fxMode.value = settings.effects;
     fxRow.append(el(doc, 'span', 'Hiệu ứng'), fxMode); nurture.append(fxRow);
     listen(fxMode, 'change', () => { settings.effects = fxMode.value; save(); house?.refreshEffects(); });
-    const companion = group('Trò chuyện và bảo trì');
-    // Bật lại thì đếm từ đầu: Chỉ bình luận các tầng mới xuất hiện sau khi bật.
-    toggle(companion, 'watch', 'Quan sát trò chuyện: Đọc văn bản cách vài tầng, nêu cảm nghĩ', () => { watchDue = 0; observeChat('toggle'); floorCounter.reset(); });
+    const companion = group('陪聊与检修');
+    // 开启时重新起算：只评论开启之后新出现的楼层。
+    toggle(companion, 'watch', '旁观陪聊：隔几层看看正文，说说感想', () => { cancelWatch(); observeChat('toggle'); floorCounter.reset(); });
     const select = (box, label, options, value, change) => {
       const row = el(doc, 'label', undefined, 'pet-settings__select');
       const control = el(doc, 'select'); control.setAttribute('aria-label', label);
@@ -1135,9 +1169,19 @@ export function createCompanion(host, context) {
   }
   const returnToPet = () => (settings.enabled === false || yielded ? settingsMount?.querySelector('button[aria-controls]') : portrait)?.focus({preventScroll:true});
   chat = makeChat();
+  // 换装桥：买皮肤的钱从生活手帐的钱包里扣，并记进小账本；皮肤目录和拥有状态都在 skinModel。
+  const skinBridge = {
+    list: (who, options) => skinModel.list(who, options),
+    equippedId: who => skinModel.equippedId(who),
+    buy: (who, id) => skinModel.buy(who, id, (price, skin) => skin.currency === 'tickets'
+      ? lifeModel.spendTickets(price, `花 ${price} 张花票买了皮肤「${skin.name}」。`, who)
+      : lifeModel.spend(price, `花 ${price} 金币买了皮肤「${skin.name}」。`, who)),
+    equip: (who, id) => skinModel.equip(who, id),
+  };
   life = createLifeWindow(host, {
-    model:lifeModel, characters:CHARACTER_IDS.map(id => CHARACTERS[id]), currentId:() => character.id,
+    model:lifeModel, skins:skinBridge, characters:CHARACTER_IDS.map(id => CHARACTERS[id]), currentId:() => character.id,
     art:(item, pose) => artFor(item)[pose] || null, nameOf,
+    skinArt:(item, skin, pose) => assetUrl(item, pose, usesDatabaseArt(item) ? readArt() : null, skin),
     onOpen:() => {chat?.close(); house?.close(); setNotebook(false); storyteller.dismiss();},
     onChange:() => {if (point) update();},
     onEvent:(type, who, detail) => {
@@ -1147,6 +1191,12 @@ export function createCompanion(host, context) {
       if (type === 'wage') { const result = care.wage(who, detail.id); if (mine) { say('care.wage', 4200, true); if (result.tierUp) celebrate(result.tierUp); } }
       if (type === 'welfare') say('care.welfare', 4200, true);
       if (type === 'wage' || type === 'welfare') { const rect = life.coinAnchor(); effects.burst('coins', rect.x, rect.y, ['#f2c14e', '#e0a526', '#ffe08a'], 12); }
+      if (type === 'skin') {
+        if (detail.action === 'bought') { const rect = life.coinAnchor(); effects.burst('coins', rect.x, rect.y, ['#f2c14e', '#e0a526', '#ffe08a'], 12); }
+        if (mine && detail.action === 'equipped') refreshArt();
+        if (mine) { say(detail.action === 'bought' ? 'care.skinBought' : 'care.skinEquipped', 4200, true); if (detail.action === 'equipped') sparkle(null, 14); }
+        house?.render();
+      }
     },
     blocked:() => model.snapshot.busy || chat?.busy,
     onStopTask:stopDatabaseTask,
@@ -1156,11 +1206,12 @@ export function createCompanion(host, context) {
   house = createPetHouse(host, {
     characters: CHARACTER_IDS.map(id => CHARACTERS[id]), currentId: () => character.id, care,
     portraits: item => { const art = artFor(item); return art.idle ? { idle: art.idle, wave: art.wave || art.idle } : null; },
-    available: item => usesDatabaseArt(item) && !readArt() ? { ok: false, reason: 'Hình ảnh của Nai Dan lấy từ cơ sở dữ liệu đang chạy. Vui lòng kích hoạt Long Huyết Huyền Hoàng · Cơ sở dữ liệu và bật pet màn hình đi kèm của nó.' } : { ok: true },
-    moodExtra, nameOf, statusOf, fxTier,
+    available: item => usesDatabaseArt(item) && !readArt() ? { ok: false, reason: '奶蛋的图来自正在运行的数据库。请启用龙血玄黄·数据库，并打开它自带的桌宠。' } : { ok: true },
+    moodExtra, nameOf, statusOf, fxTier, themeOf: item => themeOf(item, skinOf(item.id)),
     actions: {
       switchTo: id => switchCharacter(id),
       feed: id => { house.close(); life.open(id); },
+      wardrobe: id => { house.close(); life.open(id, 'skins'); },
       clean: id => cleanCharacter(id),
       nickname: (id, value) => {
         const changed = care.setNickname(id, value);
@@ -1185,7 +1236,7 @@ export function createCompanion(host, context) {
     update();
   });
   applyCharacterTexts();
-  for (const pose of Object.keys(images)) loadAsset(pose);
+  preloadArt();
   connect(); mountSettings(); watchInput(); bindChatEvents(); position(); scheduleLeisure();
   // Establish the saved location before enabling movement easing (no fly-in from 0,0).
   root.getBoundingClientRect();
@@ -1195,6 +1246,7 @@ export function createCompanion(host, context) {
     get chat() { return chat; },
     life,
     lifeModel,
+    skins: skinModel,
     care,
     house,
     get character() { return character.id; },
@@ -1203,6 +1255,7 @@ export function createCompanion(host, context) {
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      repairService.invalidate();
       chat?.destroy();
       life.destroy();
       house.destroy();
