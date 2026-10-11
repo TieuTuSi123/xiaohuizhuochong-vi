@@ -6,7 +6,7 @@ import { TIER_NAMES, MOOD_NAMES } from './care-model.js';
 const LATIN = { erii: 'ERII', zero: 'ZERO', naidan: 'NAIDAN' };
 
 // 桌宠小屋：一本翻开的图鉴。左页是立绘和流光，右页是养成档案；切换角色时翻页。
-export function createPetHouse(host, { characters, currentId, care, portraits, available, moodExtra, nameOf, statusOf, fxTier, actions, returnFocus }) {
+export function createPetHouse(host, { characters, currentId, care, portraits, available, moodExtra, nameOf, statusOf, fxTier, actions, returnFocus, themeOf = item => item.theme }) {
   const doc = host.document, listeners = [];
   let destroyed = false, focusId = currentId(), view = 'profile', aurora = null, ticker = null, editing = false, openedStory = '';
   const el = (tag, text, className) => { const node = doc.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; };
@@ -77,8 +77,9 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
   const choose = button('换她来陪我', 'erii-house__choose', 'sparkle');
   const feed = button('喂她', 'erii-house__action', 'bowl');
   const wash = button('梳洗', 'erii-house__action', 'bubbles');
+  const wardrobe = button('换装', 'erii-house__action', 'shirt');
   const diaryOpen = button('成长日记', 'erii-house__action', 'book');
-  deck.append(choose, feed, wash, diaryOpen);
+  deck.append(choose, feed, wash, wardrobe, diaryOpen);
   profile.append(nameRow, honor, affection, moodRow, needs, facts, intro, deck);
 
   const diary = el('div', undefined, 'erii-house__diary'); diary.hidden = true;
@@ -103,7 +104,7 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
     root.dataset.fx = fxTier();
     if (fancy && !aurora) aurora = createAurora(glow, host);
     if (!aurora) return;
-    aurora.setColors(byId(focusId).theme.aurora);
+    aurora.setColors(themeOf(byId(focusId)).aurora);
     if (fancy) aurora.start(); else aurora.stop();
   }
   function render() {
@@ -152,6 +153,8 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
     choose.querySelector('span:last-child').textContent = isCurrent ? `${character.pronoun}正在陪你` : `换${character.pronoun}来陪我`;
     choose.title = ready.ok ? '' : ready.reason;
     feed.querySelector('span:last-child').textContent = `喂${character.pronoun}`;
+    wardrobe.querySelector('span:last-child').textContent = `给${character.pronoun}换装`;
+    wardrobe.hidden = typeof actions.wardrobe !== 'function';
     wash.disabled = !actions.needsEnabled();
     if (!diary.hidden) renderDiary(character, state);
   }
@@ -227,6 +230,7 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
   listen(nameInput, 'blur', () => finishRename(true));
   listen(choose, 'click', () => { if (!choose.disabled) { actions.switchTo(focusId); render(); } });
   listen(feed, 'click', () => actions.feed(focusId));
+  listen(wardrobe, 'click', () => actions.wardrobe?.(focusId));
   listen(wash, 'click', () => {
     const result = actions.clean(focusId);
     say(result?.tooSoon ? `刚梳洗过，${Math.ceil(result.wait / 60000)} 分钟后再来。` : '洗得干干净净。');

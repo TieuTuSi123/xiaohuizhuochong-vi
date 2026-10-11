@@ -6,7 +6,8 @@ import { StoryCarousel } from './stories.js';
 import { createChatWindow } from './chat-window.js';
 import { LifeModel } from './life-model.js';
 import { createLifeWindow } from './life-window.js';
-import { CHARACTERS, CHARACTER_IDS, DEFAULT_CHARACTER, resolveCharacter, imageUrls, usesDatabaseArt, poseLabel } from './characters.js';
+import { CHARACTERS, CHARACTER_IDS, DEFAULT_CHARACTER, resolveCharacter, imageUrls, assetUrl, themeOf, usesDatabaseArt, poseLabel } from './characters.js';
+import { SkinModel } from './skin-model.js';
 import { CareModel, MOOD_NAMES, dayKey } from './care-model.js';
 import { createLinePicker, taskKind, timeOfDay } from './lines.js';
 import { createNotebook } from './notebook.js';
@@ -21,7 +22,7 @@ import { createTicket, describeErrors, describeFloors, describeTables, recentFlo
 import { WATCH, clampEvery, createFloorCounter, decideWatch, shouldAsk, watchMessages } from './watch.js';
 
 const ID = 'erii-database-pet';
-const VERSION = '0.9.0';
+const VERSION = '0.9.1';
 const defaults = { enabled: true, idleActions: true, edgePeeks: true, healingStories: true, hideOriginal: true, taskDetails: false, size: 88, side: 'right', position: null,
   character: DEFAULT_CHARACTER, taskTalk: true, needs: true, effects: 'auto', watch: false, watchEvery: WATCH.every, repairFloors: 3 };
 const CHAT_CONNECTION = ['mode', 'url', 'model', 'maxTokens', 'rememberKey', 'replyStyle', 'nickname'];
@@ -54,7 +55,10 @@ export function createCompanion(host, context) {
   let character = resolveCharacter(settings.character);
   let databaseArt = null;
   let artCheckedAt = 0;
-  let images = imageUrls(character);
+  // 换装：买过的皮肤和正在穿的皮肤按角色存在 settings.skins；钱从生活手帐的钱包里扣。
+  const skinModel = new SkinModel(settings.skins, { persist: value => { settings.skins = value; persistStore(); } });
+  const skinOf = id => skinModel.equipped(id);
+  let images = imageUrls(character, null, skinOf(character.id));
   const model = new CompanionModel();
   const storyteller = new StoryCarousel();
   const picker = createLinePicker();
@@ -282,14 +286,16 @@ export function createCompanion(host, context) {
     const rect = root.getBoundingClientRect();
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height * .35 };
   }
+  const theme = () => themeOf(character, skinOf(character.id));
   function sparkle(kind, count) {
     const { x, y } = petCenter();
-    effects.burst(kind || character.theme.particle, x, y, character.theme.colors, count);
+    const palette = theme();
+    effects.burst(kind || palette.particle, x, y, palette.colors, count);
   }
   function celebrate(tier) {
     if (!tier) return;
     speak(character.lines.care.tierUp[tier] || '', 5600, true);
-    effects.shower('confetti', [...character.theme.colors, '#e8c66a']);
+    effects.shower('confetti', [...theme().colors, '#e8c66a']);
     house?.render();
   }
   function readArt(force = false) {
@@ -300,7 +306,15 @@ export function createCompanion(host, context) {
   }
   function artFor(item) {
     if (item.id === character.id) return images;
-    return imageUrls(item, usesDatabaseArt(item) ? readArt() : null);
+    return imageUrls(item, usesDatabaseArt(item) ? readArt() : null, skinOf(item.id));
+  }
+  // 换了皮肤之后重新取图：和换角色一样清掉已加载的图，再把每个姿势预载一遍；当前姿势会立刻换成新图。
+  function refreshArt() {
+    images = imageUrls(character, usesDatabaseArt(character) ? readArt(true) : null, skinOf(character.id));
+    loaded.clear(); failedEdge = null; assetFailed = false; lastPose = '';
+    for (const pose of Object.keys(images)) loadAsset(pose);
+    applyCharacterTexts();
+    update();
   }
   function setNotebook(open) {
     if (open) { chat?.close(); life?.close(); house?.close(); storyteller.dismiss(); }
@@ -593,7 +607,7 @@ export function createCompanion(host, context) {
     if (usesDatabaseArt(character)) {
       const art = readArt();
       const shouldYield = !art;
-      if (art && (yielded || !images.idle)) { images = imageUrls(character, art); loaded.clear(); lastPose = ''; notebook.setCharacter(character, images.idle); }
+      if (art && (yielded || !images.idle)) { images = imageUrls(character, art, skinOf(character.id)); loaded.clear(); lastPose = ''; notebook.setCharacter(character, images.idle); }
       if (shouldYield !== yielded) { yielded = shouldYield; lastPose = ''; }
     } else yielded = false;
     root.hidden = settings.enabled === false || yielded;
@@ -711,6 +725,7 @@ export function createCompanion(host, context) {
   }
   function applyCharacterTexts() {
     root.dataset.character = character.id; overlay.dataset.character = character.id;
+    root.dataset.skin = skinModel.equippedId(character.id); overlay.dataset.skin = root.dataset.skin;
     portrait.setAttribute('aria-label', `${character.fullName}：单击、连点或长按互动；手机长按打开小本子，电脑右键查看任务`);
     portrait.title = '轻点互动 · 连点有不同反应 · 手机长按打开小本子 · 拖动移动 · 电脑右键看小本子';
     lifeBubble.setAttribute('aria-label', `${character.name}的生活进度`);
@@ -759,7 +774,7 @@ export function createCompanion(host, context) {
       const chatWasOpen = chat?.visible;
       const seenToday = care.state(next.id).lastSeen === dayKey(Date.now());
       character = next; settings.character = next.id;
-      images = imageUrls(character, usesDatabaseArt(character) ? readArt(true) : null);
+      images = imageUrls(character, usesDatabaseArt(character) ? readArt(true) : null, skinOf(character.id));
       loaded.clear(); failedEdge = null; assetFailed = false; lastPose = ''; speech = null; yielded = false;
       for (const pose of Object.keys(images)) loadAsset(pose);
       applyCharacterTexts();
@@ -1135,9 +1150,17 @@ export function createCompanion(host, context) {
   }
   const returnToPet = () => (settings.enabled === false || yielded ? settingsMount?.querySelector('button[aria-controls]') : portrait)?.focus({preventScroll:true});
   chat = makeChat();
+  // 换装桥：买皮肤的钱从生活手帐的钱包里扣，并记进小账本；皮肤目录和拥有状态都在 skinModel。
+  const skinBridge = {
+    list: (who, options) => skinModel.list(who, options),
+    equippedId: who => skinModel.equippedId(who),
+    buy: (who, id) => skinModel.buy(who, id, (price, skin) => lifeModel.spend(price, `花 ${price} 金币买了皮肤「${skin.name}」。`, who)),
+    equip: (who, id) => skinModel.equip(who, id),
+  };
   life = createLifeWindow(host, {
-    model:lifeModel, characters:CHARACTER_IDS.map(id => CHARACTERS[id]), currentId:() => character.id,
+    model:lifeModel, skins:skinBridge, characters:CHARACTER_IDS.map(id => CHARACTERS[id]), currentId:() => character.id,
     art:(item, pose) => artFor(item)[pose] || null, nameOf,
+    skinArt:(item, skin, pose) => assetUrl(item, pose, usesDatabaseArt(item) ? readArt() : null, skin),
     onOpen:() => {chat?.close(); house?.close(); setNotebook(false); storyteller.dismiss();},
     onChange:() => {if (point) update();},
     onEvent:(type, who, detail) => {
@@ -1147,6 +1170,12 @@ export function createCompanion(host, context) {
       if (type === 'wage') { const result = care.wage(who, detail.id); if (mine) { say('care.wage', 4200, true); if (result.tierUp) celebrate(result.tierUp); } }
       if (type === 'welfare') say('care.welfare', 4200, true);
       if (type === 'wage' || type === 'welfare') { const rect = life.coinAnchor(); effects.burst('coins', rect.x, rect.y, ['#f2c14e', '#e0a526', '#ffe08a'], 12); }
+      if (type === 'skin') {
+        if (detail.action === 'bought') { const rect = life.coinAnchor(); effects.burst('coins', rect.x, rect.y, ['#f2c14e', '#e0a526', '#ffe08a'], 12); }
+        if (mine && detail.action === 'equipped') refreshArt();
+        if (mine) { say(detail.action === 'bought' ? 'care.skinBought' : 'care.skinEquipped', 4200, true); if (detail.action === 'equipped') sparkle(null, 14); }
+        house?.render();
+      }
     },
     blocked:() => model.snapshot.busy || chat?.busy,
     onStopTask:stopDatabaseTask,
@@ -1157,10 +1186,11 @@ export function createCompanion(host, context) {
     characters: CHARACTER_IDS.map(id => CHARACTERS[id]), currentId: () => character.id, care,
     portraits: item => { const art = artFor(item); return art.idle ? { idle: art.idle, wave: art.wave || art.idle } : null; },
     available: item => usesDatabaseArt(item) && !readArt() ? { ok: false, reason: '奶蛋的图来自正在运行的数据库。请启用龙血玄黄·数据库，并打开它自带的桌宠。' } : { ok: true },
-    moodExtra, nameOf, statusOf, fxTier,
+    moodExtra, nameOf, statusOf, fxTier, themeOf: item => themeOf(item, skinOf(item.id)),
     actions: {
       switchTo: id => switchCharacter(id),
       feed: id => { house.close(); life.open(id); },
+      wardrobe: id => { house.close(); life.open(id, 'skins'); },
       clean: id => cleanCharacter(id),
       nickname: (id, value) => {
         const changed = care.setNickname(id, value);
@@ -1195,6 +1225,7 @@ export function createCompanion(host, context) {
     get chat() { return chat; },
     life,
     lifeModel,
+    skins: skinModel,
     care,
     house,
     get character() { return character.id; },

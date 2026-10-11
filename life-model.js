@@ -78,6 +78,13 @@ export class LifeModel {
     this.setActivity(who, {kind:'food',id,startedAt:this.now(),uid:`food-${this.now()}-${++this.serial}`});
     this.record('spent',`花 ${food.price} 金币买了${food.name}。`, who); this.save(); return true;
   }
+  // 用钱包里的金币买别的东西（例如皮肤）：余额不够返回 false，不扣钱；成功时记一条小账本。
+  spend(amount, text, who = OWNER) {
+    const price = integer(amount);
+    if (this.state.coins < price) return false;
+    this.state.coins -= price; this.state.spent = integer(this.state.spent + price);
+    this.record('spent', String(text || `花了 ${price} 金币。`).slice(0, 160), who); this.save(); return true;
+  }
   welfareAvailable() { return this.state.coins < WELFARE.below && this.state.welfareDate !== today(this.now()); }
   claimWelfare() {
     if (!this.welfareAvailable()) return 0;

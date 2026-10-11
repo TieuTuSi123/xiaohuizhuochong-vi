@@ -538,6 +538,21 @@
 .erii-life__food-image { display: block; width: 104px; height: 96px; object-fit: contain; margin: 0 auto 6px; }
 .erii-life__food p { color: var(--pet-gold-lo); font-size: 11.5px; }
 .erii-life__food button { margin-top: 7px; width: 100%; font-size: 12px; }
+/* 换装页：和点餐卡片同一套版式；左上角的小纸签写价格 / 已拥有 / 使用中。皮肤的界面配色用 [data-skin="皮肤 id"] 另写。 */
+.erii-life__closet { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.erii-life__skin { position: relative; padding: 14px 10px 12px; text-align: center; border: 1px solid var(--pet-line); border-radius: 16px; background: var(--pet-card); transition: transform .18s var(--pet-ease), box-shadow .18s; }
+.erii-life__skin:hover { transform: translateY(-2px) rotate(.5deg); box-shadow: 0 10px 18px -14px var(--pet-shadow); }
+.erii-life__skin[data-state="equipped"] { border-color: var(--pet-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--pet-accent) 22%, transparent); }
+.erii-life__skin[data-state="locked"] { background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--pet-line) 45%, transparent) 6px 7px), var(--pet-paper); }
+.erii-life__skin[data-state="locked"] .erii-life__skin-image { filter: grayscale(.6) opacity(.75); }
+.erii-life__skin-tag { position: absolute; left: -4px; top: 9px; padding: 1px 9px 1px 7px; border-radius: 0 99px 99px 0; font: 600 10.5px/1.6 var(--pet-hand); letter-spacing: 1px;
+  color: #4a3204; background: linear-gradient(180deg, var(--pet-gold-hi), var(--pet-gold)); box-shadow: 0 2px 5px -3px var(--pet-shadow); }
+.erii-life__skin[data-state="equipped"] .erii-life__skin-tag { color: #fffaf4; background: linear-gradient(180deg, var(--pet-accent-2), var(--pet-accent)); }
+.erii-life__skin[data-state="owned"] .erii-life__skin-tag { color: var(--pet-accent-ink); background: var(--pet-soft); }
+.erii-life__skin-image { display: block; width: 104px; height: 104px; object-fit: contain; margin: 0 auto 6px; }
+.erii-life__skin p { color: var(--pet-muted); font-size: 11px; min-height: 2.8em; }
+.erii-life__skin button { margin-top: 7px; width: 100%; font-size: 12px; }
+.erii-life__skin[data-state="locked"] button { color: var(--pet-muted) !important; }
 .erii-life__totals { color: var(--pet-gold-lo); padding-bottom: 12px; font-size: 12px; }
 .erii-life__records { list-style: none; margin: 0; padding: 0; font-size: 12px; }
 .erii-life__records li { display: grid; grid-template-columns: auto 1fr; gap: 0 8px; padding: 9px 0; border-bottom: 1px dashed var(--pet-line); }

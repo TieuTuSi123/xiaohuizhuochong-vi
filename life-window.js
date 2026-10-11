@@ -1,12 +1,14 @@
 import {JOBS, FOODS, WELFARE} from './life-model.js';
 import {FOOD_CARE} from './care-model.js';
+import {DEFAULT_SKIN} from './skin-model.js';
 import {createSheet, leave} from './sheet.js';
 import {icon} from './icons.js';
 
-// 生活手帐：家里的钱包所有角色共用，打工和吃饭按角色各算各的。
-export function createLifeWindow(host, {model, characters, currentId, art, nameOf, onOpen, onClose, onChange, onEvent, blocked, onStopTask, onOpenDatabase, returnFocus}) {
+// 生活手帐：家里的钱包所有角色共用，打工、吃饭和换装按角色各算各的。
+// skins 是 index.js 给的换装桥（list / equippedId / buy / equip，见 skin-model.js）；skinArt(角色, 皮肤, 姿势) 取某一套皮肤的图做预览。
+export function createLifeWindow(host, {model, skins, characters, currentId, art, skinArt, nameOf, onOpen, onClose, onChange, onEvent, blocked, onStopTask, onOpenDatabase, returnFocus}) {
   const doc = host.document, listeners = [];
-  let destroyed = false, selected = 'jobs', who = currentId(), cancelConfirmed = false, recordsKey = '', sceneKey = '', menuKey = '';
+  let destroyed = false, selected = 'jobs', who = currentId(), cancelConfirmed = false, recordsKey = '', sceneKey = '', sceneUrl = '', menuKey = '', closetKey = '';
   const node = (tag, text, name) => { const element = doc.createElement(tag); if (text !== undefined) element.textContent = text; if (name) element.className = name; return element; };
   const button = (text, name, iconName) => { const element = node('button',undefined,name); element.type = 'button'; if (iconName) element.append(icon(doc,iconName)); element.append(node('span',text)); return element; };
   const listen = (target,type,callback) => { target.addEventListener(type,callback); listeners.push(()=>target.removeEventListener(type,callback)); };
@@ -47,7 +49,7 @@ export function createLifeWindow(host, {model, characters, currentId, art, nameO
   sceneText.append(activityTitle,activityLine,progress,countdown,activityActions); scene.append(illustration,sceneText);
   const tabs = node('div',undefined,'erii-life__tabs'); tabs.setAttribute('role','tablist'); tabs.setAttribute('aria-label','生活手帐页面');
   const panels = {}, tabButtons = {};
-  for (const [id,text,iconName] of [['jobs','去打工','briefcase'],['food','吃点好的','bowl'],['journal','小账本','book']]) {
+  for (const [id,text,iconName] of [['jobs','去打工','briefcase'],['food','吃点好的','bowl'],['skins','换装','shirt'],['journal','小账本','book']]) {
     const control = button(text,undefined,iconName); control.id = `erii-life-tab-${id}`; control.dataset.tab = id;
     control.setAttribute('role','tab'); control.setAttribute('aria-controls',`erii-life-panel-${id}`); tabs.append(control); tabButtons[id] = control;
     const panel = node('div',undefined,`erii-life__panel erii-life__panel--${id}`); panel.id = `erii-life-panel-${id}`;
@@ -68,6 +70,8 @@ export function createLifeWindow(host, {model, characters, currentId, art, nameO
     card.append(symbol,node('h4',food.name),node('p',`${food.price} 金币 · 饱腹 +${FOOD_CARE[food.id][0]}`),buy); menu.append(card); foodButtons.push(buy);
   }
   panels.food.append(menu,node('p','买好就开饭，8～12 秒后吃完，吃完饱腹会涨。没有饿肚子惩罚，想请谁吃的时候再来。','erii-life__note'));
+  const closet = node('div',undefined,'erii-life__closet'), closetNote = node('p','','erii-life__note');
+  panels.skins.append(closet,closetNote);
   const totals = node('p',undefined,'erii-life__totals'), records = node('ol',undefined,'erii-life__records'); panels.journal.append(totals,records);
   scroll.append(scene,tabs,...Object.values(panels));
   const status = node('p','','erii-life__status'); status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
@@ -78,6 +82,31 @@ export function createLifeWindow(host, {model, characters, currentId, art, nameO
     selected = id;
     for (const key of Object.keys(panels)) { panels[key].hidden = key !== id; tabButtons[key].setAttribute('aria-selected',String(key === id)); tabButtons[key].tabIndex = key === id ? 0 : -1; }
   }
+  const skinOf = person => skins?.equippedId(person) || DEFAULT_SKIN;
+  // 换装页：默认装扮永远在第一张；买过的直接“换上”，没买的显示价格，钱不够时按钮禁用并写明还差多少。
+  function renderCloset(view, character, name) {
+    const entries = skins ? skins.list(who, {coins: view.coins}) : [];
+    const key = JSON.stringify([who, entries.map(entry => [entry.id, entry.owned, entry.equipped, entry.affordable])]);
+    if (key === closetKey) return;
+    closetKey = key; closet.replaceChildren();
+    for (const entry of entries) {
+      const card = node('article',undefined,'erii-life__skin'); card.dataset.skin = entry.id;
+      card.dataset.state = entry.equipped ? 'equipped' : entry.owned ? 'owned' : entry.affordable ? 'open' : 'locked';
+      const tag = node('span', entry.equipped ? '使用中' : entry.owned ? '已拥有' : entry.price ? `${entry.price} 金币` : '免费', 'erii-life__skin-tag');
+      const image = node('img',undefined,'erii-life__skin-image'); image.loading = 'lazy'; image.draggable = false;
+      const url = skinArt?.(character, entry.id === DEFAULT_SKIN ? null : entry.skin, 'idle') || null;
+      image.hidden = !url; if (url) image.src = url; image.alt = `${name}的${entry.skin.name}`;
+      const control = button(entry.equipped ? '正在穿着' : entry.owned ? '换上' : entry.price ? `买下 · ${entry.price} 金币` : '免费领取', entry.owned && !entry.equipped ? 'erii-life__primary' : undefined, entry.owned ? 'sparkle' : 'coin');
+      control.dataset.skin = entry.id; control.dataset.act = entry.owned ? 'equip' : 'buy';
+      control.disabled = entry.equipped || !entry.affordable;
+      control.title = entry.equipped ? `${name}现在就穿着这套` : entry.owned ? `让${name}换上${entry.skin.name}` : entry.affordable ? `花 ${entry.price} 金币买下${entry.skin.name}` : `还差 ${entry.price - view.coins} 金币`;
+      control.setAttribute('aria-label', `${control.querySelector('span:last-child').textContent}：${entry.skin.name}`);
+      card.append(tag,image,node('h4',entry.skin.name),node('p',entry.skin.description || ''),control); closet.append(card);
+    }
+    closetNote.textContent = entries.length > 1
+      ? '皮肤用家里钱包里的金币购买，买过的按角色各自拥有、不会消失，随时可以换，也可以换回默认装扮。换装不花 API，也不改数据库。'
+      : '现在还没有上架的皮肤。以后上架的皮肤会出现在这里，用家里钱包里的金币购买；买过的按角色各自拥有，随时换，也可以换回默认装扮。';
+  }
   function stateText(view) {
     if (view.ready) return '下班了';
     if (view.active?.kind === 'job') { const s = Math.ceil(view.remaining/1000); return `${view.item.name} ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
@@ -87,7 +116,7 @@ export function createLifeWindow(host, {model, characters, currentId, art, nameO
   function render() {
     if (destroyed) return;
     const view = model.view(who), busy = blocked?.() === true, active = view.active, character = byId(who), name = nameOf(character);
-    root.dataset.character = who; root.dataset.current = currentId();
+    root.dataset.character = who; root.dataset.current = currentId(); root.dataset.skin = skinOf(who);
     for (const item of characters) {
       const control = personButtons[item.id], itemView = model.view(item.id);
       const face = control.querySelector('img'), url = art(item,'idle');
@@ -101,16 +130,17 @@ export function createLifeWindow(host, {model, characters, currentId, art, nameO
     }
     balance.textContent = String(view.coins); stats.textContent = `一起打工 ${view.jobs} 次 · 吃饭 ${view.meals} 次`;
     welfare.hidden = !view.welfare;
-    const key = `${who}:${active ? `${active.uid}:${view.ready}` : 'idle'}`;
+    const key = `${who}:${skinOf(who)}:${active ? `${active.uid}:${view.ready}` : 'idle'}`;
+    // 插图每次都比对一次地址：换装后 index.js 会重新取图，这里跟着换，不用等别的状态变化。
+    const url = active ? art(character, view.item.image) : art(character, 'idle');
+    if (url && url !== sceneUrl) { sceneUrl = url; illustration.src = url; }
     if (key !== sceneKey) {
       sceneKey = key; cancelConfirmed = false;
-      const url = active ? art(character, view.item.image) : art(character, 'idle');
-      if (url) illustration.src = url;
       illustration.alt = active ? `${name}${active.kind === 'food' ? '吃' : '在'}${view.item.name}${active.kind === 'job' ? '打工' : ''}` : `${name}的生活插图`;
       activityTitle.textContent = view.ready ? '下班啦，工资等你来领。' : active?.kind === 'job' ? `${view.item.name}的小帮手` : active?.kind === 'food' ? `开饭啦 · ${view.item.name}` : `${name}在家，先赚一点，再吃点喜欢的。`;
       activityLine.textContent = view.ready ? '今天认真完成了一份工作，领到的金币可以买点好吃的。' : active ? view.item.line : '“一点一点，也能攒出今天的小快乐。”';
     }
-    const imagesKey = who;
+    const imagesKey = `${who}:${skinOf(who)}`;
     if (imagesKey !== menuKey) {
       menuKey = imagesKey;
       for (const image of [...jobImages, ...foodImages]) { const url = art(character, image.dataset.pose); image.hidden = !url; if (url) image.src = url; }
@@ -141,7 +171,8 @@ export function createLifeWindow(host, {model, characters, currentId, art, nameO
         row.append(time,tag,node('span',entry.text)); records.append(row);
       }
     }
-    totals.textContent = `累计领到 ${view.earned} 金币 · 买饭花了 ${view.spent} 金币`;
+    renderCloset(view, character, name);
+    totals.textContent = `累计领到 ${view.earned} 金币 · 花了 ${view.spent} 金币`;
     root.dataset.activity = active?.kind || 'idle'; root.dataset.ready = String(view.ready); root.dataset.coins = String(view.coins);
   }
   function action(callback, message, event) {
@@ -150,9 +181,10 @@ export function createLifeWindow(host, {model, characters, currentId, art, nameO
     if (!result) { say('先完成当前活动，并确认金币足够。'); render(); return; }
     say(message); render(); onChange?.(); if (event) onEvent?.(event.type, who, typeof result === 'object' ? result : event.detail || {});
   }
-  function open(person = currentId()) {
+  function open(person = currentId(), tab = '') {
     if (destroyed) return;
-    onOpen?.(); who = person; root.hidden = false; root.classList.remove('is-leaving'); select(selected); sceneKey = ''; menuKey = ''; render(); sheet.layout(); close.focus({preventScroll:true}); onChange?.();
+    onOpen?.(); who = person; if (panels[tab]) selected = tab;
+    root.hidden = false; root.classList.remove('is-leaving'); select(selected); sceneKey = ''; menuKey = ''; closetKey = ''; render(); sheet.layout(); close.focus({preventScroll:true}); onChange?.();
   }
   function hide() {
     if (destroyed || root.hidden) return;
@@ -171,8 +203,26 @@ export function createLifeWindow(host, {model, characters, currentId, art, nameO
     event.preventDefault(); const next = event.key === 'Home' ? 0 : event.key === 'End' ? keys.length-1 : (index+(event.key === 'ArrowRight' ? 1 : -1)+keys.length)%keys.length;
     select(keys[next]); tabButtons[keys[next]].focus();
   });
+  // 买皮肤和换装不占用活动、不碰数据库，所以数据库忙的时候也可以做。
+  function changeSkin(control) {
+    const id = control.dataset.skin, name = nameOf(byId(who));
+    if (control.dataset.act === 'buy') {
+      const result = skins.buy(who, id);
+      if (!result.ok) {
+        say(result.reason === 'coins' ? '金币还不够，先去打一份工吧。' : result.reason === 'owned' ? '已经买过了，直接换上就好。' : '这套皮肤现在买不了。');
+        render(); return;
+      }
+      // 先通知 index.js（它会重新取图、让桌宠说话），再画这边：这样插图和缩略图拿到的已经是新图。
+      onEvent?.('skin', who, {id, action:'bought', name:result.skin.name});
+      say(`买好了「${result.skin.name}」，让${name}换上试试。`); render(); onChange?.(); return;
+    }
+    if (!skins.equip(who, id)) { say('现在换不了这套。'); render(); return; }
+    onEvent?.('skin', who, {id, action:'equipped'});
+    say(id === DEFAULT_SKIN ? `${name}换回了平时的样子。` : `${name}换上了新装扮。`); render(); onChange?.();
+  }
   listen(scroll,'click',event=> {
-    const control = event.target.closest?.('button[data-job],button[data-food]'); if (!control || control.disabled) return;
+    const control = event.target.closest?.('button[data-job],button[data-food],button[data-skin]'); if (!control || control.disabled) return;
+    if (control.dataset.skin) { if (skins) changeSkin(control); return; }
     if (blocked?.()) {say('数据库正在处理任务，等它结束后再开始。'); return;}
     const name = nameOf(byId(who));
     if (control.dataset.job) action(()=>model.startJob(control.dataset.job, who),`${name}去帮忙啦。回来后，记得领取工资。`,{type:'job',detail:{id:control.dataset.job}});
@@ -184,6 +234,7 @@ export function createLifeWindow(host, {model, characters, currentId, art, nameO
   select(selected); render();
   return {open, close:hide, render, get visible(){return !root.hidden;},
     setCharacter(id) { if (root.hidden) who = id; render(); },
+    get tab() { return selected; },
     coinAnchor() { const rect = balance.getBoundingClientRect(); return {x:rect.left + rect.width / 2, y:rect.top + rect.height / 2}; },
     setTask(task) {taskBar.hidden = !task; if (!task) return; taskText.textContent = task.text; taskStop.dataset.taskId = task.id || ''; taskStop.hidden = !task.canStop; taskStop.disabled = task.pending; taskStop.querySelector('span').textContent = task.pending ? '停止中…' : '停止任务';},
     destroy() {if (destroyed) return; destroyed = true; sheet.destroy(); for(const remove of listeners) remove(); root.remove();},

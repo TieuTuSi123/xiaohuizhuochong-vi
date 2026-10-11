@@ -15,8 +15,18 @@ export const LIFE_POSES = Object.freeze(['work-bookshop', 'work-bakery', 'work-f
 export const resolveCharacter = id => CHARACTERS[id] || CHARACTERS[DEFAULT_CHARACTER];
 export const usesDatabaseArt = character => character.assets.source === 'database';
 
+// 皮肤只写有图的姿势；没写的姿势沿用角色原来的图。地址相对扩展根目录（和 index.js 同基准）。
+export function skinAssetUrl(skin, pose) {
+  const file = skin?.assets?.poses?.[pose];
+  if (typeof file !== 'string' || !file) return null;
+  return new URL(`${skin.assets.base || ''}${file}`, import.meta.url).href;
+}
+
 // 返回一个姿势的图片地址。奶蛋这类取自数据库的角色需要运行时读到的图片表，读不到返回 null。
-export function assetUrl(character, pose, runtimeImages = null) {
+// 传了 skin（见 skin-model.js）时，皮肤里有图的姿势优先。
+export function assetUrl(character, pose, runtimeImages = null, skin = null) {
+  const skinned = skinAssetUrl(skin, pose);
+  if (skinned) return skinned;
   const assets = character.assets;
   if (assets.source === 'database') return runtimeImages?.[assets.poses[pose] || assets.poses.idle] || null;
   if (pose.startsWith('edge-')) return new URL(`${assets.base}${assets.edge[pose.slice(5)]}.webp`, import.meta.url).href;
@@ -24,11 +34,14 @@ export function assetUrl(character, pose, runtimeImages = null) {
   return new URL(`${assets.base}${assets.files[pose] || pose}.webp`, import.meta.url).href;
 }
 
-export function imageUrls(character, runtimeImages = null) {
+export function imageUrls(character, runtimeImages = null, skin = null) {
   const urls = {};
-  for (const pose of [...POSES, ...EDGE_POSES, ...LIFE_POSES]) urls[pose] = assetUrl(character, pose, runtimeImages);
+  for (const pose of [...POSES, ...EDGE_POSES, ...LIFE_POSES]) urls[pose] = assetUrl(character, pose, runtimeImages, skin);
   return urls;
 }
+
+// 粒子颜色等主题：皮肤可以覆盖其中一部分，没写的沿用角色自己的。
+export const themeOf = (character, skin = null) => skin?.theme ? { ...character.theme, ...skin.theme } : character.theme;
 
 export function poseLabel(character, pose) {
   if (pose.startsWith('eat-')) return '慢慢吃一顿饭';
