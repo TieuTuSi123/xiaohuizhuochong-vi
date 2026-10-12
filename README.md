@@ -4,37 +4,37 @@ Link Gốc: https://github.com/dzsks/xiaohuizhuochong
 
 ## Phiên bản hiện tại: v0.9.3
 
-**v0.9.3: Mở bán trang phục mới của Tiểu Erii「Lễ phục Dạ tím Tsukuyomi」, giá 10.320 vé hoa; tỷ lệ quy đổi 1 xu vàng = 40 vé hoa, cần 258 xu vàng là đổi đủ một bộ. Trang phục không tặng sẵn từ đầu mà cần tự đi làm thêm tích lũy tiền. Đã tích hợp trọn bộ 27 hình ảnh hành động và sinh hoạt, số dư xu vàng, hoạt động và dữ liệu lưu cũ vẫn tiếp tục được sử dụng.**
+**v0.9.3: Mở bán trang phục「Tsukuyomi · Lễ Phục Dạ Tím」của Tiểu Erii, mua bằng 10.320 vé hoa; 1 tiền vàng đổi được 40 vé hoa, 258 tiền vàng có thể đổi đủ một bộ. Trang phục không tặng sẵn ban đầu, cần tự đi làm thêm tích lũy tiền. Đã tích hợp đầy đủ 27 động tác và hình minh họa đời sống, tiếp tục sử dụng tiền vàng, hoạt động và dữ liệu lưu cũ.**
 
-Sổ tay cuộc sống → **Trang phục** → Nhập số lượng xu vàng → **Đổi vé hoa** → **Mua** → **Mặc vào**. Điền số lượng sẽ không trừ tiền, chỉ khi bấm đổi mới trừ xu vàng; sau khi đã mua thì thay đổi qua lại hoàn toàn miễn phí.
+Sổ tay đời sống → **Trang phục** → Nhập số lượng tiền vàng → **Đổi vé hoa** → **Mua** → **Mặc lên**. Tự điền số lượng không bị trừ tiền, chỉ khi bấm đổi mới trừ tiền vàng; sau khi mua có thể đổi trang phục qua lại miễn phí vĩnh viễn.
 
-Tiếp tục duy trì 6 mục sửa lỗi từ bản v0.9.2:
+Giữ nguyên 6 mục sửa lỗi của v0.9.2:
 
-- Đề xuất kiểm tu được tạo dựa trên dữ liệu bảng biểu tại thời điểm gửi yêu cầu; nếu chuyển đoạn chat trong lúc chờ phản hồi thì yêu cầu cũ sẽ bị hủy. Trong cùng một đoạn chat, nếu các dòng bị chèn thêm hoặc sắp xếp lại thứ tự thì hệ thống vẫn dựa vào `row_id` gốc để định vị dòng tương ứng, nếu giá trị gốc bị thay đổi sẽ từ chối ghi đè.
-- Sau khi quá trình sao lưu kết thúc, trước mỗi mục ghi và trước khi hoàn tác nhập lại, hệ thống sẽ kiểm tra lại phiên chat, nguồn cơ sở dữ liệu và trạng thái bận; mỗi trang chỉ thực hiện một tác vụ ghi/hoàn tác kiểm tu tại một thời điểm. Trường hợp thành công một phần vẫn lưu lại kết quả từng mục và bản sao lưu.
-- Trước khi xóa dòng sẽ đối chiếu toàn bộ nội dung dòng và tiêu đề cột; trước khi đổi preset sẽ đối chiếu preset gốc. Các đề xuất xóa dòng tạo từ bản cũ thiếu giá trị gốc hoàn chỉnh sẽ được nhắc tạo lại; sau khi nâng cấp nên kiểm tra lại các đề xuất cũ chưa áp dụng một lần nữa.
-- Khi cơ sở dữ liệu đang bận, thao tác hoàn tác thông thường và "Vẫn muốn hoàn tác" đều tạm thời bị vô hiệu hóa; hoàn tác cưỡng chế chỉ có thể bỏ qua bước xác nhận "bảng biểu đã bị thay đổi sau đó", tuyệt đối không bỏ qua bước kiểm tra nguồn đoạn chat và trạng thái bận.
-- Khi tắt chỉ số nhu cầu sẽ đóng băng độ no/sạch sẽ tại thời điểm tắt, khi bật lại sẽ bắt đầu tính giờ từ thời điểm mới.
-- Khi tắt quan sát trò chuyện, ẩn pet màn hình hoặc chuyển đoạn chat, các bình luận đang chờ phản hồi sẽ bị hủy; kể cả khi API trả về trễ cũng không lưu vào lịch sử và không hiện bóng thoại cũ. Các yêu cầu trò chuyện thông thường vẫn độc lập.
+- Đề xuất kiểm tu được tạo theo bảng biểu tại thời điểm gửi yêu cầu; chuyển phòng chat trong lúc chờ phản hồi sẽ hủy yêu cầu cũ. Trong cùng một phòng chat nếu chỉ chèn/sắp xếp lại dòng, hệ thống vẫn định vị theo `row_id` gốc, giá trị ban đầu bị thay đổi sẽ từ chối ghi.
+- Đợi sau khi sao lưu xong, trước mỗi thao tác ghi và trước khi hoàn tác import, hệ thống sẽ kiểm tra lại phòng chat, nguồn cơ sở dữ liệu và trạng thái bận; trên cùng một trang mỗi lần chỉ thực hiện một thao tác ghi/hoàn tác kiểm tu. Khi thành công một phần vẫn lưu kết quả từng mục và bản sao lưu.
+- Trước khi xóa sẽ đối chiếu toàn bộ nội dung dòng và tiêu đề bảng, trước khi chuyển preset sẽ đối chiếu preset gốc. Đề xuất xóa dòng tạo từ bản cũ thiếu giá trị gốc hoàn chỉnh sẽ nhắc tạo lại; sau khi nâng cấp nên kiểm tra lại các đề xuất cũ chưa áp dụng.
+- Khi cơ sở dữ liệu bận, cả hoàn tác thông thường lẫn "Vẫn hoàn tác" đều tạm thời bị vô hiệu hóa; hoàn tác cưỡng chế chỉ có thể bỏ qua xác nhận "bảng biểu bị thay đổi sau đó", không thể bỏ qua kiểm tra quyền sở hữu phòng chat và trạng thái bận.
+- Khi tắt chỉ số nhu cầu sẽ đóng băng độ no/sạch tại đúng thời điểm tắt, sau khi bật lại sẽ bắt đầu tính giờ từ mốc thời gian mới.
+- Khi tắt tính năng quan sát trò chuyện, ẩn pet hoặc chuyển phòng chat sẽ hủy các bình luận đang chờ; dù API trả lời muộn cũng không lưu vào lịch sử, không hiện bong bóng cũ. Yêu cầu trò chuyện thông thường vẫn hoạt động độc lập.
 
-Tiếp tục giữ lại khung hệ thống trang phục từ bản v0.9.1; Erii có thêm Lễ phục Dạ tím, Zero và Naidan hiện tại vẫn dùng trang phục mặc định.
+Khung hệ thống trang phục của v0.9.1 tiếp tục được giữ nguyên; Erii bổ sung Lễ Phục Dạ Tím, Zero và Naidan hiện tại vẫn chỉ có trang phục mặc định.
 
-Toàn bộ các tính năng từ v0.9.0 (Kiểm tu cơ sở dữ liệu, quan sát trò chuyện), v0.8.0 (3 pet màn hình Erii / Zero / Naidan, nhà pet màn hình, hệ thống nuôi dưỡng, lời thoại nhiệm vụ, phím tắt mở bảng cơ sở dữ liệu và giao diện sổ tay bìa cứng) đều được giữ nguyên vẹn.
+Toàn bộ các tính năng: chế độ kiểm tu cơ sở dữ liệu và quan sát trò chuyện của v0.9.0, ba pet màn hình (Erii / Zero / Naidan), nhà pet, hệ thống nuôi dưỡng, lời thoại nhiệm vụ, phím tắt mở bảng cơ sở dữ liệu và giao diện sổ tay bìa cứng của v0.8.0 đều được giữ nguyên vẹn.
 
 - Chỉ có hai trường hợp tiện ích sẽ đọc văn bản trò chuyện của Tavern, và cả hai đều phải do bạn tự mở: chế độ kiểm tu (mỗi lần gửi tin nhắn sẽ đính kèm từ 0～10 tầng trò chuyện gần đây, có thể điều chỉnh) và quan sát trò chuyện (sau khi bật, chỉ xem các tầng mới xuất hiện). Nội dung đọc được chỉ gửi đến API dùng để trò chuyện của pet màn hình.
 - Chỉ có chế độ kiểm tu mới sửa cơ sở dữ liệu: mỗi mục đều cần bạn đánh dấu chọn, nhấn **Áp dụng mục đã chọn** mới ghi; việc ghi chỉ đi qua `AutoCardUpdaterAPI` công khai của cơ sở dữ liệu, sao lưu toàn bộ trước khi ghi và có thể hoàn tác. Không có tính năng tự động áp dụng.
-- Ngoài ra, vẫn duy trì cơ chế đồng bộ chỉ đọc: không sao chép, không thay thế cơ sở dữ liệu, bình thường không đọc/ghi bảng biểu.
+- Ngoài ra, vẫn duy trì cơ chế đồng bộ chỉ đọc: không sao chép, không thay thế cơ sở dữ liệu, bình thường không đọc/ghi bảng.
 - Vị trí của pet màn hình chỉ thay đổi khi người dùng kéo thả thủ công; không khôi phục việc tự động di chuyển.
 - Hình ảnh của Naidan được đọc từ cơ sở dữ liệu đang chạy lúc runtime, không phân phối kèm tiện ích này; khi cơ sở dữ liệu không mở thì không thể chuyển sang Naidan.
-- Vé hoa được đổi thủ công từ xu vàng trong sổ tay cuộc sống, mua trang phục trừ vé hoa. Lối chơi sinh hoạt không gọi API, không đọc/ghi cơ sở dữ liệu và văn bản Tavern.
+- Vé hoa do người dùng đổi thủ công từ tiền vàng trong Sổ tay đời sống, mua trang phục sẽ trừ vé hoa. Lối chơi đời sống không gọi API, không đọc ghi cơ sở dữ liệu hay nội dung văn bản của Tavern.
 
 Các phiên bản cũ từng thêm tính năng tự động di chuyển, chạy bộ và đi dạo. Những logic đó đã được hoàn tác từ **v0.5.8**, không nên nhầm lẫn hành vi của phiên bản cũ với phiên bản hiện tại.
 
-Đối chiếu theo 4 mục dưới đây, tất cả đều hiển thị `0.9.3` thì mới tính là nguồn bảo trì hiện tại đã cập nhật hoàn chỉnh:
+Đối chiếu theo 4 mục dưới đây, tất cả đều hiển thị `0.9.3` thì nhánh bảo trì hiện tại mới được coi là cập nhật hoàn chỉnh:
 
 1. Mở [`manifest.json`](manifest.json) ở thư mục gốc của kho lưu trữ, kiểm tra xem `version` có phải là `0.9.3` không.
 2. Kiểm tra phần "Phiên bản hiện tại" ở đầu README này xem có phải là **v0.9.3** không.
-3. Kiểm tra xem lần commit GitHub gần nhất có chứa các tệp chỉnh sửa của lần này không; v0.9.3 bắt buộc phải có `life-model.js`, `life-window.js`, `skin-model.js`, `index.js`, `style.css` đã cập nhật, cùng với **27 ảnh WebP, hướng dẫn tư liệu và danh mục media** trong thư mục `assets/skins/erii-purple-night/`; đồng thời vẫn giữ lại `repair.js`, `repair-ticket.js`, `database-repair.js`, `backup-store.js`, `watch.js` của v0.9.0, thư mục `characters/`, `characters.js`, `care-model.js`, `lines.js`, `notebook.js`, `pet-house.js`, `sheet.js`, `effects.js`, `icons.js`, `database-shortcuts.js` của v0.8.0, cùng 19 ảnh trong `assets/zero/` và 7 ảnh trong `assets/zero/life/`; các tệp `assets/run-*.webp` đã bị xóa.
+3. Kiểm tra xem lần commit GitHub gần nhất có chứa các tệp chỉnh sửa của lần này không; v0.9.3 bắt buộc phải có `life-model.js`, `life-window.js`, `skin-model.js`, `index.js`, `style.css` đã cập nhật, cùng **27 ảnh WebP, hướng dẫn tài nguyên và media list** trong thư mục `assets/skins/erii-purple-night/`, đồng thời vẫn giữ lại `repair.js`, `repair-ticket.js`, `database-repair.js`, `backup-store.js`, `watch.js` của v0.9.0, thư mục `characters/`, `characters.js`, `care-model.js`, `lines.js`, `notebook.js`, `pet-house.js`, `sheet.js`, `effects.js`, `icons.js`, `database-shortcuts.js` của v0.8.0, cũng như 19 ảnh WebP trong `assets/zero/` và 7 ảnh trong `assets/zero/life/`; `assets/run-*.webp` đã bị xóa.
 4. Nếu dùng file nén, tên file phải là `绘梨衣桌宠-独立扩展-v0.9.3.zip`, sau khi giải nén thì `manifest.json` vẫn phải là `0.9.3`.
 
 Phiên bản hiển thị trong danh sách tiện ích của Tavern là phiên bản được tải thực tế. Chỉ nhìn thấy README trên GitHub đã cập nhật không chứng minh được Tavern đã tải bản mới; hãy cập nhật tiện ích và làm mới trang rồi mới đối chiếu lại số phiên bản trong Tavern.
@@ -42,7 +42,7 @@ Phiên bản hiển thị trong danh sách tiện ích của Tavern là phiên b
 ### Cài đặt lần đầu
 
 1. Mở phần **Tiện ích mở rộng** → **Cài đặt tiện ích mở rộng** ở thanh trên cùng của Tavern.
-2. Dán địa chỉ kho lưu trữ: `https://github.com/dzsks/xiaohuizhuochong` (hoặc link fork tiếng Việt của bạn).
+2. Dán địa chỉ kho lưu trữ: `https://github.com/dzsks/xiaohuizhuochong` (hoặc link fork của bạn).
 3. Sau khi cài đặt hoặc cập nhật xong, hãy làm mới trang Tavern.
 4. Trong danh sách tiện ích, xác nhận phiên bản của **Tiểu Erii · Pet màn hình cơ sở dữ liệu** là `0.9.3`.
 5. Nhấp chuột phải vào pet màn hình trên máy tính, hoặc nhấn giữ khoảng 1.4 giây trên điện thoại để mở cuốn sổ nhỏ; nếu thấy "Đã kết nối cơ sở dữ liệu" hoặc "Cơ sở dữ liệu đang xử lý nhiệm vụ", điều đó có nghĩa là đã tìm thấy nguồn dữ liệu của cơ sở dữ liệu.
@@ -51,18 +51,18 @@ Thư mục gốc của kho lưu trữ phải chứa trực tiếp các tệp `ma
 
 ## Cập nhật bản cài đặt hiện có
 
-1. Ghi đè các tệp phiên bản mới lên cùng một thư mục gốc của kho lưu trữ, giữ nguyên cấu trúc thư mục của `assets/`.
+1. Ghi đè các tệp phiên bản mới lên cùng một thư mục gốc của kho lưu trữ, giữ nguyên cấu trúc tệp của `assets/`.
 2. Commit các thay đổi lên GitHub.
 3. Quay lại trình quản lý tiện ích của Tavern, nhấp vào nút cập nhật của tiện ích này.
 4. Làm mới trang Tavern, xác nhận phiên bản trong danh sách tiện ích là `0.9.3`.
-5. Nếu hành vi hoặc hình ảnh vẫn là của bản cũ, trước tiên hãy tải lại tiện ích; nếu vẫn không thay đổi, dùng <kbd>Ctrl</kbd>+<kbd>F5</kbd> để buộc làm mới bộ nhớ cache của trình duyệt.
+5. Nếu hành vi hoặc hình ảnh vẫn là của bản cũ, trước tiên hãy tải lại tiện ích; nếu vẫn không thay đổi, dùng `Ctrl+F5` để buộc làm mới bộ nhớ cache của trình duyệt.
 
 Gói bảo trì hiện tại: `绘梨衣桌宠-独立扩展-v0.9.3.zip`.
 
-- `version` trong `manifest.json` là `0.9.3`;
+- `manifest.json` có `version` là `0.9.3`;
 - Dấu phiên bản pet màn hình trong `index.js` là `0.9.3`;
-- Thư mục gốc có `skin-model.js`, giá Lễ phục Dạ tím là 10320, loại tiền tệ là `tickets`;
-- `assets/skins/erii-purple-night/` bao gồm đầy đủ 27 tệp WebP, thiếu hình ảnh thì không được chỉ tải lên mã nguồn;
+- Thư mục gốc có `skin-model.js`, giá Lễ Phục Dạ Tím là 10.320, loại thanh toán là `tickets`;
+- `assets/skins/erii-purple-night/` bao gồm đầy đủ 27 ảnh WebP, thiếu ảnh thì không được chỉ tải lên mã nguồn;
 - Trong `assets/` không có các frame chạy trái phải, `assets/zero/` và `assets/zero/life/` đều có mặt đầy đủ;
 - Mục mới nhất ở đầu README và lịch sử phiên bản đều là `v0.9.3`.
 
@@ -78,23 +78,23 @@ Gói bảo trì hiện tại: `绘梨衣桌宠-独立扩展-v0.9.3.zip`.
 | Nhấp sáu lần trong 2.6 giây | Ló đầu → Ôm vịt → Vẫy tay, phát xong sẽ khôi phục |
 | Nhấn giữ khoảng nửa giây | Bắt đầu chợp mắt; sau khi thả ra sẽ tiếp tục nghỉ ngơi khoảng 12 giây |
 | Chạm nhẹ khi đang chợp mắt | Đánh thức sớm |
-| Kéo thả | Bị nhấc lên, thả tay ra sẽ ngồi vững và lưu vị trí |
+| Kéo thả | Bị xách lên, thả tay ra sẽ ngồi vững và lưu vị trí |
 | Nhấp chuột phải (PC) | Mở / Thu gọn cuốn sổ nhỏ |
 
-Cách tương tác của Zero và Naidan cũng tương tự, chỉ thay đổi hành động thành nét riêng của từng nhân vật: Zero ôm thiên nga đen nhỏ, gấp thiên nga giấy, uống ca cao nóng; Naidan sợ nhột khi nhấp đúp, nhấp liên tục sẽ tức giận khè khè, nhấn giữ thì ngồi ngáy ngủ. Các hành động nhấp chuột, tặng hoa, cùng bạn điền bảng đều làm tăng một chút độ thân mật (xem mục "Nuôi dưỡng"). Thỉnh thoảng nhấp một cái, pet màn hình sẽ đáp lại một câu trong bong bóng thoại.
+Cách tương tác của Zero và Nai Dan cũng tương tự, chỉ thay đổi hành động thành của riêng họ: Zero ôm thiên nga đen nhỏ, gấp thiên nga giấy, uống ca cao nóng; Nai Dan sợ nhột khi nhấp đúp, nhấp liên tục sẽ tức giận khè khè, nhấn giữ thì ngồi ngáy ngủ. Các hành động nhấp chuột, tặng hoa, cùng bạn điền bảng đều làm tăng một chút độ thân thiết (xem mục "Nuôi dưỡng"). Thỉnh thoảng nhấp một cái, pet màn hình sẽ đáp lại một câu trong bong bóng thoại.
 
-Tiêu đề của cuốn sổ nhỏ là tên của nhân vật hiện tại, ví dụ: **Cuốn sổ nhỏ của Tiểu Erii**, **Cuốn sổ nhỏ của Zero**, không hiển thị số phiên bản. Nhấp chuột thông thường sẽ không mở trang; trên máy tính cũng có thể vào cuốn sổ nhỏ từ phần cài đặt tiện ích. Sau khi tắt "Hiển thị pet màn hình", vẫn có thể mở cuốn sổ nhỏ từ cài đặt tiện ích để xem nhiệm vụ và mở cơ sở dữ liệu; trong thời gian ẩn, các nút hành động giải trí sẽ bị vô hiệu hóa. Khi đang chọn pet màn hình, phím <kbd>Enter</kbd> / <kbd>Space</kbd> dùng để tương tác, <kbd>Shift</kbd>+<kbd>Enter</kbd> để mở cuốn sổ nhỏ, các phím mũi tên để tinh chỉnh vị trí, <kbd>Home</kbd> để đặt lại vị trí ban đầu.
+Tiêu đề của cuốn sổ nhỏ là tên của nhân vật hiện tại, ví dụ: **Cuốn sổ nhỏ của Tiểu Erii**, **Cuốn sổ nhỏ của Zero**, không hiển thị số phiên bản. Nhấp chuột thông thường sẽ không mở trang; trên máy tính cũng có thể vào cuốn sổ nhỏ từ phần cài đặt tiện ích. Sau khi tắt "Hiển thị pet màn hình", vẫn có thể mở cuốn sổ nhỏ từ cài đặt tiện ích để xem nhiệm vụ và mở cơ sở dữ liệu; trong thời gian ẩn, các nút hành động giải trí sẽ bị vô hiệu hóa. Khi đang focus vào pet màn hình, phím Enter / Phím cách dùng để tương tác, Shift + Enter để mở cuốn sổ nhỏ, các phím mũi tên để tinh chỉnh vị trí, Home để đặt lại vị trí.
 
 ### Thao tác trên điện thoại
 
-Điện thoại không có chuột phải, hãy sử dụng các thao tác sau:
+Điện thoại không có chuột phải, hãy sử dụng các cách sau:
 
 - Chạm nhẹ hoặc nhấn ngắn: Tương tác;
 - Nhấn giữ khoảng nửa giây: Chợp mắt;
 - Tiếp tục nhấn giữ khoảng 1.4 giây: Mở cuốn sổ nhỏ;
-- Nhấn giữ và di chuyển: Kéo di chuyển Tiểu Erii.
+- Nhấn giữ và di chuyển: Kéo Tiểu Erii.
 
-Khi khung nhập liệu phình to, bàn phím ảo hiện ra, xoay màn hình hoặc khung nhìn hẹp lại, pet màn hình sẽ tự giới hạn trong khu vực hiển thị và tránh đè lên khung nhập liệu. Cuốn sổ nhỏ, cửa sổ trò chuyện, sổ tay cuộc sống và nhà pet màn hình trên điện thoại đều được kéo lên từ đáy màn hình, nhấn giữ phần đầu kéo xuống là có thể đóng lại; trên máy tính, chúng là các cửa sổ nổi có thể kéo thanh tiêu đề, cuốn sổ nhỏ luôn bám sát cạnh pet màn hình và cố gắng không che khuất nhân vật.
+Khi hộp nhập liệu cao lên, bàn phím hiện ra, xoay màn hình hoặc cửa sổ hẹp lại, pet màn hình sẽ bị giới hạn trong khu vực hiển thị và tránh hộp nhập liệu. Cuốn sổ nhỏ, cửa sổ trò chuyện, sổ tay sinh hoạt và nhà pet màn hình trên điện thoại đều được kéo lên từ dưới cùng màn hình, nhấn giữ phần đầu kéo xuống là có thể đóng lại; trên máy tính, chúng là các cửa sổ nổi có thể kéo thanh tiêu đề, cuốn sổ nhỏ vẫn gắn sát bên cạnh pet màn hình, cố gắng không che khuất nhân vật.
 
 ### Phản ứng với nhiệm vụ cơ sở dữ liệu
 
@@ -104,555 +104,608 @@ Khi khung nhập liệu phình to, bàn phím ảo hiện ra, xoay màn hình ho
 - Lỗi hoặc cảnh báo: Kiểm tra bản ghi;
 - Rảnh rỗi: Uống trà, đọc sách, gấp giấy, ôm vịt vàng, vươn vai, chợp mắt, v.v.
 
-Ngoài hành động, pet màn hình còn hiển thị một câu thoại phía trên bong bóng nhiệm vụ: có các bộ thoại riêng cho lúc nhận nhiệm vụ, đang xử lý (khoảng 15 giây đổi một câu), hoàn thành, gặp lỗi, hoặc khi bạn nhấn dừng; lời thoại cho việc điền bảng, thúc đẩy cốt truyện và các nhiệm vụ khác cũng khác nhau. Lời thoại thay đổi theo tính cách, độ thân mật và tâm trạng của nhân vật, ví dụ khi đói bụng sẽ lầm bầm một câu rồi mới làm tiếp. Lời thoại hoàn toàn là văn bản cục bộ đã được thiết lập sẵn, không gọi API, không phát sinh chi phí. Dòng chữ nhỏ bên dưới vẫn là tiến độ thực tế do cơ sở dữ liệu cung cấp (cài đặt bản tóm tắt / bản đầy đủ vẫn giữ nguyên). Bạn có thể tắt lời thoại qua mục "Nói chuyện khi làm nhiệm vụ" trong cài đặt tiện ích.
+Ngoài hành động, pet màn hình còn nói một câu phía trên bong bóng nhiệm vụ: sẽ có các bộ thoại riêng cho lúc nhận nhiệm vụ, đang xử lý (khoảng 15 giây đổi một câu), hoàn thành, gặp lỗi, hoặc khi bị bạn dừng lại; lời thoại cho việc điền bảng, thúc đẩy cốt truyện và các nhiệm vụ khác cũng khác nhau. Lời thoại sẽ thay đổi theo tính cách, độ thân thiết và tâm trạng của nhân vật, ví dụ khi đói bụng sẽ lầm bầm một câu rồi mới làm tiếp. Lời thoại hoàn toàn là văn bản cục bộ đã được viết sẵn, không gọi API, không tốn tiền. Dòng chữ nhỏ bên dưới vẫn là tiến độ thực tế do cơ sở dữ liệu cung cấp (Cài đặt bản tóm tắt / bản đầy đủ vẫn giữ nguyên). Bạn có thể tắt lời thoại bằng mục "Nói chuyện khi làm nhiệm vụ" trong phần cài đặt tiện ích.
 
-Khi có lỗi hoặc cảnh báo, bong bóng sẽ dừng lại lâu hơn một chút (khoảng 9 giây) và hiển thị thêm nút **Đi xem thử**: các lỗi liên quan đến API (API, khóa, hạn mức, quá thời gian, v.v.) sẽ mở bảng API của cơ sở dữ liệu, các lỗi khác sẽ mở "Nhật ký chạy" trong mục "Công cụ nâng cao".
+Khi có lỗi hoặc cảnh báo, bong bóng sẽ dừng lại lâu hơn một chút (khoảng 9 giây) và có thêm một nút **Đi xem thử**: các lỗi liên quan đến API (API, khóa, hạn mức, quá giờ, v.v.) sẽ mở bảng API của cơ sở dữ liệu, các lỗi khác sẽ mở "Nhật ký chạy" trong mục "Công cụ nâng cao".
 
-Phản ứng khi đang xử lý nhiệm vụ và thông báo kết quả/lỗi luôn được ưu tiên hơn các hành động giải trí cục bộ. Nếu bong bóng cung cấp nút dừng cho nhiệm vụ gốc của cơ sở dữ liệu, Tiểu Erii sẽ hiển thị **Dừng nhiệm vụ**, nhấp vào sẽ kích hoạt quy trình dừng ban đầu của cơ sở dữ liệu; nếu không có khả năng dừng thì sẽ không tạo nút giả. Mục tiêu dừng sẽ bám sát nhiệm vụ hiện tại của cơ sở dữ liệu, kiểm tra lại trước khi nhấp; nếu nhiệm vụ đã chuyển sang thao tác khác, hệ thống sẽ yêu cầu xác nhận trước, không gọi thao tác của nhiệm vụ cũ. Thông báo dừng thất bại được giữ lại khoảng 8 giây, thông báo lỗi cơ sở dữ liệu được ưu tiên hiển thị hơn văn bản tiến độ thông thường. Khi bong bóng gốc chuyển sang câu bông đùa hoặc thông báo và tạm thời không có nhiệm vụ hiện hành, Tiểu Erii sẽ hiển thị trạng thái chờ đồng bộ tiến độ, sau khi nhiệm vụ xuất hiện lại sẽ khôi phục nút dừng.
+Phản ứng khi đang xử lý nhiệm vụ và thông báo thành công/lỗi được ưu tiên hơn các hành động giải trí cục bộ. Nếu bong bóng cung cấp nút dừng cho nhiệm vụ gốc của cơ sở dữ liệu, Tiểu Erii sẽ hiển thị **Dừng nhiệm vụ**, nhấp vào sẽ gọi quy trình dừng ban đầu của cơ sở dữ liệu; nếu không có khả năng dừng thì sẽ không làm giả nút. Mục tiêu dừng sẽ bám theo nhiệm vụ hiện tại của cơ sở dữ liệu, kiểm tra lại trước khi nhấp; nếu nhiệm vụ đã chuyển sang cái khác, nó sẽ yêu cầu xác nhận trước, không gọi thao tác của nhiệm vụ cũ. Thông báo dừng thất bại sẽ được giữ lại khoảng 8 giây, thông báo lỗi cơ sở dữ liệu được ưu tiên hiển thị hơn văn bản tiến độ thông thường. Khi bong bóng gốc chuyển sang chuyện cười hoặc thông báo, và tạm thời không có nhiệm vụ hiện tại, Tiểu Erii sẽ hiển thị trạng thái chờ đồng bộ tiến độ, sau khi nhiệm vụ xuất hiện lại sẽ khôi phục nút dừng.
 
-### Ló đầu ở mép màn hình và những câu chuyện nhỏ
+### Ló đầu ở mép màn hình và những câu chuyện chữa lành
 
-- **Cách kích hoạt ló đầu:** Kéo Tiểu Erii sang sát mép trái, phải, trên hoặc dưới, thả tay ra cô ấy sẽ thu mình và ló đầu ra ngay, không cần chờ đếm lùi hay dời chuột đi. Nếu vị trí mặc định đã sát mép thì cũng sẽ ló đầu ra lập tức. Mép dưới sẽ tự động tránh thanh nhập liệu và hiển thị ở vùng khả dụng phía trên.
-- **Vị trí có bị thay đổi không:** Hành động ló đầu chỉ đổi tư thế và khẽ đung đưa tại chỗ, không làm thay đổi tọa độ đã lưu, cũng không khôi phục việc tự đi lại. Khi nhấp chuột, nhấn giữ, kéo thả, mở cuốn sổ nhỏ hoặc nhận nhiệm vụ sẽ khôi phục lại tư thế tương ứng; di chuột qua sẽ không hủy trạng thái ló đầu. Sau khi kết thúc tương tác, nếu vẫn ở sát mép, cô ấy sẽ tiếp tục ló đầu ngay.
-- **Cách nghe kể chuyện:** Nhấp vào "Nghe một mẩu chuyện nhỏ" trong cuốn sổ nhỏ. Sau khi bong bóng mở ra, cứ mỗi 30 giây sẽ tự động đổi câu chuyện mới, luân phiên 12 mẩu chuyện, không lặp lại trong cùng một vòng; bạn cũng có thể nhấp vào "Đổi câu khác" để chuyển ngay, hoặc đóng lại bằng dấu ×. Sau khi đóng sẽ kết thúc vòng lặp kể chuyện này.
-- **Chủ động kể chuyện:** Tự kích hoạt sau khi rảnh rỗi khoảng 5 phút; trong lúc hiển thị sẽ đổi mẩu chuyện mỗi 30 giây. Khi trỏ chuột vào hoặc focus bàn phím vào bong bóng sẽ tạm dừng đếm thời gian, khi dời đi sẽ tiếp tục thời gian còn lại; trên điện thoại, việc chạm vào câu chuyện sẽ giữ nguyên trạng thái đọc, sau khi đọc xong có thể chủ động đổi câu khác hoặc đóng lại.
-- **Ưu tiên nhiệm vụ:** Khi cơ sở dữ liệu bắt đầu xử lý, gửi thông báo kết quả hoặc khi tắt hiển thị Tiểu Erii, câu chuyện sẽ tự thu lại. Bong bóng nhiệm vụ và nút dừng của nhiệm vụ gốc luôn được ưu tiên; câu chuyện không gọi mô hình AI, không gửi tin nhắn trò chuyện và không ghi vào cơ sở dữ liệu.
-- **Công tắc điều khiển:** Trong cài đặt tiện ích có thể bật/tắt riêng "Kéo đến mép để ló đầu" và "Kể chuyện nhỏ khi rảnh rỗi". Sau khi tắt tự động kể chuyện lúc rảnh rỗi, bạn vẫn có thể bấm thủ công "Nghe một mẩu chuyện nhỏ", và tính năng tự đổi câu chuyện mỗi 30 giây vẫn hoạt động bình thường; quy tắc tạm dừng khi đọc vẫn có hiệu lực đầy đủ.
+- **Cách làm ló đầu:** Kéo Tiểu Erii sang sát mép trái, phải, trên hoặc dưới, thả tay ra cô ấy sẽ thụt vào và ló đầu ra, không cần phải đợi 6 giây hay dời chuột đi. Nếu vị trí mặc định đã sát mép thì cũng sẽ ló đầu ra ngay. Mép dưới sẽ tránh thanh nhập liệu, xuất hiện ở phía dưới khu vực khả dụng.
+- **Vị trí có bị đổi không:** Hành động ló đầu chỉ thay đổi tạo hình và khẽ lắc lư tại chỗ, không thay đổi vị trí đã lưu, cũng không khôi phục việc tự đi bộ. Khi nhấp chuột, nhấn giữ, kéo thả, mở cuốn sổ nhỏ hoặc nhận nhiệm vụ sẽ khôi phục lại hành động tương ứng; di chuột qua sẽ không hủy ló đầu. Sau khi kết thúc tương tác, nếu vẫn đang ở sát mép, cô ấy sẽ tiếp tục ló đầu ngay lập tức.
+- **Làm sao để nghe kể chuyện:** Nhấp vào "Nghe một câu chuyện nhỏ" trong cuốn sổ nhỏ. Sau khi bong bóng mở ra, cứ mỗi 30 giây sẽ tự động đổi một câu chuyện, luân phiên 12 câu chuyện, không lặp lại trong cùng một vòng; cũng có thể nhấp vào "Đổi câu khác" để đổi ngay, hoặc đóng lại bằng dấu X. Sau khi đóng sẽ kết thúc việc đổi bài liên tục của vòng này.
+- **Chủ động kể chuyện:** Bắt đầu sau khi rảnh rỗi khoảng 5 phút; trong lúc đang hiển thị thì đổi bài mỗi 30 giây. Khi trỏ chuột vào hoặc focus bàn phím vào bong bóng sẽ tạm dừng đổi bài, khi dời đi sẽ tiếp tục thời gian còn lại; trên điện thoại, việc chạm vào câu chuyện sẽ giữ lại trạng thái đọc, sau khi đọc xong có thể chủ động đổi câu khác hoặc đóng lại.
+- **Ưu tiên nhiệm vụ:** Khi cơ sở dữ liệu bắt đầu xử lý, gửi thông báo kết quả hoặc khi tắt hiển thị Tiểu Erii, câu chuyện sẽ thu lại. Bong bóng nhiệm vụ và nút dừng của nhiệm vụ gốc được ưu tiên; câu chuyện không gọi mô hình trò chuyện, không gửi tin nhắn trò chuyện, cũng không ghi vào cơ sở dữ liệu.
+- **Công tắc:** Trong cài đặt tiện ích có thể tắt riêng "Kéo đến mép để ló đầu" và "Kể chuyện nhỏ chữa lành khi rảnh rỗi". Sau khi tắt tính năng kể chuyện tự động khi rảnh rỗi, vẫn có thể bấm thủ công "Nghe một câu chuyện nhỏ", và tính năng tự động đổi câu chuyện mỗi 30 giây vẫn hoạt động bình thường khi mở lên; quy tắc tạm dừng đọc cũng vẫn có hiệu lực.
 
 ## Đổi pet màn hình: Nhà pet màn hình
 
-Cách mở: Mục **Nhà pet màn hình** ở cuối cuốn sổ nhỏ, hoặc thông qua nút nhân vật và "Nhà pet màn hình" trong **Cài đặt tiện ích → Pet màn hình cơ sở dữ liệu**. Căn nhà được thiết kế như một cuốn bách khoa toàn thư mở: trang bên trái là hình đứng và hiệu ứng luồng sáng, trang bên phải là hồ sơ bồi dưỡng nhân vật. Nhấp vào các dải thẻ đánh dấu (ribbon) ở trên cùng để lật trang nhân vật, nhấn **Đổi sang đồng hành cùng tôi** để chuyển đổi, nhân vật cũ sẽ vẫy tay rút lui, người mới sẽ đáp xuống chào hỏi.
+Cách mở: Mục **Nhà pet màn hình** ở cuối cuốn sổ nhỏ, hoặc thông qua nút nhân vật và "Nhà pet màn hình" trong **Cài đặt tiện ích → Pet màn hình cơ sở dữ liệu**. Căn nhà là một cuốn bách khoa toàn thư mở: trang bên trái là ảnh đứng, trang bên phải là hồ sơ nuôi dưỡng nhân vật đó. Nhấp vào các thẻ đánh dấu (bookmark) ở trên cùng để lật sang trang nhân vật khác, nhấn **Để cô ấy ra ngoài** để chuyển đổi, nhân vật cũ sẽ vẫy tay rút lui, người mới sẽ đáp xuống và chào hỏi.
 
 | Nhân vật | Tóm tắt | Ghi chú |
 | --- | --- | --- |
-| Tiểu Erii (Erii) | Nàng phù thủy tóc đỏ trầm lặng, thích vịt vàng nhỏ, bánh pudding và chơi game | Nhân vật mặc định, tài nguyên và hành vi tương thích hoàn toàn |
-| Zero | Thiếu nữ tóc vàng với đôi mắt băng giá, ít nói, làm việc vô cùng tỉ mỉ, trên đầu có chú thiên nga đen nhỏ | Bổ sung 26 ảnh (19 ảnh chính, 7 ảnh sinh hoạt) |
-| Naidan | Cậu nhóc tròn trịa màu vàng sữa đi kèm cơ sở dữ liệu, ham ăn, thích lăn lộn | Ảnh được đọc từ cơ sở dữ liệu lúc runtime; nếu cơ sở dữ liệu chưa bật hoặc tắt pet đi kèm thì không thể chuyển đổi, nhà pet sẽ ghi rõ lý do |
+| Tiểu Erii (Erii) | Cô phù thủy tóc đỏ trầm lặng, thích vịt vàng nhỏ, bánh pudding và chơi game | Nhân vật mặc định, tài nguyên và hành vi giống như 0.7.1 |
+| Zero | Thiếu nữ tóc vàng với đôi mắt xanh băng giá, ít nói, làm việc vô cùng tỉ mỉ, trên đầu có một con thiên nga đen nhỏ | Bản này bổ sung 26 ảnh (19 ảnh chính, 7 ảnh sinh hoạt) |
+| Nai Dan | Chú nhóc màu vàng sữa béo ngậy đi kèm cơ sở dữ liệu, tham ăn, thích lăn lộn | Ảnh được đọc từ cơ sở dữ liệu lúc chạy; nếu cơ sở dữ liệu không bật hoặc tắt pet màn hình đi kèm thì không thể chuyển đổi, nhà pet màn hình sẽ ghi rõ lý do |
 
 Sau khi đổi nhân vật:
 
-- **Dùng chung:** Vị trí và kích thước pet màn hình, các công tắc cài đặt, ví tiền gia đình.
-- **Tách biệt theo từng nhân vật:** Lịch sử trò chuyện, cách xưng hô và thiết lập tính cách, độ thân mật, chỉ số nhu cầu, nhật ký trưởng thành, biệt danh, công việc làm thêm hoặc bữa ăn đang diễn ra, trang phục sở hữu và đang mặc.
-- Lần đầu trò chuyện với nhân vật mới sẽ kế thừa cấu hình kết nối của Tiểu Erii (địa chỉ API, mô hình, độ dài phản hồi...), không cần nhập lại; khóa API lưu trên thiết bị vốn dùng chung.
-- Nhân vật đang làm việc nếu bị đổi xuống sẽ tiếp tục làm việc ngầm trong nền, khi tan làm bong bóng thoại của pet hiện tại sẽ nhắc bạn nhận lương.
+- **Dùng chung**: Vị trí và kích thước pet màn hình, các công tắc cài đặt, ví tiền chung ở nhà.
+- **Tách biệt riêng**: Lịch sử trò chuyện, cách xưng hô và thiết lập tính cách, độ thân thiết, chỉ số nhu cầu, nhật ký trưởng thành, biệt danh, công việc làm thêm hoặc bữa ăn đang diễn ra, trang phục (skin) sở hữu và đang mặc.
+- Lần đầu trò chuyện với nhân vật mới sẽ kế thừa cài đặt kết nối của Tiểu Erii (địa chỉ API, mô hình, độ dài phản hồi, v.v.), không cần phải điền lại; khóa API đã ghi nhớ trên thiết bị vốn dĩ dùng chung.
+- Nhân vật đang đi làm sau khi đổi xuống vẫn sẽ tiếp tục làm việc dưới nền, khi tan làm bong bóng thoại của pet màn hình sẽ nhắc bạn tới nhận lương.
 
 ## Nuôi dưỡng
 
-Hệ thống nuôi dưỡng hoàn toàn không có cơ chế trừng phạt: độ thân mật chỉ tăng chứ không giảm; chỉ số nhu cầu nếu thấp chỉ ảnh hưởng đến tâm trạng và lời thoại, không sinh bệnh, không bỏ đi và không cấm làm việc.
+Mọi hệ thống nuôi dưỡng đều không có hình phạt: độ thân thiết chỉ tăng chứ không giảm, chỉ số nhu cầu nếu thấp thì chỉ ảnh hưởng đến tâm trạng và lời thoại, sẽ không sinh bệnh, không bỏ nhà ra đi, cũng không cấm đi làm.
 
-- **Độ thân mật**: Chia làm 5 cấp bậc: Mới quen, Quen thuộc, Thân thiết, Tin cậy, Yêu thương sâu đậm; mỗi nhân vật tính riêng. Tương tác vuốt ve +1 (tối đa 20 lần/ngày), tặng hoa +5 (tối đa 3 lần/ngày), mời ăn cơm +3～+8, nhận lương +3, trò chuyện một lượt +2 (tối đa 20 lượt/ngày), lần đầu gặp gỡ mỗi ngày +5, cùng bạn hoàn thành một nhiệm vụ cơ sở dữ liệu +2 (tối đa 20 lần/ngày), chải chuốt sạch sẽ +2. Mỗi khi lên một cấp sẽ mở khóa một bộ lời thoại mới, một mẩu chuyện độc quyền và một danh hiệu.
-- **Chỉ số nhu cầu**: Độ no giảm từ đầy xuống cạn mất khoảng 12 tiếng, độ sạch sẽ mất khoảng 24 tiếng, kể cả khi bạn không mở máy chỉ số vẫn giảm từ từ. Độ no hồi phục bằng cách mời ăn cơm (Pudding +15, Cơm nắm +25, Cơm cuộn trứng +40, Ramen +50); độ sạch sẽ hồi phục bằng cách nhấn vào **Chải chuốt** trong cuốn sổ nhỏ hoặc nhà pet (miễn phí, thời gian hồi 30 phút). Trong cài đặt tiện ích có thể tắt các chỉ số nhu cầu này, sau khi tắt các con số sẽ đóng băng và không hiển thị nữa.
-- **Tâm trạng**: Lo lắng (cơ sở dữ liệu vừa báo lỗi), Đói bụng, Muốn chải chuốt, Nhớ bạn (lâu ngày chưa tương tác), Vui vẻ, Bình tĩnh. Tâm trạng chỉ quyết định lời thoại và con dấu tâm trạng trong nhà pet.
-- **Nhật ký trưởng thành**: Mục **Nhật ký trưởng thành** trong nhà pet ghi lại các cột mốc: ngày đầu quen biết, lần đầu ăn ramen, cùng hoàn thành nhiệm vụ cơ sở dữ liệu lần thứ 100; các mẩu chuyện độc quyền đã mở khóa cũng được xem tại đây.
-- **Biệt danh**: Bấm vào biểu tượng cây bút cạnh tên trong nhà pet để đặt biệt danh cho nhân vật, cách xưng hô trên giao diện và lời thoại sẽ thay đổi theo; để trống để khôi phục tên gốc.
-- **Lời chào mỗi ngày**: Lần đầu gặp gỡ mỗi ngày, pet màn hình sẽ chào hỏi tùy theo buổi sáng, trưa, chiều tối và mức độ thân mật của hai bạn, đồng thời ghi nhận thêm một ngày trong "Số ngày đồng hành".
-- **Trợ cấp sinh hoạt**: Khi ví tiền gia đình còn dưới 5 xu vàng, mỗi ngày có thể vào Sổ tay cuộc sống để nhận 8 xu vàng một lần, vừa đủ để mua một phần cơm nắm.
+- **Độ thân thiết**: Chia làm năm mức độ: Mới quen, Quen thuộc, Thân thiết, Tin cậy, Yêu thương sâu đậm, mỗi nhân vật tính riêng. Vuốt ve +1 (tối đa 20/ngày), tặng hoa +5 (tối đa 3 lần/ngày), mời ăn cơm +3～+8, nhận lương +3, trò chuyện một lượt +2 (tối đa 20/ngày), lần đầu gặp nhau mỗi ngày +5, cùng bạn hoàn thành một nhiệm vụ cơ sở dữ liệu +2 (tối đa 20/ngày), tắm rửa chải chuốt +2. Mỗi khi lên một mức sẽ mở khóa một bộ lời thoại mới, một câu chuyện nhỏ độc quyền và một danh hiệu.
+- **Chỉ số nhu cầu**: Độ no giảm từ đầy xuống rỗng mất khoảng 12 tiếng, độ sạch mất khoảng 24 tiếng, dù bạn không mở máy thì nó cũng sẽ từ từ giảm xuống. Độ no được hồi lại bằng cách mời ăn cơm (Pudding +15, Cơm nắm +25, Cơm cuộn trứng +40, Ramen +50), độ sạch thì bằng cách nhấp vào **Tắm rửa** trong cuốn sổ nhỏ hoặc trong nhà pet màn hình (miễn phí, hồi chiêu 30 phút). Trong phần cài đặt tiện ích có thể tắt các chỉ số nhu cầu này đi, sau khi tắt các con số sẽ bị đóng băng và không hiển thị nữa.
+- **Tâm trạng**: Lo lắng (cơ sở dữ liệu vừa báo lỗi), Đói bụng, Muốn tắm rửa, Nhớ bạn (đã lâu không để ý đến cô ấy), Vui vẻ, Bình tĩnh. Tâm trạng chỉ quyết định lời thoại và con dấu tâm trạng trong nhà pet.
+- **Nhật ký trưởng thành**: Mục **Nhật ký trưởng thành** trong nhà pet ghi lại các cột mốc, ví dụ ngày đầu quen biết, lần đầu ăn ramen, cùng bạn hoàn thành nhiệm vụ cơ sở dữ liệu lần thứ 100; các câu chuyện nhỏ độc quyền đã mở khóa cũng được đọc ở đây.
+- **Biệt danh**: Bấm vào cây bút bên cạnh tên trong nhà pet để đặt biệt danh cho nhân vật, cách xưng hô trên giao diện và lời thoại sẽ thay đổi theo, để trống để khôi phục tên gốc.
+- **Lời chào mỗi ngày**: Lần gặp gỡ đầu tiên mỗi ngày, pet màn hình sẽ chào hỏi tùy theo buổi sáng, trưa, tối và mức độ thân thiết của hai bạn, đồng thời ghi nhận một ngày "Số ngày đồng hành".
+- **Trợ cấp cơ bản**: Khi ví tiền chung ở nhà còn ít hơn 5 tiền vàng, mỗi ngày có thể vào Sổ tay sinh hoạt để nhận 8 tiền vàng một lần, vừa đủ để mua một phần cơm nắm.
 
-Đối với người dùng nâng cấp từ bản cũ, Tiểu Erii sẽ dựa vào số lần trò chuyện, làm thêm và dùng bữa hiện có để quy đổi ra độ thân mật ban đầu (tối đa đến mức "Quen thuộc"), "Ngày đầu gặp gỡ" sẽ tính theo bản ghi trò chuyện hoặc sổ tay sớm nhất.
+Đối với người dùng cũ khi nâng cấp, Tiểu Erii sẽ dựa vào số lần trò chuyện, đi làm và ăn cơm hiện có để quy đổi ra một lượng độ thân thiết ban đầu (tối đa đến mức "Quen thuộc"), "Ngày đầu gặp gỡ" sẽ lấy theo bản ghi trò chuyện hoặc sổ tay nhỏ sớm nhất.
 
 ## Phím tắt mở bảng cơ sở dữ liệu
 
-Trong mục "Cơ sở dữ liệu" của cuốn sổ nhỏ có một nhóm phím tắt điều hướng nhanh: **Mở cơ sở dữ liệu gốc** (Bảng điều khiển), **Bàn làm việc điền bảng**, **Thúc đẩy cốt truyện**, **Quản lý dữ liệu**, **API**, **Xem bảng** (Bảng trực quan của cơ sở dữ liệu). Trong thanh nhiệm vụ của cửa sổ trò chuyện và sổ tay cuộc sống cũng có nút **Mở cơ sở dữ liệu**.
+Trong mục "Cơ sở dữ liệu" của cuốn sổ nhỏ có một nhóm phím tắt: **Mở cơ sở dữ liệu gốc** (Bảng điều khiển), **Bàn làm việc điền bảng**, **Thúc đẩy cốt truyện**, **Quản lý dữ liệu**, **API**, **Xem bảng** (Bảng trực quan của cơ sở dữ liệu). Trong thanh nhiệm vụ của cửa sổ trò chuyện và sổ tay sinh hoạt cũng có nút **Mở cơ sở dữ liệu**.
 
-Thao tác mở cơ sở dữ liệu sử dụng giao diện công khai `AutoCardUpdaterAPI.openSettings()` / `openVisualizer()`; chuyển đến bảng chỉ định tương đương với việc nhấp chuyển trang trên thanh bên giúp bạn, chỉ đổi giao diện chứ không đọc/ghi bảng biểu, không gọi thao tác nhiệm vụ. Nếu một trang nào đó không có trong phiên bản cơ sở dữ liệu hiện tại của bạn, nút bấm sẽ chỉ mở cơ sở dữ liệu và giải thích lý do; khi không tìm thấy cơ sở dữ liệu, cuốn sổ nhỏ sẽ nhắc bạn kích hoạt cơ sở dữ liệu trước.
+Việc mở cơ sở dữ liệu dùng hàm `AutoCardUpdaterAPI.openSettings()` / `openVisualizer()` công khai của nó; nhảy đến một bảng chỉ định tương đương với việc nó nhấp giúp bạn vào mục đó trên thanh bên, chỉ đổi trang chứ không đọc/ghi bảng biểu, không gọi thao tác nhiệm vụ. Nếu một bảng nào đó không được hiển thị trong phiên bản cơ sở dữ liệu hiện tại của bạn, nút bấm sẽ chỉ mở cơ sở dữ liệu và ghi rõ lý do; khi không tìm thấy lối vào cơ sở dữ liệu, cuốn sổ nhỏ sẽ nhắc bạn bật cơ sở dữ liệu lên trước.
 
 ## Ngoại hình và Hiệu ứng
 
-Giao diện mang phong cách "Sổ tay bìa cứng": vân giấy, viền ép kim mờ, họa tiết và con dấu, ba nhân vật sở hữu ba bộ màu sắc riêng biệt. Mục **Hiệu ứng** trong cài đặt tiện ích có 4 mức: Tự động (Màn hình PC hiển thị rực rỡ, điện thoại hiển thị đơn giản), Rực rỡ, Đơn giản, Tắt. Mức "Rực rỡ" sẽ kích hoạt hiệu ứng rải cánh hoa, bông tuyết hoặc ánh sao khi tặng hoa, thăng cấp, hoặc đổi nhân vật; khung ảnh đứng của nhà pet màn hình có dải cực quang chuyển động mượt mà bằng WebGL; mức "Đơn giản" chỉ giữ lại một lượng nhỏ hạt phân tử (Canvas2D); nếu hệ thống bật chế độ "Giảm chuyển động", hiệu ứng sẽ tự động tắt. Khi chuyển tab sang chạy ngầm hoặc đóng giao diện, toàn bộ hoạt ảnh đồ họa sẽ lập tức dừng lại.
+Giao diện mang phong cách "Sổ tay bìa cứng": vân giấy, viền ép kim, băng dính washi và con dấu, ba nhân vật có ba bộ màu sắc riêng. Mục **Hiệu ứng** trong cài đặt tiện ích có bốn mức: Tự động (Màn hình PC thì rực rỡ, điện thoại thì đơn giản), Rực rỡ, Đơn giản, Tắt. Mức "Rực rỡ" sẽ rải cánh hoa, bông tuyết hoặc ngôi sao khi tặng hoa, thăng cấp, hoặc đổi nhân vật, trang ảnh đứng của nhà pet màn hình cũng có dải ánh sáng lấp lánh chầm chậm chảy qua; mức "Đơn giản" chỉ giữ lại một lượng nhỏ hạt phân tử (particles); nếu hệ thống bật "giảm chuyển động động", hiệu ứng sẽ tự động tắt. Khi chuyển trang sang chạy ngầm hoặc đóng bảng điều khiển, mọi hình ảnh động sẽ dừng lại.
 
-## Đi làm, Kiếm tiền và Dùng bữa
+## Đi làm, Kiếm tiền và Ăn cơm
 
-Nhấp chuột phải trên PC hoặc nhấn giữ trên điện thoại để mở cuốn sổ nhỏ, chọn **Sổ tay cuộc sống**; bạn cũng có thể mở từ phần cài đặt tiện ích. Phía trên cùng cửa sổ có thể chọn phân công nhân vật: ví tiền dùng chung cho cả gia đình, các hoạt động làm việc, ăn uống và thay trang phục được tính riêng cho từng người; các nhân vật có thể đến các địa điểm khác nhau cùng lúc. Sổ tay gồm bốn tab: **Đi làm thêm**, **Ăn món ngon**, **Trang phục**, **Sổ cái nhỏ**.
+Nhấp chuột phải trên PC / Nhấn giữ trên điện thoại để mở cuốn sổ nhỏ, nhấp vào **Sổ tay đời sống**; cũng có thể mở từ cài đặt tiện ích. Phía trên cùng của cửa sổ có thể chọn nhân vật tham gia: ví tiền là "ví tiền chung ở nhà" dùng chung cho mọi nhân vật, việc đi làm, ăn uống và đổi trang phục được tính riêng theo từng nhân vật, các nhân vật khác nhau có thể đồng thời tới những địa điểm khác nhau. Sổ tay gồm bốn trang: **Đi làm thêm**, **Ăn món ngon**, **Trang phục**, **Sổ cái nhỏ**.
 
 ### Công việc và Tiền lương
 
 | Công việc | Nhiệm vụ | Thời gian | Lương |
 | --- | --- | --- | --- |
-| Tiệm sách | Đặt sách mới lên kệ | 1 Phút | 10 Xu vàng |
-| Tiệm tráng miệng | Phụ chuẩn bị đồ ngọt | 2 Phút | 18 Xu vàng |
-| Tiệm hoa | Sắp xếp bó hoa, thay nước | 3 Phút | 25 Xu vàng |
+| Tiệm sách | Đặt sách mới lên kệ | 1 Phút | 10 Tiền vàng |
+| Tiệm tráng miệng | Phụ chuẩn bị đồ ngọt | 2 Phút | 18 Tiền vàng |
+| Tiệm hoa | Sắp xếp bó hoa, thay nước | 3 Phút | 25 Tiền vàng |
 
-1. Chọn công việc trong mục **Đi làm thêm**. Mỗi nhân vật chỉ thực hiện một hoạt động tại một thời điểm.
-2. Sổ tay và bong bóng thoại sẽ đếm ngược thời gian còn lại, pet màn hình đổi sang trang phục làm việc và cử động nhẹ nhàng tại chỗ.
-3. Khi hoàn thành, nhấn **Nhận tiền lương**. Bạn cũng có thể đóng sổ tay lại và bấm nhận trực tiếp trên bong bóng thoại khi tan làm.
-4. Mỗi nhân vật phải hoàn tất nhận lương thì mới có thể bắt đầu công việc tiếp theo hoặc mua đồ ăn. Lương chưa nhận sẽ được lưu giữ vĩnh viễn, không có thời hạn hết hạn.
+1. Chọn công việc trong phần **Đi làm**. Mỗi lần chỉ thực hiện một hoạt động.
+2. Sổ tay và bong bóng thoại sẽ đếm ngược thời gian còn lại, pet màn hình thay trang phục làm việc và khẽ hô hấp tại chỗ.
+3. Khi làm xong, nhấp **Nhận tiền lương**. Bạn cũng có thể đóng sổ tay đi và nhận trực tiếp từ bong bóng thoại lúc tan làm.
+4. Mỗi nhân vật phải nhận lương xong thì mới được làm tiếp hoặc mua đồ ăn. Lương chưa nhận sẽ được giữ mãi, không có kỳ hạn.
 
-Thao tác **Tan làm sớm** yêu cầu bấm xác nhận thêm một lần: dừng công việc đang làm dở, không nhận được lương nhưng cũng không bị trừ xu vàng. Những công việc đã hoàn thành sẽ chỉ có nút nhận lương, không thể bấm nhầm hủy bỏ.
+Tính năng **Tan làm sớm** yêu cầu xác nhận thêm một lần nữa: dừng công việc đang làm, không có lương nhưng cũng không bị trừ tiền. Các công việc đã hoàn thành sẽ được nhận ngay, không thể bấm nhầm hủy bỏ.
 
 ### Mời pet ăn cơm
 
-| Món ăn | Giá cả | Thời gian ăn |
+| Thức ăn | Giá | Thời gian ăn |
 | --- | --- | --- |
-| Pudding | 5 Xu vàng | 8 Giây |
-| Cơm nắm | 8 Xu vàng | 9 Giây |
-| Cơm cuộn trứng | 15 Xu vàng | 10 Giây |
-| Ramen | 20 Xu vàng | 12 Giây |
+| Pudding | 5 Tiền vàng | 8 Giây |
+| Cơm nắm | 8 Tiền vàng | 9 Giây |
+| Cơm cuộn trứng | 15 Tiền vàng | 10 Giây |
+| Ramen | 20 Tiền vàng | 12 Giây |
 
-Mua tại mục **Ăn món ngon**, sau khi bấm xác nhận hệ thống sẽ trừ xu vàng và bắt đầu dùng bữa, ăn xong độ no sẽ tăng lên. Khi số dư không đủ hoặc đang bận làm việc khác, nút mua sẽ bị vô hiệu hóa. Bữa ăn hoàn tất sẽ được ghi vào sổ cái nhỏ; bốn món ăn có 4 bộ hình ảnh riêng biệt: Pudding dùng thìa nhỏ ăn bánh flan caramel, cơm nắm cầm tay bọc rong biển, cơm cuộn trứng dùng thìa xúc trứng vàng ươm, mì ramen dùng đũa gắp sợi mì. Thẻ gọi món, ảnh minh họa trong sổ tay và pet ngoài màn hình đều đồng bộ hình ảnh tương ứng. Chỉ số nhu cầu chỉ tác động tới tâm trạng và lời thoại, không có phạt bỏ đói hay ép ăn.
+Mua trong mục **Ăn món ngon**, sau khi xác nhận thao tác sẽ trừ tiền vàng và bắt đầu ăn cơm, ăn xong độ no sẽ tăng. Khi số dư không đủ hoặc đang thực hiện hoạt động khác, nút mua sẽ bị vô hiệu hóa. Ăn xong sẽ được ghi vào sổ cái nhỏ; bốn loại món ăn đều sử dụng hình minh họa ăn uống riêng biệt: Pudding dùng thìa nhỏ ăn bánh caramel pudding, Cơm nắm dùng tay cầm cơm nắm rong biển, Cơm cuộn trứng dùng thìa ăn cơm cuộn trứng vàng óng, Ramen dùng đũa gắp mì. Thẻ gọi món, hình minh họa trong sổ tay khi ăn và pet nổi đều sử dụng chung hình ảnh tương ứng. Chỉ số nhu cầu chỉ ảnh hưởng đến tâm trạng và lời thoại, không có hình phạt đói bụng hay ép ăn.
 
-### Thay trang phục (Skin)
+### Trang phục (Skin)
 
-Trang thứ ba của Sổ tay cuộc sống là **Trang phục**; nút **Thay đồ cho cô ấy** trong nhà pet cũng có thể dẫn thẳng vào đây. Mỗi nhân vật luôn sở hữu sẵn một bộ trang phục mặc định hoàn toàn miễn phí.
+Trang thứ ba của Sổ tay đời sống là **Trang phục**; nút **Thay trang phục cho cô ấy** trong Nhà pet màn hình cũng có thể mở trực tiếp trang này. Mỗi nhân vật vĩnh viễn sở hữu một bộ trang phục mặc định miễn phí.
 
-Bộ trang phục mới của Tiểu Erii trong bản này là **Lễ phục Dạ tím Tsukuyomi**, chỉ dành riêng cho Erii:
+Bộ trang phục mới của Tiểu Erii trong phiên bản này là **Tsukuyomi · Lễ Phục Dạ Tím**, chỉ dành riêng cho Erii:
 
-| Nội dung | Chi tiết |
+| Nội dung | Số lượng |
 | --- | --- |
 | Giá trang phục | 10.320 Vé hoa |
-| Tỷ lệ quy đổi | 1 Xu vàng → 40 Vé hoa |
-| Tích lũy từ 0 vé hoa | 258 Xu vàng |
-| Sở hữu ban đầu | Không, cần mua trong cửa hàng |
+| Tỷ lệ quy đổi | 1 Tiền vàng → 40 Vé hoa |
+| Tích đủ từ 0 vé hoa | 258 Tiền vàng |
+| Sở hữu ban đầu | Chưa, cần phải mua |
 
-1. Đi làm thêm, sau khi hoàn thành bấm nhận tiền lương thủ công.
-2. Tại mục **Đổi vé hoa** ở trang phục, nhập số lượng xu vàng nguyên dương muốn đổi. Bên cạnh sẽ hiển thị số vé hoa dự kiến nhận được; bạn cũng có thể bấm **Điền số xu vàng cần để mua trang phục**, thao tác này chỉ điền số hộ bạn chứ chưa trừ tiền.
-3. Bấm **Đổi vé hoa**, hệ thống mới trừ xu vàng và cộng thêm vé hoa vào ví. Nếu không đủ xu vàng hoặc số lượng không hợp lệ sẽ không thể đổi; vé hoa không thể đổi ngược lại thành xu vàng, vé hoa chưa dùng hết sẽ được giữ nguyên.
-4. Khi đủ vé hoa, nhấn vào **Mua · 10.320 vé hoa** trên thẻ trang phục. Thao tác mua chỉ thực hiện một lần, không tự động mặc lên người và không trừ tiền lặp lại.
-5. Nhấn **Mặc vào**. Sau đó bạn có thể chuyển qua lại giữa trang phục mặc định và bộ lễ phục này hoàn toàn miễn phí bất cứ lúc nào.
+1. Đi làm thêm, sau khi hoàn thành hãy nhận lương thủ công.
+2. Tại mục **Đổi vé hoa** ở trang Trang phục, nhập số nguyên dương tiền vàng muốn đổi. Bên cạnh sẽ hiển thị số vé hoa quy đổi tương ứng; cũng có thể bấm **Điền số tiền vàng cần mua trang phục**, nút này chỉ tự điền số chứ không trừ tiền.
+3. Bấm **Đổi vé hoa**, hệ thống mới trừ tiền vàng và cộng vé hoa. Không thể đổi nếu không đủ tiền vàng hoặc số lượng không hợp lệ; vé hoa không thể đổi ngược lại thành tiền vàng, vé hoa dư thừa sẽ được bảo lưu.
+4. Khi đã đủ vé hoa, bấm vào nút **Mua · 10.320 Vé hoa** trên thẻ trang phục. Chỉ mua một lần duy nhất, không tự động mặc lên và không trừ tiền lặp lại.
+5. Bấm **Mặc lên**. Sau đó bạn có thể đổi lại trang phục mặc định hoàn toàn miễn phí bất cứ lúc nào, rồi mặc lại bộ này.
 
-- Trang phục mới bao gồm 27 bức ảnh: phủ kín 16 tư thế chờ/nhiệm vụ/tương tác, 4 tư thế ló đầu ở mép, 3 hình làm thêm và 4 hình ăn uống độc lập. Pet màn hình, avatar cuốn sổ nhỏ và chat, ảnh minh họa sinh hoạt, menu món ăn, hình đứng nhà pet đều đồng bộ đổi sang trang phục mới; bong bóng thoại và sổ tay chuyển sang tông màu tím nhạt thanh lịch.
-- Thiết kế giữ lại găng tay voan đen mỏng, nơ bướm màu tím ở cổ và giày. Động tác ôm vịt giữ lại chú vịt trong lòng, các động tác khác giữ lại vịt con trên đầu; hình ảnh của trang phục mặc định gốc không bị can thiệp.
-- Xu vàng và vé hoa nằm trong ví tiền dùng chung của gia đình; trang phục thuộc quyền sở hữu riêng của từng nhân vật, mua cho Erii sẽ không dùng chung cho Zero hay Naidan. Việc chuyển nhân vật, làm mới trang, đóng cửa sổ đều bảo lưu toàn vẹn dữ liệu.
-- Thay trang phục không chiếm dụng lượt hoạt động làm việc hay ăn uống; khi cơ sở dữ liệu đang bận bạn vẫn có thể đổi vé hoa và thay đồ. Tính năng này không phát sinh yêu cầu API mới và không có việc tự động đi lại.
-- Thư mục trang phục thanh toán bằng xu vàng của bản cũ vẫn tương thích; thuộc tính `currency: 'tickets'` trong cấu hình biểu thị thanh toán bằng vé hoa, nếu không khai báo sẽ mặc định thanh toán bằng xu vàng.
+- Trang phục mới bao gồm 16 động tác chờ/nhiệm vụ/tương tác, 4 tư thế ló đầu mép tường, 3 hoạt ảnh đi làm thêm, 4 hình minh họa ăn uống riêng biệt, tổng cộng 27 ảnh. Pet màn hình, avatar trong cuốn sổ nhỏ và khung trò chuyện, hình minh họa đời sống, thực đơn, ảnh đứng trong nhà pet đều đổi theo; bong bóng thoại của pet và Sổ tay đời sống sẽ chuyển sang tông màu tím nhạt.
+- Tạo hình giữ lại găng tay lụa đen trong suốt, nơ tím ở cổ và giày. Động tác ôm vịt chỉ giữ lại chú vịt trong lòng, các động tác khác giữ lại chú vịt vàng nhỏ trên đỉnh đầu; hình ảnh trang phục mặc định không bị thay đổi.
+- Tiền vàng và vé hoa là ví tiền chung ở nhà; trang phục thuộc sở hữu riêng của từng nhân vật, mua cho Tiểu Erii sẽ không dùng chung cho Zero hay Naidan. Dữ liệu tiếp tục được lưu giữ khi đổi nhân vật, làm mới trang hoặc đóng cửa sổ.
+- Việc đổi trang phục không chiếm dụng thời gian làm việc hay ăn uống; bạn vẫn có thể quy đổi và thay trang phục khi cơ sở dữ liệu đang bận. Không phát sinh thêm yêu cầu gọi API hay kích hoạt tự di chuyển.
+- Danh mục trang phục thanh toán bằng tiền vàng của phiên bản cũ vẫn tương thích hoàn toàn; trường `currency: 'tickets'` trong danh mục biểu thị thanh toán bằng vé hoa, nếu không ghi sẽ mặc định tiếp tục xử lý bằng tiền vàng.
 
-### Lưu trữ dữ liệu và Nhiệm vụ Cơ sở dữ liệu
+### Lưu trữ và Nhiệm vụ Cơ sở dữ liệu
 
-- Ví tiền ban đầu có 0 xu vàng, 0 vé hoa, trang phục mới chưa sở hữu. Công việc do bạn chủ động bắt đầu, không tự động nhận tiếp hay treo máy kiếm tiền vô hạn; khi tiền gần cạn có thể nhận trợ cấp sinh hoạt mỗi ngày một lần.
-- Xu vàng, vé hoa, lịch sử đổi và chi tiêu vé hoa, hoạt động hiện tại, tổng số lần làm thêm/dùng bữa và 20 bản ghi sổ cái gần nhất được lưu trong cấu hình tiện ích của tài khoản Tavern hiện hành; trang phục sở hữu và đang mặc cũng lưu tại đó (trường `skins`), phân chia theo từng nhân vật.
-- Công việc đã bắt đầu sẽ tính giờ theo thời gian thực của thiết bị. Khi đóng cửa sổ, làm mới trang hoặc tạm rời đi, khi quay lại đồng hồ vẫn tiếp tục chạy hoặc hiển thị trạng thái chờ nhận lương; bữa ăn diễn ra lúc ngoại tuyến chỉ quyết toán một lần duy nhất, không trừ tiền lặp lại.
-- Khi nhiệm vụ cơ sở dữ liệu xuất hiện, động tác, bong bóng thoại và nút dừng của nhiệm vụ gốc luôn được ưu tiên; sổ tay cuộc sống cũng cung cấp nút dừng cho tác vụ cơ sở dữ liệu gốc. Tiến trình đếm giờ làm thêm vẫn chạy bình thường, sau khi cơ sở dữ liệu hoàn thành nhiệm vụ bạn mới có thể nhận việc mới hoặc mua đồ ăn.
-- Cửa sổ trò chuyện, sổ tay cuộc sống, nhà pet và cuốn sổ nhỏ mở hoàn toàn độc lập. Lối chơi sinh hoạt không gọi API ngoài, không sửa đổi bảng biểu hay văn bản của Tavern. Không có việc tự ý di chuyển.
-- Hệ thống này là lối chơi cục bộ nhẹ nhàng trong cài đặt tài khoản người dùng, có cơ chế ngăn chặn việc nhận thưởng/trừ tiền trùng lặp trên cùng một trang; không có dịch vụ giao dịch ví tiền đồng thời giữa nhiều thiết bị.
+- Ví tiền khởi điểm là 0 tiền vàng, 0 vé hoa, trang phục mới chưa sở hữu. Công việc do bạn bắt đầu thủ công, không tự động nhận công việc tiếp theo hay treo máy kiếm tiền vô hạn; khi gần hết tiền có thể nhận trợ cấp cơ bản một lần.
+- Tiền vàng, vé hoa, lịch sử quy đổi và chi tiêu vé hoa, hoạt động hiện tại, tổng số lần làm thêm / ăn cơm và 20 bản ghi sổ cái nhỏ gần nhất được lưu trong Cài đặt tiện ích của tài khoản Tavern hiện tại; trang phục đã sở hữu và đang mặc cũng được lưu ở đó (trường `skins`), tách riêng theo từng nhân vật.
+- Công việc đã bắt đầu sẽ tính giờ theo thời gian thực của thiết bị. Khi đóng cửa sổ, làm mới trang hoặc tạm thời rời đi, khi quay lại đồng hồ vẫn tiếp tục đếm hoặc hiển thị chờ nhận; bữa ăn hoàn thành lúc ngoại tuyến chỉ quyết toán một lần duy nhất, không trừ tiền lặp lại.
+- Khi nhiệm vụ cơ sở dữ liệu xuất hiện, động tác nhiệm vụ gốc, bong bóng thoại và nút dừng được ưu tiên cao nhất; Sổ tay đời sống cũng cung cấp nút dừng tác vụ cơ sở dữ liệu gốc. Đồng hồ đếm giờ làm thêm đã bắt đầu vẫn chạy bình thường, sau khi nhiệm vụ cơ sở dữ liệu kết thúc mới có thể bắt đầu công việc mới hoặc mua đồ ăn.
+- Cửa sổ trò chuyện, Sổ tay đời sống, Nhà pet màn hình và Cuốn sổ nhỏ được mở riêng biệt. Tính năng đời sống không gọi API trò chuyện, không chỉnh sửa cơ sở dữ liệu hay nội dung câu chuyện trong Tavern. Không khôi phục việc tự do di chuyển.
+- Phiên bản này là lối chơi đơn gọn nhẹ lưu trong cài đặt tài khoản, chống nhận thưởng / trừ tiền lặp lại trên cùng một trang; không có dịch vụ giao dịch ví tiền đồng thời đa thiết bị.
 
 ## Trò chuyện cùng pet màn hình
 
-Mỗi nhân vật sở hữu lịch sử trò chuyện, cách xưng hô và thiết lập tính cách hoàn toàn riêng biệt, chuyển đổi nhân vật sẽ không bị trộn lẫn dữ liệu. Thiết lập của Zero được bám sát nguyên tác "Long Tộc", còn Naidan là cậu bạn đồng hành tinh nghịch háu ăn (mối quan hệ mặc định là "Bạn đồng hành"); bạn có thể tự tinh chỉnh theo ý muốn trong thư mục `characters/`.
+Mỗi nhân vật có riêng lịch sử trò chuyện, cách xưng hô và thiết lập, chuyển đổi nhân vật sẽ không bị lẫn lộn dữ liệu. Thiết lập của Zero được soạn theo tính cách nguyên tác của "Long Tộc", còn Nai Dan là cậu bạn đồng hành háu ăn đầy sức sống (Mối quan hệ mặc định là "Bạn đồng hành"), bạn có thể tự điều chỉnh theo ý hiểu của mình trong mục `characters/`.
 
-1. Nhấp chuột phải vào pet màn hình (PC) hoặc nhấn giữ khoảng 1.4 giây (điện thoại) để mở cuốn sổ nhỏ, nhấn vào **Trò chuyện cùng Tiểu Erii** (khi đổi sang Zero hay Naidan, nút bấm sẽ tự đổi tên tương ứng). Bạn cũng có thể mở trực tiếp cửa sổ trò chuyện từ Cài đặt tiện ích.
-2. Mặc định sẽ chọn **Dùng API hiện tại của Tavern**, kế thừa toàn bộ kết nối, mô hình và khóa hiện hành. Hãy đảm bảo Tavern đã thiết lập sẵn kết nối hoàn thành trò chuyện (chat completion) hoặc hoàn thành văn bản (text completion) hoạt động tốt.
-3. Nhập tin nhắn và nhấn **Gửi**. Trên PC, nhấn <kbd>Enter</kbd> để gửi, <kbd>Shift</kbd>+<kbd>Enter</kbd> để xuống dòng; trên điện thoại dùng phím Return để xuống dòng và chạm nút Gửi.
-4. Nút **Dừng phản hồi** giúp hủy bỏ yêu cầu lần này của pet; **Thử lại** sẽ gửi lại nội dung trò chuyện chưa nhận được phản hồi. Việc đóng cửa sổ hay tắt tiện ích cũng sẽ hủy các yêu cầu trò chuyện đang chờ xử lý.
-5. Nhấp vào **Cài đặt kết nối** để tùy chỉnh cách xưng hô, mối quan hệ, phong cách nói chuyện, độ dài câu trả lời và ký ức thủ công, hoặc chuyển sang chế độ **Cấu hình API riêng (Tương thích OpenAI)**.
+1. Nhấp chuột phải vào pet màn hình (PC), hoặc nhấn giữ khoảng 1.4 giây (điện thoại) để mở cuốn sổ nhỏ, nhấn vào **Trò chuyện cùng Tiểu Erii** (khi đổi sang Zero hay Nai Dan, nút bấm sẽ đổi tên theo). Bạn cũng có thể mở trực tiếp cửa sổ trò chuyện trong Cài đặt tiện ích.
+2. Mặc định sẽ **Dùng API hiện tại của Tavern**, sử dụng kết nối, mô hình và các khóa hiện tại. Hãy cấu hình sẵn kết nối hoàn thành trò chuyện (chat completion) hoặc hoàn thành văn bản (text completion) hoạt động tốt trên Tavern.
+3. Nhập tin nhắn và nhấp **Gửi**. Trên PC, nhấn Enter để gửi, Shift+Enter để xuống dòng; trên điện thoại dùng phím Return để xuống dòng, nút Gửi để đẩy tin nhắn lên.
+4. **Dừng phản hồi** hủy bỏ yêu cầu lần này của Tiểu Erii; **Thử lại** gửi lại nội dung trò chuyện chưa nhận được phản hồi. Việc đóng cửa sổ hay tắt tiện ích cũng sẽ hủy các yêu cầu trò chuyện chưa xong.
+5. Nhấp vào **Cài đặt kết nối**, bạn có thể tùy chỉnh danh xưng, quan hệ, phong cách trò chuyện, độ dài câu trả lời và những việc muốn cô ấy nhớ, hoặc chuyển sang phần **Cấu hình API riêng (Tương thích OpenAI)**.
 
 ### Cấu hình API riêng
 
-Điền URL cơ sở (Base URL) API (ví dụ: `https://api.cua.ban/v1`) và Khóa API (Key), nhấp **Lấy danh sách mô hình**, chọn trong danh sách **Mô hình khả dụng**, kiểm tra lại **Tên mô hình** bên dưới trước khi nhấp **Lưu cài đặt**.
+Điền URL cơ sở (Base URL) API (ví dụ: `https://api.cua.ban/v1`) và Khóa (Key), nhấp **Lấy danh sách mô hình**, chọn trong danh sách **Mô hình khả dụng**, rồi xem lại mục **Tên mô hình** bên dưới trước khi nhấp **Lưu cài đặt**.
 
-Bạn hoàn toàn có thể tự nhập tay tên mô hình; một số nhà cung cấp không mở API lấy danh sách, việc không lấy được danh sách không đồng nghĩa với việc kết nối trò chuyện không khả dụng. Trong lúc lấy danh sách có thể bấm **Hủy lấy**. Việc đổi URL hoặc Khóa sẽ tự động hủy các yêu cầu cũ và làm mới danh sách; đóng cửa sổ hoặc vô hiệu hóa tiện ích cũng sẽ hủy tiến trình đang gọi. Danh sách sẽ tự lọc trùng ID mô hình và sắp xếp lại, việc chọn mô hình tại đây không ảnh hưởng đến thiết lập mô hình toàn cục của Tavern.
+Bạn vẫn có thể nhập tay tên mô hình; một số giao diện không cung cấp danh sách mô hình, việc không lấy được danh sách chưa chắc là do kết nối trò chuyện không khả dụng. Trong quá trình lấy danh sách, có thể nhấn **Hủy lấy**. Thay đổi URL hoặc Khóa sẽ tự hủy các yêu cầu cũ và xóa danh sách cũ; việc đóng cửa sổ hoặc vô hiệu hóa tiện ích cũng sẽ hủy yêu cầu đang gọi. Danh sách sẽ lọc bỏ các ID mô hình trùng lặp và sắp xếp lại, việc chọn mô hình trong danh sách này sẽ không làm thay đổi thiết lập mô hình toàn cục của Tavern.
 
-Chế độ **Dùng API hiện tại của Tavern** sẽ bám sát theo mô hình mà Tavern đang chọn; khi bạn muốn chỉ định mô hình độc lập, hãy dùng **Cấu hình API riêng**.
+Chế độ **Sử dụng API hiện tại của Tavern** sẽ bám sát vào mô hình mà Tavern đang chọn; còn khi bạn muốn lựa chọn riêng, hãy chuyển sang chế độ **Cấu hình API riêng**.
 
-Hệ thống sẽ tự nhận diện URL cơ sở nếu bạn lỡ điền sẵn đường dẫn hoàn chỉnh kết thúc bằng `/chat/completions`. Cổng kết nối riêng hỗ trợ chuẩn API chat completion tương thích OpenAI; bạn vẫn có thể sử dụng giao diện Claude / Gemini qua kết nối mặc định của Tavern.
+Hệ thống sẽ tự động nhận diện URL cơ sở nếu bạn đã điền sẵn đường dẫn hoàn chỉnh kết thúc bằng `/chat/completions`. Phần kết nối riêng này hỗ trợ các giao diện API hoàn thành trò chuyện tương thích chuẩn OpenAI; bạn vẫn có thể dùng giao diện gốc của Claude / Gemini thông qua hệ thống kết nối hiện tại của Tavern.
 
-Yêu cầu mạng được chuyển tiếp qua thiết bị đang chạy máy chủ Tavern, trình duyệt chỉ kết nối duy nhất tới Tavern. Điền `localhost` được hiểu là chính thiết bị đang chạy Tavern. Nút **Kiểm tra kết nối** sẽ gửi một yêu cầu thử nghiệm cực ngắn (có thể phát sinh chi phí nhỏ của nhà cung cấp); nội dung kiểm tra này hoàn toàn không lưu vào lịch sử trò chuyện.
+Yêu cầu sẽ được chuyển tiếp qua thiết bị đang chạy Tavern, trình duyệt chỉ kết nối duy nhất vào Tavern. Nếu bạn điền `localhost`, nó sẽ được hiểu là cái thiết bị đang chạy Tavern. Nút **Kiểm tra kết nối** sẽ phát đi một yêu cầu siêu ngắn, có thể tốn phí; nội dung đoạn test này sẽ không bị ném vào lịch sử trò chuyện.
 
-Khóa API theo mặc định chỉ lưu trong phiên làm việc hiện tại, tải lại trang sẽ cần nhập lại. Đánh dấu chọn **Ghi nhớ khóa trên thiết bị này** sẽ lưu vào bộ nhớ cục bộ trình duyệt; bỏ chọn và lưu lại sẽ xóa khóa khỏi thiết bị. Khóa không bao giờ bị ghi vào cài đặt tiện ích, prompt trò chuyện hay gói cài đặt.
+Khóa API theo thiết lập mặc định sẽ chỉ hoạt động trong lần chạy tiện ích hiện tại, tải lại trang sẽ phải điền lại. Tích chọn **Ghi nhớ khóa trên thiết bị này** sẽ lưu vào bộ nhớ trình duyệt; bỏ chọn và lưu lại sẽ xóa khóa. Khóa sẽ không bị ghi vào cài đặt tiện ích, prompt trò chuyện hay gói cài đặt.
 
 ### Thao tác tin nhắn và bản nháp
 
-- **Sao chép**: Mọi tin nhắn đều có thể sao chép nhanh qua nút bấm. Nếu trình duyệt chặn quyền clipboard tự động, bạn có thể bôi đen văn bản để sao chép thủ công.
-- **Tạo lại câu trả lời**: Nằm ở phía dưới cùng của câu trả lời thành công gần nhất, dùng để yêu cầu AI trả lời lại câu hỏi đó. Phản hồi mới tạo thành công mới thay thế câu cũ; nếu bị hủy hoặc báo lỗi thì nội dung gốc vẫn được bảo toàn. Hệ thống không lưu nhiều nhánh câu trả lời rẽ nhánh.
-- **Chỉnh sửa rồi gửi lại**: Cho phép sửa lại tin nhắn người dùng gần nhất và yêu cầu pet phản hồi lại một lượt mới. Chỉ khi thành công mới cập nhật bản ghi. Bấm "Hủy chỉnh sửa" sẽ khôi phục lại bản nháp ban đầu.
-- **Lưu bản nháp tự động**: Ô nhập liệu thông thường và nội dung đang chỉnh sửa dở dang đều được tự động lưu nháp. Bạn đóng cửa sổ hoặc làm mới trang web vẫn có thể viết tiếp nội dung cũ.
-- **Xuất dữ liệu**: Xuất toàn bộ lịch sử trò chuyện hiện tại thành tệp `.txt` bao gồm tên người nói, nội dung và mốc thời gian; không đính kèm thông tin nhạy cảm như khóa API hay ký ức riêng tư.
-- **Xóa bản ghi**: Thao tác yêu cầu bấm xác nhận thêm một lần. Xóa lịch sử trò chuyện không làm ảnh hưởng đến cấu hình kết nối và ký ức thủ công; hai mục này có thể chỉnh sửa trong Cài đặt kết nối.
+- **Sao chép**: Mọi tin nhắn đều có thể sao chép. Dù trình duyệt chặn việc tự động sao chép thì bạn vẫn có thể bôi đen văn bản để copy tay.
+- **Trả lời lại**: Nằm ở phía dưới cùng của phản hồi thành công cuối cùng, dùng để trả lời lại cùng một câu hỏi. Cần đợi phản hồi mới thành công xong thì mới thế chỗ câu cũ; nếu hủy bỏ hoặc báo lỗi thì nội dung gốc vẫn được giữ lại. Sẽ không lưu lại nhiều nhánh câu trả lời phụ.
+- **Sửa rồi gửi lại**: Cho phép sửa tin nhắn cuối cùng của bạn, rồi bắt nó tạo lại một vòng câu trả lời khác. Cũng cần phải thành công xong thì mới thế chỗ bản ghi gốc. Bấm vào "Hủy chỉnh sửa" sẽ quay trở về cái bản nháp trước lúc sửa.
+- **Lưu bản nháp**: Các bản nháp bình thường và bản nháp đang chỉnh sửa dở đều sẽ được lưu lại. Cho dù đóng cửa sổ mở lại hay làm mới trang web thì bạn vẫn có thể viết tiếp.
+- **Xuất dữ liệu**: Xuất lịch sử trò chuyện hiện tại thành tệp TXT, bao gồm danh xưng, nội dung tin nhắn và thời gian đã có, không bao gồm cấu hình kết nối, mã khóa hay ký ức tự điền.
+- **Xóa bản ghi**: Cần phải bấm xác nhận thêm lần nữa. Hành động xóa chat sẽ không xóa thiết lập kết nối và ký ức điền tay; 2 mục đó phải tự sửa trong phần Cài đặt kết nối.
 
-Tin nhắn hiển thị rõ ảnh đại diện và mốc thời gian; các tin nhắn cũ từ phiên bản trước không có mốc thời gian vẫn đọc được bình thường mà không tự tạo thời gian giả. Trong lúc chờ API, giao diện hiển thị thông báo pet đang soạn lời hồi đáp; ở phiên bản hiện tại, phản hồi được trả về nguyên khối (non-streaming).
+Tin nhắn sẽ hiện rõ avatar và mốc thời gian; những đoạn nhắn từ phiên bản cũ không có thời gian cũng không sao, nó vẫn đọc được và sẽ không tự chế ra cái mốc thời gian giả tạo nào. Lúc chờ API, nó sẽ hiện "Erii đang soạn hồi âm", tới lúc nhận xong thì bung ra đầy đủ luôn; ở phiên bản này, câu trả lời vẫn không phải dạng luồng (non-streaming).
 
-Khi đang cuộn lên xem lại tin nhắn cũ, nếu có câu trả lời mới xuất hiện khung chat sẽ không tự động nhảy tuột xuống đáy, bạn chỉ cần bấm "Quay lại tin nhắn mới nhất". Trên PC có thể kéo mép thanh tiêu đề ↔ để mở rộng kích thước cửa sổ; trên điện thoại khung nhập liệu tự động co giãn theo nội dung và chừa khoảng trống cho bàn phím ảo.
+Lúc lật xem lại tin nhắn cũ, có câu trả lời mới xuất hiện nó cũng sẽ không tự động cuộn tuột xuống đáy đâu, phải bấm "Quay lại tin nhắn mới nhất" thì nó mới xuống. PC thì kéo cái thanh tiêu đề ↔ để giãn cửa sổ ra, còn kéo đi đâu cũng được; điện thoại thì phần gõ chữ sẽ tự động phình to lên tới giới hạn nhất định, đồng thời còn phải chừa chỗ cho cái bàn phím ảo nhảy lên nữa.
 
-Khi lịch sử trống, các nút gợi ý chủ đề chỉ hỗ trợ điền sẵn chữ vào khung nhập liệu, bạn cần bấm nút Gửi thì tin nhắn mới phát đi, không tự động gửi ngầm.
+Khi lịch sử trống trơn, ba nút bấm chủ đề sẽ chỉ điền chữ vào ô nháp thôi, bạn phải bấm nút Gửi nó mới đi, không có vụ tự gửi luôn đâu.
 
-### Phong cách trò chuyện và Ký ức thủ công
+### Phong cách trò chuyện và ký ức thủ công
 
-Bạn có thể tùy chỉnh trong **Cài đặt kết nối → Bạn và Tiểu Erii**:
+Bạn có thể chỉnh trong phần **Cài đặt kết nối → Bạn và Tiểu Erii**:
 
-- **Trò chuyện tự nhiên**: Độ dài phản hồi linh hoạt theo chủ đề, tập trung vào việc hồi đáp chi tiết, chân thật.
-- **Bầu bạn ngắn gọn**: Thường gói gọn trong 1 đến 3 câu, hạn chế dài dòng lan man.
-- **Giao tiếp chi tiết**: Khi hỏi han nghiêm túc sẽ phân tích đầy đủ, giao tiếp thường ngày vẫn giữ nét tự nhiên.
-- **Mong muốn pet ghi nhớ**: Cho phép ghi tối đa 2.000 ký tự (thói quen xưng hô, sở thích, hoàn cảnh cá nhân), sau khi lưu sẽ được đính kèm vào mỗi yêu cầu gửi đi; bạn có thể chỉnh sửa hoặc xóa bất cứ lúc nào.
+- **Trò chuyện tự nhiên**: Độ dài dài ngắn là tùy vào chủ đề, chú tâm vào việc hồi đáp nội dung chi tiết.
+- **Bầu bạn ngắn gọn**: Thường chỉ một đến ba câu, hạn chế lan man sang mấy thứ chả liên quan.
+- **Giao tiếp chi tiết**: Lúc nghiêm túc hỏi thăm thì sẽ trả lời đẩy đủ, còn giao tiếp thường ngày thì vẫn tự nhiên.
+- **Mong Tiểu Erii ghi nhớ**: Tối đa 2000 ký tự, có thể ghi thói quen gọi nhau, sở thích hay tình hình dạo này, sau khi lưu thì lần nào yêu cầu nó cũng đính kèm theo, bạn có thể sửa hay xóa bất cứ lúc nào.
 
-Dữ liệu ký ức này hoàn toàn do bạn nhập thủ công, hệ thống không tự động trích xuất từ nội dung trò chuyện, không gọi AI tóm tắt gây tốn chi phí và không đọc trộm dữ liệu bảng biểu hay văn bản của Tavern. Phong cách giao tiếp được truyền đạt qua câu lệnh định hình (prompt), chất lượng câu trả lời phụ thuộc vào mô hình AI bạn chọn; mục "Giới hạn độ dài phản hồi" giúp kiểm soát số lượng token trả về.
+Mấy cái này là dữ liệu bạn tự cập nhật bằng tay, nó không tự chiết xuất từ khung chat ra đâu, cũng không gọi model đi tóm tắt chi cho tốn tiền, và dĩ nhiên là nó cũng chả thèm ngó ngàng tới cơ sở dữ liệu hay mấy cái khung văn bản của Tavern đâu. Phong cách được truyền đạt qua câu lệnh prompt, còn trả lời thế nào thì lại phải xem cái model kia; còn "Giới hạn độ dài câu trả lời" thì vẫn dùng để gò cái đầu ra cho chuẩn.
 
-### Câu lệnh định hình (Prompt) và Lưu trữ bản ghi
+### Lệnh prompt và bản ghi
 
-Prompt tích hợp sẵn được tái cấu trúc từ các bộ preset do người dùng tạo (chế độ chat, tính cách, thói quen), mặc định thiết lập mối quan hệ thân thiết; bạn có thể tự chỉnh thành quan hệ bạn bè hoặc thiết lập khác. Toàn bộ sử dụng văn bản thuần, không phụ thuộc vào macro của Tavern, world info/lorebook, regex hay script cốt truyện. Tệp quản lý prompt là `chat-prompt.js`.
+Câu lệnh prompt tích hợp sẵn đã được nhào nặn lại từ cái preset của Erii do người dùng tạo (như mục `opt_mode_chat`, tính cách và khí chất, v.v...), mặc định là quan hệ người yêu, bạn có thể tự chỉnh lại thành bạn bè hay quan hệ nào khác cũng được. Dùng toàn bộ bằng văn bản thuần, không cần phải bấu víu vào macro preset của Tavern, sách thế giới, regex hay kịch bản sổ truyện (storybook script). Tệp bảo trì ở đây là `chat-prompt.js`.
 
-Lịch sử trò chuyện được lưu độc lập trong thiết lập tiện ích của tài khoản Tavern hiện hành, giới hạn tối đa 100 dòng (khoảng 128.000 ký tự). Mỗi yêu cầu gửi đi sẽ kèm theo khoảng 40 lượt hội thoại gần nhất (tương đương 24.000 ký tự); tuyệt đối không tự ý gom thêm văn bản từ Tavern, thẻ nhân vật hay cơ sở dữ liệu. Nút **Xóa bản ghi** yêu cầu xác nhận lần hai để tránh bấm nhầm.
+Lịch sử trò chuyện được cất vào một xó riêng trong phần cấu hình cài đặt cho cái tài khoản Tavern đó, sức chứa tối đa là 100 dòng, tầm đâu cỡ 128000 chữ. Mỗi lần xin yêu cầu thì nó kẹp thêm cỡ 40 dòng chat gần nhất, khoảng 24000 chữ; nó sẽ không tự động ôm đồm thêm văn bản từ Tavern, thẻ nhân vật, sách thế giới hay bảng dữ liệu gì đâu. **Xóa bản ghi** bắt buộc phải ấn lần nữa để xác nhận.
 
-Cửa sổ chat hiển thị độc lập: trên PC có thể kéo thanh tiêu đề di chuyển tự do, trên điện thoại tự động căn chỉnh toàn màn hình. Trong lúc đợi phản hồi, Tiểu Erii sẽ làm động tác ghi chép, nhận được tin sẽ vẫy tay chào; khi đang chat tính năng tự động kể chuyện sẽ tạm dừng. Nhiệm vụ cơ sở dữ liệu sẽ hiển thị ở dải thông tin phía trên cửa sổ chat và có nút **Dừng nhiệm vụ** riêng biệt.
+Cửa sổ chat hiển thị tách biệt luôn, trên PC thì túm thanh tiêu đề kéo đi đâu cũng được, điện thoại thì nó sẽ tự co giãn lấp đầy màn hình. Lúc chờ nó phản hồi, Tiểu Erii sẽ làm hành động ghi chép tại chỗ, nhận được tin thì sẽ vẫy tay chào; lúc chat thì tạm thời dẹp vụ tự động kể chuyện sang một bên. Nhiệm vụ cơ sở dữ liệu sẽ hiển thị ở ngay phía trên cửa sổ trò chuyện và có hẳn cái nút **Dừng nhiệm vụ** độc lập.
 
-### Phạm vi tương thích của API hiện tại
+### Phạm vi của API hiện tại
 
-- Kết nối Chat Completion của Tavern: Sử dụng trọn vẹn nhà cung cấp, mô hình và khóa máy chủ hiện hành của Tavern (bao gồm Claude, Gemini, OpenRouter); phiên bản hiện tại trả về phản hồi nguyên khối và hiển thị trạng thái chờ.
-- Kết nối Text Completion `textgenerationwebui` của Tavern: Sử dụng trình tạo tham số nguyên bản và backend tương ứng.
-- Hiện chưa hỗ trợ trò chuyện độc lập cho các kết nối Kobold, Horde, NovelAI; nếu gặp phải hệ thống sẽ nhắc đổi kết nối hoặc chuyển sang Cấu hình API riêng.
-- SillyTavern 1.14.0: Tận dụng cơ chế yêu cầu chạy ngầm (quiet request) có sẵn; giới hạn độ dài phản hồi theo thiết lập của Tavern. Từ 1.15.0–1.19.0: Sao chép trình tạo tham số độc lập, bạn có thể chỉnh độ dài câu trả lời riêng cho pet mà không ảnh hưởng tới thiết lập chung của Tavern.
+- Kết nối hoàn thành trò chuyện (chat completion) của Tavern: Dùng nguyên nhà cung cấp, mô hình và khóa Backend của nó hiện tại, kể cả mấy nguồn kiểu Claude, Gemini, OpenRouter mà Tavern đang cấu hình; ở bản này, câu trả lời vẫn không phải dạng luồng, và sẽ hiện trạng thái lúc đang chờ.
+- Kết nối hoàn thành văn bản `textgenerationwebui` của Tavern: Sử dụng trình tạo tham số nguyên bản và backend tương ứng.
+- Hiện chưa hỗ trợ trò chuyện độc lập cho các kết nối Kobold, Horde, NovelAI, nếu dính phải nó sẽ nhắc thẳng là phải đổi kết nối hoặc phải xài cài đặt riêng.
+- 1.14.0 thì tận dụng luôn cái tính năng yêu cầu ẩn (quiet request) độc lập có sẵn của nó; giới hạn độ dài đầu ra bám theo thiết lập hiện thời của Tavern. Từ 1.15.0-1.19.0 thì copy cái trình tạo tham số ra xài, bạn có thể chỉnh độ dài câu trả lời riêng cho Tiểu Erii mà chả ảnh hưởng gì đến thiết lập chung của Tavern cả.
 
-## Kiểm tu cơ sở dữ liệu (Chế độ kiểm tu trong cửa sổ trò chuyện)
+## Bảo trì cơ sở dữ liệu (Chế độ bảo trì của cửa sổ trò chuyện)
 
-Khi việc điền bảng gặp lỗi, hoặc dữ liệu bảng biểu không khớp với cốt truyện, bạn có thể gọi pet màn hình ra hỗ trợ phân tích và sửa chữa.
+Lúc điền bảng bị lỗi, hoặc bảng biểu và cốt truyện không khớp, bạn có thể gọi pet màn hình ra kiểm tra xem.
 
-1. Mở cửa sổ trò chuyện, bấm vào mục **Kiểm tu cơ sở dữ liệu** ở thanh tiêu đề trên cùng (bấm lại vào **Trò chuyện** để quay về chế độ thường; dữ liệu hai bên lưu riêng biệt, thông tin kiểm tu không làm xáo trộn cuộc trò chuyện thường nhật).
-2. Phía trên cửa sổ sẽ ghi rõ các dữ liệu được thu thập lần này: **Toàn bộ bảng biểu**, **Số tầng văn bản gần đây** (bấm vào để chọn từ 0～10 tầng, mặc định là 3) và **Các lỗi gần nhất** (thông báo lỗi/cảnh báo nhận từ cơ sở dữ liệu, tối đa 5 thông báo).
-3. Bạn có thể nêu rõ lỗi cần sửa, hoặc nhấn **Kiểm tra giúp tôi**. Pet sẽ dùng văn phong riêng để phân tích hiện trạng; nếu cần chỉnh sửa, phía dưới phản hồi sẽ đính kèm một **Phiếu chỉnh sửa**.
-4. Mỗi mục trong phiếu chỉnh sửa đều ghi rõ vị trí (bảng nào, hàng nào, cột nào), giá trị cũ → giá trị mới, kèm lý do sửa. Ban đầu **mặc định không có mục nào được chọn sẵn**. Những mục đối chiếu thấy lỗi (sai tên bảng, sai cột, hàng không tồn tại, giá trị mới trùng giá trị cũ, xung đột với mục khác) sẽ bị chú thích nguyên nhân và làm mờ, không thể tích chọn.
-5. Đánh dấu những mục cần áp dụng, sau đó nhấn **Áp dụng mục đã chọn (N mục)**. Trước khi ghi dữ liệu, hệ thống tự động sao lưu toàn bộ bảng biểu; sau đó tiến hành ghi theo thứ tự an toàn: "sửa ô/dòng hiện có → xóa dòng → thêm dòng mới → chuyển preset cốt truyện → yêu cầu điền lại bảng"; kết quả thành công hay thất bại của từng mục đều được hiển thị rõ ràng.
-6. Sau khi hoàn tất, bạn có thể bấm **Hoàn tác** để khôi phục toàn bộ bảng biểu về trạng thái trước khi ghi (bao gồm cả preset cốt truyện); hoặc bạn có thể **Tải bản sao lưu** dưới dạng tệp JSON về máy.
+1. Bật cửa sổ trò chuyện lên, bấm vào cái chữ **Bảo trì cơ sở dữ liệu** ở trên đỉnh (bấm lại vào **Trò chuyện** để quay về như cũ; dữ liệu của 2 bên lưu riêng, mấy thông tin bảo trì sẽ chả dính vô cuộc sống đời thường của bạn đâu).
+2. Phía trên cửa sổ sẽ ghi rõ lần này nó ngó được những gì: **Toàn bộ bảng biểu**, **Mấy tầng văn bản gần đây** (bấm vào để chọn từ 0-10, mặc định là 3 tầng) và **Mấy cái lỗi gần đây** (thông báo lỗi/cảnh báo từ cơ sở dữ liệu bay qua, tối đa là 5 thông báo).
+3. Cứ thẳng thắn nói ra chỗ sai ở đâu, không thì ấn **Kiểm tra giúp tôi**. Nó sẽ lấy cái ngữ khí riêng của nó để kể lại nó thấy gì; nếu phải sửa, bên dưới câu trả lời của nó sẽ đi kèm theo một **Danh sách sửa đổi**.
+4. Trong đó, mỗi cái mục sửa đổi đều ghi rõ nằm ở chỗ nào (bảng nào, hàng thứ mấy, cột nào), giá trị cũ -> giá trị mới, và luôn cả lý do vì sao. Lúc đầu **mặc định là không chọn mục nào hết**. Những mục nào đối chiếu thấy fail (ghi sai tên bảng, sai cột, hàng lặn đâu mất tiêu, giá trị mới với cũ như nhau, đụng độ (conflict) với mục khác) sẽ bị chú thích lý do và bị mờ đi không cho chọn.
+5. Đánh dấu mấy mục bạn cần, rồi ấn **Áp dụng mục đã chọn (N mục)**. Trước khi ghi vào, nó sẽ sao lưu toàn bộ cái bảng đó; sau đó sẽ nạp theo thứ tự: "sửa dòng có sẵn -> xóa dòng -> thêm dòng -> chuyển đổi preset thúc đẩy cốt truyện -> điền bảng lại", mục nào làm xong hay báo lỗi đều được hiển thị kết quả.
+6. Sau khi nạp xong xuôi, bạn có thể ấn **Hoàn tác**, lôi cái bảng về lại như lúc chưa đụng vào (kể cả preset cốt truyện đã chuyển cũng sẽ kéo về luôn); hoặc bạn có thể **Tải bản sao lưu về** dưới định dạng JSON.
 
-Các thao tác mà Phiếu chỉnh sửa có thể thực hiện:
+Những việc mà Danh sách sửa đổi làm được:
 
-- **Sửa ô, sửa dòng, thêm dòng, xóa dòng**: Gọi trực tiếp qua các hàm công khai `updateCell`, `updateRow`, `insertRow`, `deleteRow`, tương đương với thao tác thủ công trong cơ sở dữ liệu. Các ô, hàng, cột bị khóa trong cơ sở dữ liệu sẽ bị từ chối và hiển thị rõ trạng thái "chưa thể áp dụng".
-- **Chuyển đổi preset cốt truyện**: Hỗ trợ chuyển cuộc trò chuyện hiện tại sang một preset thúc đẩy cốt truyện khác đã có sẵn (`switchPlotPreset`).
-- **Yêu cầu điền lại bảng**: Yêu cầu cơ sở dữ liệu thực hiện điền bảng thủ công một lần theo cấu hình hiện tại (`manualUpdate`). Thao tác này sẽ kích hoạt API điền bảng của cơ sở dữ liệu và tính phí theo dịch vụ API cơ sở dữ liệu của bạn.
+- **Sửa ô**, **sửa cả dòng**, **thêm dòng**, **xóa dòng**: Dùng thẳng qua giao diện công khai `updateCell`, `updateRow`, `insertRow`, `deleteRow` để ghi vào, nó y hệt như lúc bạn sửa bảng bằng tay bên trong cơ sở dữ liệu. Mấy cái dòng, cột hay ô đang bị khóa sẽ bị cơ sở dữ liệu đá văng ra, phần mềm sẽ hiện đúng trạng thái "chưa được nạp vào".
+- **Chuyển preset cốt truyện**: Giúp chuyển đoạn chat hiện tại sang một cái preset cốt truyện khác đã có sẵn (`switchPlotPreset`).
+- **Điền bảng lại**: Ép cơ sở dữ liệu điền bảng một lần nữa dựa theo cái cài đặt hiện tại của nó (`manualUpdate`). Tính năng này sẽ kích hoạt cái API điền bảng mà bạn đã cài bên trong cơ sở dữ liệu, có tính tiền y như lúc bạn điền bảng bình thường.
 
-Các giới hạn an toàn được thiết lập:
+Để còn nước cứu vãn, có mấy món cố tình không được cài vào:
 
-- **Không sửa nội dung bên trong preset cốt truyện, không lưu preset phụ**: Cơ chế nhập preset của cơ sở dữ liệu sẽ vô tình chuyển cuộc trò chuyện sang chế độ "Triệu hồi LLM", trong khi API công khai không có hàm xóa preset hay khôi phục chế độ cũ nên không thể hoàn tác an toàn. Nếu cần sửa nội dung, pet sẽ giải thích trong tin nhắn để bạn tự vào trang **Thúc đẩy cốt truyện** của cơ sở dữ liệu chỉnh sửa thủ công (trong cuốn sổ nhỏ có phím tắt mở trực tiếp).
-- Không hỗ trợ lệnh xóa toàn bộ bảng, xóa hàng loạt dữ liệu lớn; mỗi phiếu sửa chữa giới hạn tối đa 12 mục.
-- Tuyệt đối không tự động ghi dữ liệu; chỉ thực thi khi bạn trực tiếp tích chọn và nhấn nút áp dụng.
+- **Không sửa nội dung của preset cốt truyện, cũng không lưu bản phụ.** Giao diện nhập preset của cơ sở dữ liệu sẽ vô tình kéo theo cuộc hội thoại hiện tại vào "Chế độ triệu hồi LLM" (LLM Recall), mà cái giao diện công khai của nó thì không có nút xóa hay trả về chế độ cũ, nên nạp vô rồi là khỏi hoàn tác. Nếu muốn sửa thì pet màn hình sẽ nói cho bạn biết trong tin nhắn, bạn tự qua bên trang **Thúc đẩy cốt truyện** của cơ sở dữ liệu mà sửa bằng tay (Trên cuốn sổ nhỏ có luôn nút bấm bay tới thẳng).
+- Không đề xuất vụ xóa bay cả cái bảng, xóa sạch dữ liệu hay nạp lại với số lượng lớn; một cái danh sách sửa chữa giới hạn nhiều nhất là 12 mục thôi.
+- Không tự động nạp vô, bạn không ấn thì nó chả bao giờ tự ghi.
 
 Chính sách bảo vệ an toàn:
 
-- Mỗi mục trước khi ghi đều được đối chiếu lại: nếu ô dữ liệu đã bị sửa đổi trước khi bạn xác nhận, hoặc dòng dữ liệu đã biến mất, hệ thống sẽ từ chối ghi và báo rõ lý do. Định vị dòng dựa trên `row_id` của cơ sở dữ liệu, việc xóa hoặc thêm dòng khác sẽ không làm lệch mục tiêu của các dòng phía sau.
-- Chỉ cho phép áp dụng và hoàn tác trên đúng đoạn chat đã tạo ra phiếu chỉnh sửa đó; chuyển sang đoạn chat khác hệ thống sẽ từ chối thực thi.
-- Khi nhấn hoàn tác, nếu phát hiện bảng biểu đã có thay đổi mới sau lần ghi đó (ví dụ cơ sở dữ liệu vừa tự động điền bảng một lượt mới), hệ thống sẽ cảnh báo: "Hoàn tác sẽ xóa bỏ cả những thay đổi mới này", bạn phải nhấn **Vẫn muốn hoàn tác** thì lệnh mới chạy.
-- Bản sao lưu được lưu an toàn trong IndexedDB của trình duyệt, mỗi thiết bị lưu trữ tối đa 10 bản gần nhất; làm mới trang (<kbd>F5</kbd>) vẫn có thể hoàn tác bình thường. Nếu trình duyệt chặn IndexedDB, hệ thống sẽ lưu tạm trong bộ nhớ phiên và hiển thị thông báo khuyên bạn nên tải bản sao lưu JSON về máy.
-- Trong lúc cơ sở dữ liệu đang bận xử lý, nút **Áp dụng mục đã chọn** sẽ bị vô hiệu hóa để đảm bảo an toàn toàn vẹn dữ liệu.
+- Mỗi mục trước khi được nạp vô đều sẽ được đối chiếu lại một lần: Cái ô này đã bị thay đổi trước khi bạn xác nhận rồi, hoặc cái dòng này mất tiêu luôn rồi, thì khỏi nạp, ghi thẳng lý do. Hàng được tra bằng `row_id` của cơ sở dữ liệu, nên vụ xóa dòng hay thêm dòng sẽ không khiến những mục phía sau sửa nhầm.
+- Chỉ cho phép áp dụng và hoàn tác trên cái đoạn chat mà cái danh sách đó được đẻ ra; nếu bạn đổi qua phòng chat khác thì hệ thống sẽ từ chối cái lệnh hoàn tác.
+- Lúc bấm hoàn tác, nếu nó phát hiện cái bảng đã bị chỉnh sửa sau lần ghi đó (ví dụ như cơ sở dữ liệu tự nhiên nó nhảy ra điền bảng một lần nữa), nó sẽ cảnh báo ngay: "Hoàn tác sẽ kéo theo mấy cái thay đổi mới này lùi về theo luôn đó", bạn bấm **Vẫn muốn hoàn tác** thì nó mới chịu thực thi.
+- Sao lưu sẽ được giấu vào trong trình duyệt của thiết bị này luôn (IndexedDB), một máy tính giữ lại được tối đa 10 bản mới nhất, bấm F5 load lại trang thì vẫn hoàn tác được. Nếu trình duyệt chặn không cho lưu cục bộ, hệ thống sẽ chỉ giữ lại trong lần mở trang này thôi, nó sẽ hiện thông báo khuyên bạn nên tải một bản nháp về máy.
+- Trong lúc cơ sở dữ liệu bận bịu, nút **Áp dụng mục đã chọn** sẽ tối màu, đợi nó rảnh tay rồi tính.
 
-Quá trình kiểm tra sẽ đóng gói toàn bộ bảng biểu, các thông báo lỗi gần nhất và các tầng trò chuyện bạn đã chọn gửi tới kết nối API của pet màn hình. Nếu bảng biểu quá dài, hệ thống sẽ tự động rút gọn phần đầu của bảng dài nhất kèm dòng chú thích thông báo rõ ràng.
+Quá trình kiểm tra sẽ kẹp cái bảng, mớ lỗi gần đây với những tầng văn bản chat mà bạn chọn quăng luôn cho kết nối API của pet màn hình (Cái giao diện cài đặt ngay ở tab **Cài đặt kết nối** trong khung trò chuyện). Bảng biểu mà dài quá là nó tự hớt bớt phần mào đầu ở bảng nào dài nhất, rồi nó còn để lại dòng ghi chú báo hiệu luôn.
 
 ## Quan sát trò chuyện
 
-Khi bật tính năng này, pet màn hình sẽ đồng hành bên cạnh cuộc hội thoại của bạn và thỉnh thoảng đưa ra những lời bình phẩm, nhận xét thú vị.
+Bật cái này lên, con pet nó sẽ kiểu như đang chầu chực kế bên coi bạn diễn, lâu lâu quăng ra một hai câu review.
 
-- Vào **Cài đặt tiện ích → Quan sát & Kiểm tu** để bật **Quan sát trò chuyện** (mặc định tắt). Sau đó tùy chỉnh **Tần suất bình luận** (từ 1～20 tầng trò chuyện, mặc định là 4 tầng).
-- Hệ thống chỉ đếm các tầng tin nhắn mới phát sinh sau khi bật: chuyển sang đoạn chat khác bộ đếm sẽ tính lại từ đầu; xóa tin nhắn không bị trừ lùi; tạo lại câu trả lời (chưa sinh tầng mới) sẽ không tính thêm. Các tầng tin nhắn bị ẩn đi sẽ không được thu thập.
-- Khi đủ số tầng quy định, hệ thống sẽ chờ nhân vật nói xong khoảng 4 giây mới bắt đầu đánh giá; khoảng cách giữa hai lần bình luận tối thiểu là 60 giây. Nếu cơ sở dữ liệu đang bận điền bảng, pet sẽ chờ thêm 30 giây; nếu vẫn bận liên tục pet sẽ bỏ qua lượt đó để chờ tầng tiếp theo.
-- Lời nhận xét của pet sẽ hiển thị ngay trên bong bóng thoại (kèm nút **Trả lời cô ấy/cậu ấy**), đồng thời được lưu vào lịch sử chat riêng dưới vai trò "người quan sát". Bấm vào nút sẽ mở thẳng cửa sổ trò chuyện để bạn đối thoại tiếp.
-- Các hành động trả lời tin nhắn, vuốt ve hay tặng hoa đều được tính là đã phản hồi pet. Nếu liên tục 3 câu bình phẩm không được người dùng tương tác, tâm trạng pet sẽ chuyển sang "Tủi thân"; ở lần tiếp theo pet sẽ rụt rè hỏi thăm xem bạn có đang bận không——hoàn toàn không giục giã, và mỗi tiếng đồng hồ chỉ hỏi tối đa một lần.
-- Mỗi lần bình luận sẽ gửi một yêu cầu thông qua kết nối API của nhân vật; nếu lỗi mạng pet sẽ im lặng chứ không gửi lại dồn dập, chi tiết lỗi hiển thị trong cài đặt tiện ích.
+- Vào **Cài đặt tiện ích → Quan sát & Bảo trì** bật **Quan sát trò chuyện** lên (Mặc định nó bị tắt). Sau đó lựa chọn **Tần suất bình luận** (Từ 1-20 tầng, mặc định là 4 tầng).
+- Nó chỉ đếm mấy cái tầng chat mới sinh ra sau khi bật thôi: Lướt sang khung chat khác là nó đếm lại từ đầu, bạn có lỡ tay xóa cũng không bị trừ bớt, bạn có lướt lên bắt nó tạo lại (chưa sinh thêm tầng mới) thì nó chả tính đâu. Mấy tầng chat bị ẩn đi là nó mù luôn, cũng không coi được gì hết.
+- Sau khi đã đủ target, phải chờ nhân vật thả câu xong thì 4 giây sau nó mới quyết định bình phẩm; cách mỗi lần sủa phải cách nhau tầm 60 giây. Đợt nào mà dữ liệu nó đang điền bảng thì nó sẽ nén thêm tầm 30 giây nữa, mà đang bận tối tăm mặt mũi thì nó nhịn không bình phẩm, để tầng tới nói luôn.
+- Những lời nhận xét của nó sẽ nhảy ngay trên bong bóng thoại (đi kèm nút **Trả lời cô ấy/nó**), cái này cũng sẽ được ghi luôn vào lịch sử chat cá nhân dưới tư cách "người quan sát". Bấm vô là mở thẳng cửa sổ chat để nhắn lại luôn.
+- Bất kể bạn rep, xoa đầu nó hay tặng hoa thì cũng coi như là đã phản hồi. Liên tục 3 câu chả ai thèm nghía, thì tâm trạng nó chuyển sang "Tủi thân" liền; tới lúc cất lời tiếp theo nó sẽ rụt rè hỏi thăm xem bạn có đang kẹt lịch không——không chửi rủa, không hối thúc, mà một tiếng đồng hồ nó chỉ dám hỏi một lần.
+- Cứ mỗi lần mỏ nó nhấp nháy là coi như request gọi thông qua mạng của nhân vật; nếu lỗi API là nó chịu chết chứ không spam lại, trong menu cài đặt sẽ thảy lỗi hôm đó.
 
 ## Bong bóng nhiệm vụ: Bản tóm tắt và Bản đầy đủ
 
-Trong mục **Cài đặt tiện ích → Tiểu Erii · Pet màn hình cơ sở dữ liệu → Hiển thị nội dung nhiệm vụ**, bạn có thể chọn:
+Trong **Cài đặt tiện ích → Tiểu Erii · Pet màn hình cơ sở dữ liệu → Hiển thị nội dung nhiệm vụ**, hãy chọn:
 
 - **Bản tóm tắt (Mặc định)**: Ví dụ "Đang cập nhật thủ công…".
-- **Bản đầy đủ (Nội dung công việc thực tế)**: Hiển thị tên nhiệm vụ ban đầu và chuỗi `detail` đầy đủ, ví dụ "Cập nhật thủ công / Đợt 1/4 · Gọi AI (Lần thử thứ 1/3)". Giữ nguyên các dấu xuống dòng gốc, nội dung dài hỗ trợ cuộn văn bản, nút dừng nhiệm vụ vẫn thao tác bình thường.
+- **Bản đầy đủ (Nội dung công việc thực tế)**: Hiển thị tên nhiệm vụ ban đầu và `detail` (chi tiết) đầy đủ, ví dụ "Cập nhật thủ công / Đợt 1/4 · Gọi AI (Lần thử thứ 1/3)". Giữ nguyên ngắt dòng ban đầu, nội dung dài có thể cuộn, nút dừng vẫn thao tác được bình thường.
 
-Tùy chọn này được lưu cục bộ và áp dụng đồng thời cho bong bóng ngoài màn hình lẫn thanh nhiệm vụ trong cửa sổ chat. Dữ liệu nhiệm vụ đọc trực tiếp từ `feature` và `detail` trên giao diện gốc của cơ sở dữ liệu; tuyệt đối không đoán mò phần trăm tiến độ, số đợt hay số lần thử lại. Khi cơ sở dữ liệu không có nhiệm vụ nào, pet sẽ hiển thị trạng thái chờ đồng bộ.
+Lựa chọn này sẽ được lưu lại, và áp dụng đồng thời cho bong bóng của pet màn hình lẫn thanh nhiệm vụ trong cửa sổ trò chuyện. Nội dung nhiệm vụ đọc trực tiếp `feature` và `detail` từ giao diện gốc của cơ sở dữ liệu; không đoán mò phần trăm, số đợt hay số lần thử lại. Khi thanh cuộn của cơ sở dữ liệu không có nhiệm vụ nào, nó sẽ hiển thị trạng thái đang đợi đồng bộ tiến độ.
 
-## Ranh giới đồng bộ cơ sở dữ liệu
+## Giới hạn đồng bộ cơ sở dữ liệu
 
-Bình thường tiện ích này chỉ đọc trạng thái nhiệm vụ, văn bản tiến độ và thông báo kết quả hiển thị trên giao diện hiện hành của cơ sở dữ liệu:
+Bình thường tiện ích này chỉ đọc trạng thái nhiệm vụ được cung cấp trên giao diện hiện tại của cơ sở dữ liệu, văn bản nhiệm vụ đang hiển thị và thông báo kết quả:
 
-- Không sao chép hay chỉnh sửa mã nguồn của plugin cơ sở dữ liệu;
-- Không thay thế lối vào cơ sở dữ liệu gốc;
-- Không can thiệp vào văn bản trò chuyện trong Tavern, cấu hình API toàn cục của Tavern hay các nút bấm nhiệm vụ gốc; lịch sử trò chuyện và cài đặt kết nối của pet được lưu riêng biệt;
-- Dữ liệu bảng biểu chỉ bị chỉnh sửa khi ở chế độ kiểm tu, sau khi người dùng trực tiếp tích chọn từng mục và bấm "Áp dụng mục đã chọn"; chỉ dùng API công khai `AutoCardUpdaterAPI` và luôn sao lưu toàn bộ trước khi ghi; preset thúc đẩy cốt truyện chỉ thực hiện chuyển đổi, không chỉnh sửa nội dung bên trong;
-- Văn bản trò chuyện của Tavern chỉ được đọc khi ở chế độ kiểm tu (kèm vài tầng gần nhất) và khi bạn chủ động bật quan sát trò chuyện; nội dung này chỉ gửi duy nhất tới API trò chuyện của pet;
-- Không can thiệp vào điều khiển cử động của Naidan (pet gốc của cơ sở dữ liệu); hình ảnh Naidan chỉ được đọc lúc runtime khi cơ sở dữ liệu đã tải xong ảnh, không đóng gói phát tán lại;
-- Cuốn sổ nhỏ chỉ lưu văn bản nhiệm vụ quan sát được gần nhất, không đại diện cho danh sách toàn bộ tiến trình ngầm; nút dừng bám sát nhiệm vụ đang hiển thị ngoài giao diện cơ sở dữ liệu;
-- Khi không có dữ liệu tỷ lệ phần trăm chính xác, hệ thống hiển thị nguyên văn tiến độ gốc của cơ sở dữ liệu;
-- Phím tắt điều hướng chỉ hỗ trợ mở giao diện và chuyển tab tương ứng, không tự ý đọc/ghi bảng hay kích hoạt nhiệm vụ.
+- Không sao chép plugin cơ sở dữ liệu;
+- Không thay thế lối vào cơ sở dữ liệu;
+- Không sửa đổi văn bản trò chuyện trong Tavern, thiết lập API toàn cục của Tavern hay các nút nhiệm vụ của cơ sở dữ liệu; lịch sử trò chuyện và cài đặt kết nối của Tiểu Erii được lưu riêng;
+- Bảng biểu của cơ sở dữ liệu chỉ bị thay đổi khi ở chế độ bảo trì, và sau khi bạn tích chọn từng mục rồi nhấn "Áp dụng mục đã chọn", hơn nữa chỉ dùng `AutoCardUpdaterAPI` công khai, sao lưu toàn bộ trước khi ghi; preset thúc đẩy cốt truyện chỉ thực hiện chuyển đổi, không sửa nội dung của nó;
+- Văn bản của Tavern chỉ được đọc khi ở chế độ bảo trì (kèm theo một vài tầng gần nhất) và khi bạn bật tính năng quan sát trò chuyện, nội dung đó cũng chỉ được gửi đến API dành riêng cho trò chuyện của pet màn hình;
+- Không gọi điều khiển hành động của Nai Dan (pet gốc của cơ sở dữ liệu); ảnh của Nai Dan chỉ được đọc lúc runtime khi cơ sở dữ liệu đã tải xong hình ảnh, không đi sao chép hay phát tán lại;
+- Cuốn sổ nhỏ lưu lại phần văn bản nhiệm vụ quan sát được gần đây nhất, những bản ghi này không đồng nghĩa với toàn bộ danh sách các nhiệm vụ đang chạy; nút dừng chỉ ăn khớp với nhiệm vụ mà cơ sở dữ liệu đang hiển thị ra ngoài;
+- Khi không có số liệu phần trăm thực, nó sẽ hiện luôn cái dòng tiến độ gốc của cơ sở dữ liệu;
+- Tính năng mở trang chỉ là mở cái giao diện cơ sở dữ liệu, nhảy sang cái trang cần mở, chứ không đọc ghi bảng, cũng chả gọi thao tác nhiệm vụ.
 
-Hiện tại tiện ích tương thích với cấu trúc giao diện của cơ sở dữ liệu `naiv1`. Nếu tương lai cơ sở dữ liệu thay đổi cấu trúc DOM (như `DeskPetLayer`, `DeskPet` hay `NoticeBubble`), Tiểu Erii có thể báo "Giao diện cơ sở dữ liệu không tương thích" và sẽ bảo toàn nguyên vẹn hiển thị cho pet gốc của cơ sở dữ liệu.
+Hiện tại đang tương thích với cấu trúc giao diện sẵn có của cơ sở dữ liệu `naiv1`. Nếu tương lai cơ sở dữ liệu có chỉnh sửa cấu trúc giao diện như `DeskPetLayer`, `DeskPet` hay `NoticeBubble`, Tiểu Erii có thể thông báo "Giao diện cơ sở dữ liệu không tương thích", và nó sẽ bảo toàn cho cái hiển thị pet màn hình gốc của cơ sở dữ liệu.
 
-Khuyến nghị: Bạn nên giữ hiển thị cho Naidan gốc và bong bóng nhiệm vụ trong phần cài đặt của cơ sở dữ liệu, sau đó vào cài đặt của tiện ích này để ẩn chúng đi. Thao tác "ẩn" tại đây chỉ là che phần hiển thị trên giao diện, không gỡ bỏ cơ sở dữ liệu và không làm gián đoạn nguồn cấp dữ liệu.
+Khuyến nghị nên duy trì việc hiển thị con Nai Dan gốc lẫn bong bóng nhiệm vụ trong phần cài đặt của cơ sở dữ liệu, rồi sau đó vào cài đặt tiện ích này ẩn chúng đi. Chữ "ẩn" ở đây chỉ là che đi cái phần hiển thị, không gỡ bỏ cơ sở dữ liệu, cũng không cắt đứt nguồn cấp dữ liệu.
 
-## Xem trước cục bộ và Trả lời lặp lại
+## Thông báo về Xem trước cục bộ và Trả lời lặp lại
 
-Trong phiên bản v0.6.0, tính năng xem trước độc lập (standalone preview) từng sử dụng dữ liệu mẫu cố định, dẫn tới việc mọi câu hỏi đều nhận phản hồi giống nhau và kiểm tra kết nối chỉ là giả lập. Vấn đề này đã được khắc phục hoàn toàn từ bản v0.6.1; gói cài đặt chính thức luôn gửi và nhận phản hồi thực tế qua API.
+Trong phiên bản v0.6.0, tính năng xem trước độc lập (standalone preview) từng bị chặn lại để gửi một mẫu cố định, khiến cho tin nhắn khác nhau cũng chỉ nhận được cùng một câu trả lời, và kiểm tra kết nối cũng chỉ là giả lập kết quả. Vấn đề này đã được khắc phục ở phần xem trước của bản v0.6.1; gói cài đặt chính thức luôn lấy phản hồi thật qua API.
 
-Bản xem trước độc lập yêu cầu bạn tự nhập API của mình vào Cài đặt kết nối để lấy danh sách mô hình, kiểm tra kết nối và trò chuyện thực tế. Giao diện trang độc lập không thể đọc thông số cấu hình của Tavern; chỉ khi cài đặt tiện ích vào Tavern bạn mới có thể dùng API mặc định của Tavern. Giao diện xem trước sẽ hiển thị nhãn **Xem trước độc lập · Cấu hình API riêng là có thể trò chuyện thật**.
+Bản xem trước mặc định của phiên bản mới cần bạn phải tự điền API của riêng mình vào Cài đặt kết nối, để lấy danh sách mô hình, test kết nối và nhắn tin nó mới gọi API thật. Giao diện trang độc lập thì chịu chết không đọc được thông số kết nối của Tavern; chỉ khi đã cài tiện ích vô rồi mới có thể kế thừa API mặc định của Tavern. Giao diện sẽ đính mác **Xem trước độc lập · Cấu hình API riêng là có thể trò chuyện thật**.
 
-Chế độ xem trước chỉ hiển thị dữ liệu mẫu khi bạn chủ động thêm tham số `demo=1` vào đường dẫn URL. Giao diện sẽ thông báo rõ ràng "Chế độ xem trước", dữ liệu demo và môi trường thực tế hoàn toàn tách biệt, dữ liệu mẫu cũ không bao giờ lọt vào lịch sử trò chuyện. Khi gặp lỗi kết nối, hệ thống sẽ báo lỗi thực tế chứ không dùng mẫu văn bản giả để lấp liếm.
+Chỉ có tự nguyện xài thêm cái đuôi `demo=1` ở link Demo thì mới thấy được mẫu test. Giao diện sẽ thông báo rành rọt "Chế độ xem trước", cái phần Demo với Xem trước thực tế là hai mục riêng biệt chả ai đụng ai, phần dữ liệu demo cũ mềm không có len lỏi vào lịch sử trò chuyện được. Lỗi giao diện thì nó cũng nổ thông báo lỗi, chả nhét đại một cái mẫu thoại vô tri đâu.
 
-Môi trường xem trước cục bộ chạy qua `work/erii_preview_server.mjs` chuyển tiếp yêu cầu trong localhost; tệp này không nằm trong gói phát hành chính thức. Khi cài trong Tavern, tiện ích sử dụng trực tiếp backend của Tavern nên không cần khởi chạy máy chủ xem trước này.
+Cái xem trước trên máy dùng cục bộ này chạy qua `work/erii_preview_server.mjs` hốt hết request rồi đẩy lại trong localhost; nó chả được kẹp vô cục cài đặt đâu. Bản cài trong Tavern thì dùng xài luôn cái backend của Tavern, khỏi cần tốn công boot thêm cái server xem trước rách việc này nữa.
 
 ## Toàn bộ lịch sử phiên bản
 
-Phiên bản được sắp xếp theo thứ tự thời gian từ mới nhất đến cũ nhất. Hành vi của phiên bản mới nhất căn cứ theo mục đầu tiên.
+Phiên bản được sắp xếp theo thời gian từ mới nhất đến cũ nhất. Hành vi của phiên bản mới nhất sẽ lấy theo mục ở trên cùng.
 
-### v0.9.3 · Lễ phục Dạ tím và Đổi vé hoa (Hiện tại)
+### v0.9.3 · Lễ Phục Dạ Tím và Đổi vé hoa (Bản hiện tại)
 
-- Mở bán「Lễ phục Dạ tím Tsukuyomi」: Giá 10.320 vé hoa, tỷ lệ đổi 1 xu vàng = 40 vé hoa; ban đầu không sở hữu, không tự động mua hay tự mặc.
-- Trang phục bổ sung hiển thị số dư xu vàng/vé hoa, số lượng quy đổi, dự kiến nhận được, số xu vàng cần để mua đồ, cảnh báo khi thiếu số dư. Nút điền số không trừ tiền; quy đổi, mua, mặc vào là 3 thao tác độc lập, rõ ràng.
-- Dữ liệu ví tiền bổ sung số dư vé hoa, tổng đổi và chi tiêu vé hoa; trang phục thống kê riêng lượng vé hoa đã dùng, bảo lưu toàn bộ xu vàng, hoạt động và dữ liệu trang phục cũ. Mua một lần thay đổi miễn phí vĩnh viễn, vé hoa dư được bảo toàn.
-- Bổ sung 27 ảnh WebP trong suốt chất lượng cao phủ kín mọi hành động và sinh hoạt; ảnh phát hành chuẩn 960×960 (khoảng 6.45 MiB). Ảnh gốc PNG 1254×1254 lưu trong không gian tư liệu bảo trì, không đưa vào gói cài đặt nhẹ của tiện ích.
-- Tải trước 8 hành động thường dùng, các hành động khác giải mã theo nhu cầu; sửa lỗi tràn viền ngang do xoay thẻ trang phục. Khi mặc đồ, bong bóng pet và sổ tay chuyển sang tông màu tím nhạt.
-- Vượt qua 9 nhóm kiểm thử logic mới, 10 kịch bản trình duyệt cho trang phục (độ rộng 1280/375/320), cùng 25 nhóm kiểm thử mô hình và 15 nhóm kiểm thử hồi quy trình duyệt. Xác nhận tương thích thực tế trên Tavern và điện thoại xem tại `COMPATIBILITY.md`.
-- Duy trì 6 mục sửa lỗi của v0.9.2; không khôi phục tự động di chuyển, không thay đổi mỹ thuật mặc định, không tự động gọi API trò chuyện.
+- Ra mắt trang phục「Tsukuyomi · Lễ Phục Dạ Tím」: Giá 10.320 vé hoa, 1 tiền vàng đổi được 40 vé; ban đầu chưa sở hữu, không tự động mua hay mặc.
+- Trang Đổi trang phục bổ sung số dư tiền vàng / vé hoa, số lượng quy đổi, số vé dự kiến nhận, số tiền vàng cần mua trang phục, cảnh báo không đủ số dư. Nút tự điền không trừ tiền; quy đổi, mua, mặc lên là 3 thao tác riêng biệt rõ ràng.
+- Dữ liệu lưu ví tiền bổ sung số dư vé hoa, tổng tích lũy quy đổi và chi tiêu vé hoa; trang phục thống kê riêng chi phí vé hoa, bảo lưu toàn bộ tiền vàng, hoạt động và dữ liệu trang phục ban đầu. Chỉ cần mua một lần là đổi trang phục miễn phí vĩnh viễn, bảo lưu số vé hoa còn dư.
+- 27 ảnh WebP nền trong suốt mới bao phủ toàn bộ động tác và hình ảnh minh họa đời sống; kích thước bản phát hành là 960×960, khoảng 6.45 MiB. Bản gốc PNG 1254×1254 được lưu giữ trong thư mục tài nguyên bảo trì, không nén vào gói tiện ích nhẹ.
+- Tải trước 8 động tác thường dùng, các động tác còn lại giải mã theo nhu cầu; sửa lỗi tràn chiều ngang do xoay thẻ trang phục. Khi mặc, bong bóng thoại của pet và Sổ tay đời sống chuyển sang tông màu tím nhạt.
+- Vượt qua 9 nhóm kiểm thử logic mới, 10 kịch bản trình duyệt cho trang phục (độ phân giải 1280/375/320), cùng 25 nhóm mô hình và 15 nhóm hồi quy trình duyệt hiện có. Cần cài đặt thực tế để kiểm tra trên Tavern và điện thoại thật, xem thêm COMPATIBILITY.md.
+- Giữ nguyên 6 mục sửa lỗi của v0.9.2; không khôi phục tự do di chuyển, không sửa đổi đồ họa mặc định, không tự ý gọi API trò chuyện.
 
-### v0.9.2 · Sáu hạng mục sửa lỗi (Bản cũ)
+### v0.9.2 · Sửa 6 nhóm vấn đề lớn (Bản cũ)
 
-- Đề xuất kiểm tu cố định dữ liệu bảng biểu tại thời điểm gửi yêu cầu; chuyển chat hủy yêu cầu cũ, sắp xếp lại dòng vẫn định vị theo `row_id` gốc, giá trị gốc thay đổi sẽ từ chối áp dụng.
-- Quá trình ghi/hoàn tác kiểm tra lại quyền sở hữu sau khi sao lưu; chuyển chat trong lúc đang thực thi hàng loạt sẽ dừng các mục tiếp theo; bản sao lưu bắt buộc phải thuộc về đoạn chat hiện hành; mỗi lần chỉ thực hiện một tác vụ kiểm tu.
-- Thao tác xóa dòng so sánh toàn bộ nội dung dòng gốc và tiêu đề cột, phiếu xóa dòng từ bản cũ thiếu giá trị gốc bắt buộc phải tạo lại; chuyển preset so sánh với preset gốc.
-- Vô hiệu hóa hoàn tác và hoàn tác cưỡng chế khi cơ sở dữ liệu đang bận, kiểm tra lại trạng thái ngay trước khi gọi hàm.
-- Sửa lỗi chỉ số no/sạch sẽ bị nhảy về giá trị cũ sau khi tắt; đóng băng chỉ số trong thời gian tắt, bật lại không tính bù phần sụt giảm lúc tắt.
-- Khi tắt quan sát trò chuyện, ẩn pet hoặc chuyển chat sẽ hủy bỏ bình luận đang chờ, loại bỏ phản hồi trễ; việc hủy bình luận không ảnh hưởng tới tin nhắn chat thông thường của người dùng.
-- Vượt qua 25 nhóm kiểm thử hồi quy thuần logic, 15 kịch bản trình duyệt cách ly (gồm PC/375px/320px) cùng kiểm tra cú pháp, danh mục và tham chiếu tư liệu. Kiểm thử sử dụng mô phỏng, không phát sinh chi phí API.
-- Nếu API công khai của cơ sở dữ liệu đã bắt đầu tiến trình bên trong, tiện ích không thể can thiệp hoàn tác giữa chừng; cơ chế bảo vệ bao quát thời điểm trước và giữa các lần gọi. Cơ chế lưu trữ bất đồng bộ thực tế của cơ sở dữ liệu vẫn cần kiểm tra độc lập.
-- Giữ nguyên vịt vàng trên đầu, cử động tại chỗ, kéo thả thủ công và nút dừng nhiệm vụ gốc; không khôi phục việc tự do đi lại.
+- Cố định bản chụp nhanh dữ liệu (snapshot) tại thời điểm phát yêu cầu kiểm tu; chuyển phòng chat sẽ hủy yêu cầu cũ; sắp xếp lại dòng trong cùng một đoạn chat được định vị bằng `row_id` gốc, giá trị ban đầu thay đổi sẽ từ chối áp dụng.
+- Ghi dữ liệu / Hoàn tác sẽ kiểm tra lại quyền sở hữu sau khi đợi sao lưu xong; chuyển phòng chat trong lúc đang chạy hàng loạt sẽ dừng các mục tiếp theo; bản sao lưu bắt buộc phải thuộc về đoạn chat của phiếu sửa đổi hiện tại; mỗi lần chỉ thực hiện một thao tác kiểm tu duy nhất.
+- Thao tác xóa dòng sẽ so sánh toàn bộ dòng gốc và tiêu đề bảng, các phiếu xóa dòng bản cũ không có giá trị gốc hoàn chỉnh sẽ cần phải tạo lại; chuyển đổi preset sẽ so sánh preset gốc.
+- Vô hiệu hóa tính năng hoàn tác và hoàn tác cưỡng chế khi cơ sở dữ liệu đang bận, đồng thời kiểm tra lại trước khi gọi thực tế.
+- Sửa lỗi chỉ số no / sạch nhảy về giá trị cũ sau khi tắt chỉ số nhu cầu; đóng băng trong thời gian tắt, bật lại sẽ không tính bù mức giảm trong thời gian đã tắt.
+- Tắt tính năng quan sát trò chuyện, ẩn pet màn hình, chuyển đoạn chat sẽ hủy bỏ bình luận và hủy các phản hồi cũ đến muộn; việc hủy bình luận không làm ảnh hưởng đến tin nhắn trò chuyện thông thường của người dùng.
+- Vượt qua 25 nhóm kiểm thử hồi quy logic thuần túy, 15 kịch bản trình duyệt cách ly (gồm desktop / chiều rộng 375 / 320) cùng các bước rà soát cú pháp, bảng kê và tham chiếu tài nguyên. Mọi yêu cầu trình duyệt và cơ sở dữ liệu đều là giả lập, không tốn phí gọi API. Chưa kiểm thử lại trên cơ sở dữ liệu thực tế hoặc toàn bộ các phiên bản Tavern, xem chi tiết tại COMPATIBILITY.md.
+- Nếu bên trong giao diện công khai của cơ sở dữ liệu đã bắt đầu một thao tác, tiện ích không thể đảm bảo việc rollback giữa chừng; cơ chế bảo vệ chỉ bao quát trước khi gọi và giữa các lần gọi. Chế độ lưu trữ bất đồng bộ bên trong cơ sở dữ liệu thật vẫn cần kiểm chứng riêng.
+- Vịt vàng trên đầu, tay trần, tương tác tại chỗ, kéo thả thủ công và nút dừng tác vụ gốc được giữ nguyên, không khôi phục tự do đi lại.
 
 ### v0.9.1 · Khung hệ thống trang phục (Bản cũ)
 
-- Sổ tay cuộc sống thêm tab **Trang phục**: Mua trang phục bằng tiền trong ví gia đình, tính sở hữu riêng theo từng nhân vật, có thể mặc hoặc đổi về mặc định tùy thích; thiếu tiền nút bấm sẽ khóa và ghi rõ số tiền còn thiếu; mua và thay đồ đều ghi vào sổ cái nhỏ và pet sẽ nói một câu tương ứng.
-- Khi thay trang phục, toàn bộ hình ảnh pet, avatar, ảnh minh họa sinh hoạt, thumbnail gọi món và hình đứng nhà pet đều đổi theo skin; các tư thế chưa vẽ skin sẽ dùng ảnh mặc định; màu hạt hiệu ứng có thể tùy biến theo skin; giao diện hỗ trợ thuộc tính `data-skin` để tùy biến CSS màu sắc.
-- Nhà pet thêm nút **Thay đồ cho cô ấy**, mở thẳng tab trang phục của nhân vật tương ứng.
-- Bản này chỉ dựng khung hệ thống, **chưa mở bán trang phục**: danh mục rỗng, mỗi nhân vật chỉ có trang phục mặc định gốc. Sau này chỉ cần thêm dữ liệu vào `skin-model.js` và bổ sung ảnh, không cần sửa đổi mã nguồn khác.
-- Lưu trữ: Trang phục sở hữu và đang mặc lưu trong trường `skins` của cài đặt tiện ích; trang phục đã mua nếu tạm thời bị ẩn khỏi danh mục vẫn không bị mất. Khi hạ cấp về v0.9.0 trường này sẽ bị bỏ qua, tiền và sổ cái vẫn nguyên vẹn.
-- Bổ sung 2 bộ thoại cho cả 3 nhân vật (khi mua được đồ mới, khi mặc đồ mới). Tổng kết trong sổ cái đổi từ "Tiền ăn" thành "Đã chi", vì tiền có thể dùng để mua trang phục.
-- Tệp mới: `skin-model.js` (danh mục skin, lưu trữ, mua và thay trang phục).
+- Sổ tay đời sống thêm trang **Trang phục**: Mua skin bằng tiền vàng trong ví chung của gia đình, phân quyền sở hữu riêng theo từng nhân vật, có thể mặc lên hoặc đổi lại đồ mặc định bất cứ lúc nào; thiếu tiền thì nút bấm sẽ bị khóa và ghi rõ còn thiếu bao nhiêu; cả mua lẫn đổi đều ghi vào sổ cái nhỏ và pet sẽ nói một câu tương ứng.
+- Sau khi mặc lên, bản thể pet màn hình, avatar, hình minh họa đời sống, ảnh thu nhỏ gọi món và ảnh đứng trong nhà pet đều chuyển sang dùng ảnh của trang phục mới; tư thế nào trang phục chưa vẽ sẽ dùng ảnh gốc của nhân vật; màu hạt hiệu ứng có thể bị ghi đè bởi trang phục; pet và Sổ tay đời sống có thuộc tính `data-skin` để tùy biến giao diện theo trang phục.
+- Nhà pet thêm nút **Thay trang phục cho cô ấy**, mở trực tiếp vào trang trang phục của nhân vật tương ứng.
+- Bản này chỉ dựng khung hệ thống, **chưa mở bán trang phục nào**: Danh mục trống, mỗi nhân vật chỉ có bộ trang phục mặc định ban đầu. Sau này chỉ cần thêm một dòng vào danh mục trong `skin-model.js` và đặt file ảnh vào là xong, không cần sửa code khác.
+- Lưu trữ: Trang phục đã sở hữu và đang mặc được lưu trong trường `skins` của cài đặt tiện ích; trang phục đã mua nhưng tạm thời không có trong danh mục sẽ không bị mất. Khi hạ cấp về v0.9.0 trường này sẽ bị bỏ qua, tiền vàng và sổ cái nhỏ vẫn giữ nguyên (bản ghi mua trang phục được lưu dưới dạng chi tiêu "Tiêu tiền").
+- Mỗi nhân vật trong ba nhân vật được bổ sung thêm hai bộ lời thoại (khi mua được trang phục, khi mặc trang phục). Tổng kết trang sổ cái đổi từ "Tiền mua cơm" thành "Đã chi", vì tiền còn có thể chi cho trang phục.
+- File mới: `skin-model.js` (danh mục skin, lưu trữ, mua và mặc trang phục).
 
 ### v0.9.0 · Chế độ kiểm tu và Quan sát trò chuyện (Bản cũ)
 
-- Bổ sung chế độ kiểm tu cơ sở dữ liệu chuyên sâu, tạo phiếu sửa đổi an toàn với khả năng hoàn tác toàn diện qua IndexedDB.
-- Bổ sung tính năng quan sát trò chuyện thông minh, phản hồi theo ngữ cảnh với tần suất tùy chỉnh và trạng thái cảm xúc tự nhiên.
-
 ### v0.8.0 · Ba pet màn hình, Nuôi dưỡng và Phím tắt mở bảng cơ sở dữ liệu (Bản cũ)
 
-- Thêm nhân vật Zero (26 ảnh) và Naidan (đọc trực tiếp ảnh gốc của cơ sở dữ liệu lúc chạy); gom dữ liệu nhân vật vào thư mục `characters/`, muốn thêm nhân vật mới chỉ cần bổ sung 1 file cấu hình và 1 thư mục tài nguyên.
-- Cập nhật tính năng Nhà pet màn hình: thiết kế dạng bách khoa toàn thư, hiệu ứng lật trang mượt mà khi đổi nhân vật, hỗ trợ đặt biệt danh, ghi nhật ký trưởng thành và các mẩu chuyện độc quyền.
-- Tích hợp hệ thống nuôi dưỡng: độ thân mật 5 cấp bậc, chỉ số no và sạch sẽ, các trạng thái cảm xúc, lời chào buổi sáng; hoàn toàn không có cơ chế phạt, có thể tắt bỏ chỉ số nhu cầu tùy thích.
-- Tiền lương và bữa ăn tính riêng cho từng nhân vật, ví tiền gia đình dùng chung; tương thích hoàn toàn với tệp lưu của v0.7.1.
-- Bổ sung hệ thống lời thoại ngoại tuyến phong phú theo tính cách, tâm trạng và độ thân mật; bong bóng thoại tách biệt câu thoại của pet và tiến độ thực tế của cơ sở dữ liệu; hỗ trợ bật/tắt linh hoạt.
-- Cuốn sổ nhỏ bổ sung nhóm phím tắt mở nhanh các bảng cơ sở dữ liệu; thông báo lỗi có thêm nút "Đi xem thử".
-- Giao diện thiết kế theo phong cách sổ bìa cứng cao cấp, bổ sung các mức hiệu ứng đồ họa; trên điện thoại hỗ trợ vuốt ngăn kéo từ dưới lên.
-- Tối ưu hóa dung lượng: dọn dẹp các khung hình chuyển động không dùng (giảm khoảng 21 MB), tổng dung lượng gói tiện ích giảm từ hơn 25 MB xuống còn khoảng 6.5 MB.
-- Bổ sung công cụ `tools/slice-pose-sheet.py`: Tách bảng pose ảnh thành các khung hình rời chuẩn xác.
-- Bảo toàn nguyên vẹn tài nguyên, đường dẫn, văn bản, tương tác, cơ chế đồng bộ chỉ đọc và nút dừng nhiệm vụ của Tiểu Erii; hạ cấp về 0.7.1 vẫn an toàn tuyệt đối.
+- Thêm nhân vật Zero (26 hình) và Nai Dan (đọc trực tiếp hình gốc của cơ sở dữ liệu đang chạy); gom chung tư liệu nhân vật vào `characters/`, muốn nhét thêm nv là chỉ cần bổ sung 1 file với 1 folder tài nguyên thôi.
+- Cập nhật thêm tính năng Nhà pet màn hình: Cái đống card nhân vật kiểu sổ tay bách khoa, anime lúc thay đứa khác, rồi thì tên gọi, ghi nhật ký, đến mấy cái mẩu chuyện bé xinh làm riêng cho nhân vật.
+- Nhét thêm tính năng Nuôi bé: Độ thân thiết 5 nấc, sạch với no, đủ trò vui buồn, chào buổi sáng, ân xá cho lính mới; mọi thứ chả có gì trừng phạt, thậm chí có quyền gạt bay cái chỉ số nhu cầu.
+- Lương bổng với cắm cơm là tách biệt theo từng nhân vật, nhưng kho tiền là cái thẻ Visa dùng chung; file save chơi tương thích tuốt 0.7.1 (tiến độ sinh hoạt của Tiểu Erii sẽ bám dính vào file cũ).
+- Có đống lời thoại offline theo tính cách, tâm trạng, và độ khăng khít cho đủ loại hầm bà lằng từ việc cơ sở dữ liệu, sờ đụng, hầu hạ, lêu lổng; cái bong bóng thoại cũng tách làm 2 nhịp thoại với tiến độ gốc; tắt được tuốt.
+- Cuốn sổ tay thêm cái phím tắt bay qua cơ sở dữ liệu với nút "Xem bảng"; error cũng lòi thêm "Chạy qua xem thử".
+- UI biến tấu mang đậm phong vị sổ da xịn xò, có level hiệu ứng bung xòe; UI lúc xem điện thoại thì kéo từ dưới mông lên cho nhanh.
+- Thanh lọc cả đám hình nhấp nhô chạy sang ngang chả xài (Bay mất tầm 21 MB), tóm lại extension gọt từ hơn 25 MB về cỡ 6.5 MB.
+- Nhét thêm con `tools/slice-pose-sheet.py`: Tách bảng biểu tạo dáng ra cái frame rời đúng chuẩn cho dự án.
+- Hình ảnh, đường dẫn, văn bản, tương tác, đồng bộ độc quyền đọc (read-only) cơ sở dữ liệu, phím dừng, mấy đoạn kể chuyện nhảm, lịch mần ăn đều bất di bất dịch của Tiểu Erii; Nếu cài đặt cũ chả lòi thêm thuộc tính gì thì ưu tiên xài của Tiểu Erii; `settings.chat` tiếp tục ghi, giật lùi về 0.7.1 không rớt một sợi lông.
 
-### v0.7.1 · Bốn hình minh họa lúc ăn và chuẩn hóa tên gọi (Bản cũ)
+### v0.7.1 · Bốn hình minh họa riêng lúc ăn với đổi tên nút (Bản cũ)
 
-- Bổ sung 4 ảnh nền WebP trong suốt chất lượng cao cho các món ăn: Pudding, Cơm nắm, Cơm cuộn trứng, Ramen (`eat-pudding`, `eat-riceball`, `eat-omurice`, `eat-ramen`).
-- Thẻ gọi món đổi thành biểu tượng tương ứng lúc ăn của Tiểu Erii; hình ảnh trong sổ tay và pet ngoài màn hình đồng bộ hoàn toàn.
-- Hình ảnh thiết kế tỉ mỉ giữ nguyên nét đặc trưng: vịt vàng trên đầu, kimono đỏ trắng; ảnh xuất bản nén chuẩn WebP 768×768.
-- Thống nhất tên gọi trên toàn bộ giao diện thành "Sổ tay cuộc sống".
-- Cơ chế tiền tệ, giá món ăn, thời gian ăn và dữ liệu lưu trữ giữ nguyên vẹn; bản ghi ăn dở cũ tự động ánh xạ sang ảnh mới theo Food ID.
+- Mấy cái Pudding / Cơm nắm / Cơm cuộn trứng / Ramen lấy luôn 4 bộ ảnh nền WebP xuyên thấu là eat-pudding / eat-riceball / eat-omurice / eat-ramen.
+- Card gọi món đổi thành mấy cái biểu tượng lúc ăn của Tiểu Erii; mua đồ ăn thì trong sổ tay với ngoài màn hình nó lên đồ giống y chang nhau, bỏ luôn bộ icon ăn cơm chung.
+- Hình mới cũng cố giữ đầu gắn vịt vàng, xòe hai tay, mắt đỏ tóc đỏ, mận áo kimono đỏ trắng; hình HD được lưu chui, hình up lên bị ép lại thành WebP 768x768.
+- Lối vào của sổ tay nhỏ, cài đặt extension, với trang Preview được nhét thành 1 tên "Sổ tay sinh hoạt".
+- Cơ chế tiền bạc, giá cả đồ ăn, thời lượng cạp, tiến độ nhặt gạch, dữ kiện có sẵn y xì đúc; bản record ăn dở cũ được đẩy qua ảnh mới nếu trùng cái Food ID.
 
-### v0.7.0 · Đi làm, Kiếm tiền và Dùng bữa (Bản cũ)
+### v0.7.0 · Đi làm, Bào tiền và Ăn cơm (Bản cũ)
 
-- Ra mắt tính năng Sổ tay cuộc sống: hệ thống làm thêm kiếm tiền, ăn uống hồi phục và sổ cái theo dõi thu chi.
-- Ba công việc: Tiệm sách, Tiệm tráng miệng, Tiệm hoa với thời gian 1 / 2 / 3 phút, nhận thưởng 10 / 18 / 25 xu vàng; làm xong phải nhận lương thủ công, không tự động nhận việc tiếp.
-- Bốn món ăn: Pudding, Cơm nắm, Cơm cuộn trứng, Ramen với giá 5 / 8 / 15 / 20 xu vàng, thời gian ăn 8 / 9 / 10 / 12 giây.
-- Tự động lưu trữ số dư ví, thời gian bắt đầu, tổng hoạt động và 20 bản ghi sổ cái gần nhất; làm mới trang hoặc mất mạng vẫn bảo lưu dữ liệu.
-- Tiền lương chưa nhận được giữ vĩnh viễn, không nhận trùng lặp; hủy công việc yêu cầu xác nhận lần hai.
-- Thêm 4 ảnh WebP trong suốt 768×768 tối ưu (chỉ 584 KB). Hoạt ảnh làm việc và ăn uống cử động nhẹ nhàng tại chỗ, không tự do đi lại.
-- Bổ sung thanh trạng thái sinh hoạt và bong bóng nhận lương khi hết giờ; ưu tiên hiển thị nhiệm vụ cơ sở dữ liệu khi có xung đột.
-- Toàn bộ tính năng chat, prompt, ký ức thủ công, cấu hình API từ v0.6.2 được giữ nguyên vẹn.
+- Mở thêm Sổ tay sinh hoạt với cái cửa sổ trơ chọi: cày tiền, bốc cái gì ngon xơi đi, quyển sổ bé hạt tiêu.
+- Mấy tiệm như Tiệm sách / Tráng miệng / Tiệm Hoa cắn tầm 1 / 2 / 3 phút, hốt 10 / 18 / 25 tiền vàng; Xong là nghỉ chứ đếch cho tự động mần lại.
+- Tương ứng Pudding / Cơm nắm / Cơm cuộn trứng / Ramen ngốn hết 5 / 8 / 15 / 20 tiền vàng, ăn uống trôi qua 8 / 9 / 10 / 12 giây.
+- Ghi sổ ví, giờ giấc nổ máy, tổng lượng hoạt động với 20 lượt bốc mần ăn; F5 hoặc sập mạng cũng hồi lại như cũ.
+- Lương chưa rinh chả bao giờ rụng đi đâu, chung một tab đố mà ấn trùng hay thồn gấp đôi; Hủy kèo bốc phét là phải dằn mặt xác nhận.
+- 4 bức WebP trong vắt 768x768 nhét thêm có 584 KB; Ảnh cũ nằm yên. Gõ phím / Hốc cơm ngồi ỳ một xó, múa may chầm chậm, chả đi bộ rong ruổi nữa.
+- Lòi thêm thanh trạng thái sinh hoạt với cái bong bóng hốt bạc lúc hết giờ; cơ sở dữ liệu bay ra cướp cờ thì chịu lùi bước, tab sinh hoạt cũng có thể diệt trừ lệnh cũ gốc.
+- Mấy cái chức năng múa phím, chỉnh tone, nhớ dài, nháp văn, API với đổi model hồi v0.6.2 vẫn yên vị.
 
 ### v0.6.2 · Sổ tay trò chuyện và Thao tác tin nhắn (Bản cũ)
 
-- Nâng cấp khung chat: avatar, mốc thời gian, dải phân cách ngày, trạng thái kết nối và nhóm cài đặt chuyên biệt.
-- Bổ sung tính năng sao chép tin nhắn, xuất tệp `.txt`, tạo lại câu trả lời và sửa tin nhắn cũ gửi lại.
-- Lưu trữ bản nháp thông thường và bản nháp đang chỉnh sửa tự động.
-- Ba phong cách trò chuyện: Tự nhiên / Bầu bạn ngắn gọn / Chi tiết, cùng ô ký ức thủ công tối đa 2.000 ký tự.
-- Giữ nguyên vị trí cuộn khi xem tin nhắn cũ, có nút quay lại tin nhắn mới nhất; trên PC kéo chỉnh kích thước linh hoạt, trên điện thoại tự co giãn tránh bàn phím ảo.
-- Đọc tốt dữ liệu chat từ phiên bản cũ; khóa API lưu độc lập và an toàn.
+- Băm lại khung chat: Ava, giờ giấc, dải phân cách ngày, cái tag rỗng, status treo mạng, với tab settings nhóm.
+- Mọc thêm chức năng Copy từng cái, hốt cả mảng TXT, xé nháp rep lại cái đuôi, hốt văn cũ nắn lại rớt ra chém tiếp.
+- Làm mới hay sửa đè chỉ nuốt lời lúc API phím pass, tạch hay hủy là câu cũ vẫn ngồi im.
+- Nuốt nháp thường với nháp đang nặn; hủy nặn là khè lại ngay mớ văn thô chưa nổ.
+- Ba style: Tự nhiên / Cụt lủn / Nhây nhớt, cộng thêm cái kho ghi chú tống tay mắc xê được 2000 chữ.
+- Coi đồ cổ vẫn neo đúng tọa độ cày, thêm nút "Chạy vèo xuống coi câu mới"; PC xòe to hẹp nhỏ được, Mobile tự dãn khung text lên lấp bàn phím.
+- Ăn rơ cả đống log thời xưa rít, chả bốc phét thời điểm tin nhắn; Mã key vẫn tống ly thân với mớ chat và setting.
+- Cái list Model, API đơn / cục bộ, chức năng cắt cổ lệnh cũ cơ sở dữ liệu, với mấy trò bẹo má tương tác pet y như cũ; tính năng tản bộ, làm cu li chả ló dạng.
 
 ### v0.6.1 · Danh sách mô hình và Kết nối thực cho bản xem trước (Bản cũ)
 
-- Mục API riêng có thêm tính năng "Lấy danh sách mô hình", hỗ trợ chọn nhanh hoặc tự nhập tay.
-- Hiển thị rõ trạng thái tải danh sách, báo lỗi chi tiết hoặc hủy tác vụ; đổi URL/Khóa sẽ tự làm mới tiến trình.
-- Bản xem trước độc lập hỗ trợ kết nối API thực tế, loại bỏ hoàn toàn dữ liệu giả lập.
-- Chế độ demo chỉ hiển thị khi có tham số `demo=1` rõ ràng.
+- Mục cấu hình API riêng có thêm tính năng "Lấy danh sách mô hình", giúp lựa chọn các mô hình hiện có, nhưng vẫn có thể tự gõ tên.
+- Hiện lên lúc húp data, chửi thề vì fail, với bấm Hủy; bẻ tay cắm IP/Key khác, ngắt tab, hay tắt đi là nó xả kèo request, đỡ phải lo chèn đồ cũ.
+- Quăng mẻ lấy model xuyên qua cái cổng Model Native Tavern, lôi hẳn Key riêng đang ghi, chứ chả thèm móc ngoéo gì vô connection của Tavern.
+- Bản Local Preview đẻ ra là chỏ thẳng tới API query model, móc connection check test, nhào vô chat thiệt; chôn cái trò sample fix cứng, nhái fake connection thành công.
+- Muốn vọc cái Demo mode là phải khai rõ ràng, băm log ra xài riêng biệt.
+- Check hàng 2 chiều câu mới nứt đọt với dây leo; Lỗi API nổ chữ đỏ, chả nặn thêm cái câu bù khú cho qua chuyện.
+- Cái tab Chat độc lập, tắt bật status chi tiết task với cái nút trảm lệnh cơ sở dữ liệu đời v0.6.0 thì vẫn để y.
 
 ### v0.6.0 · Trò chuyện độc lập và Nội dung công việc thực tế (Bản cũ)
 
-- Thêm tab trò chuyện độc lập với bộ prompt định hình nhân vật Erii, hỗ trợ tùy chỉnh danh xưng và mối quan hệ.
-- Hỗ trợ kế thừa API mặc định của Tavern hoặc cấu hình API riêng tương thích OpenAI.
-- Cho phép dừng phản hồi, gửi lại tin nhắn, kiểm tra kết nối và xóa lịch sử trò chuyện an toàn.
-- Cung cấp tùy chọn hiển thị nội dung nhiệm vụ cơ sở dữ liệu: Bản tóm tắt hoặc Bản đầy đủ.
-- Nút dừng nhiệm vụ cơ sở dữ liệu hoạt động độc lập ngay trong khung chat.
+- Ợ thêm cái tab độc lập để Chat, nhét sẵn đống Prompt của con ẻm Erii, có quyền set xưng hô/tình trạng 2 đứa.
+- Trả về cái Completion Chat / Text của Tavern xài mặc định; Hoặc tay bo nhồi API tương thích OpenAI, Model, với Key vô.
+- API rời rạc cũng xài nút cắt phăng Request riêng; Ném lệnh, thử lửa lại, check IP, diệt chat log, sao lưu lịch sử có cả.
+- Mobile Layout vẹo vọ nắn theo cái view hiển thị, PC kéo cái Header bứng đi cũng ngon. Cái vụ Save API Key lên Device thì quăng cho Options.
+- Cái Setting Extension đẻ thêm mục coi Status gọn gọn hay ném mẹ nó ra; Full là ôm luôn tên cũ, giữ cái ngắt dòng của `detail`, content cuộn thả phanh, nút diệt Task còn nhạy.
+- Màn Chat quất luôn cái nút chặt Task gốc của cơ sở dữ liệu, Chat Stop với Task Stop chia ra hai đường.
+- Cái trò rớt vịt vàng trên đầu, bê kéo tự do, mép là chòi, vỗ lạch bạch vô em nó, câu chuyện ru ngủ 30 giây rải rác tuốt; Cái trò tự bay bộ là chả thấy mọc lên nữa.
 
-### v0.5.14 · Tự động đổi mẩu chuyện mỗi 30 giây (Bản cũ)
+### v0.5.14 · Câu chuyện nhỏ tự động đổi bài mỗi 30 giây (Bản cũ)
 
-- Tự động đổi câu chuyện nhỏ mỗi 30 giây sau khi mở bong bóng; áp dụng cho cả mở thủ công và tự động lúc rảnh rỗi.
-- Luân phiên 12 mẩu chuyện, đảm bảo không lặp lại trong một vòng.
-- Tự động tạm dừng đếm ngược khi di chuột vào hoặc thao tác bàn phím; trên điện thoại chạm để giữ trạng thái đọc.
-- Bấm "Đổi câu khác" để chuyển ngay lập tức; đóng bong bóng hoặc có nhiệm vụ cơ sở dữ liệu sẽ dừng chu kỳ.
+- Sau khi mở bóng thoại câu chuyện, cứ 30 giây nó nhảy sang truyện mới; tự mở hay máy rảnh ném ra thì đều dùng được.
+- Quất loạn cái mớ 12 bài, nhưng 1 vòng cấm lặp, 2 vòng cạnh nhau cấm trùng liên hoàn.
+- Để chuột hơ hơ, gõ gõ thì nó ngừng, lấy đi thì đếm lùi tiếp; Mobile thì chọc 1 phát là ghim lại.
+- Bấm "Đổi câu khác" là trảm ngay luôn; Diệt tab, Task cơ sở dữ liệu lao vào, bung cuốn sổ là bóp cổ cái loop này.
+- Cái chức năng 5 phút quăng Story, Toggles của nó với cái trò sửa cái nút băm Task hồi v0.5.13 vẫn chạy bền.
 
 ### v0.5.13 · Sửa lỗi dừng nhiệm vụ và ẩn cuốn sổ nhỏ (Bản cũ)
 
-- Nút dừng liên kết trực tiếp với tiến trình nhiệm vụ hiện hành của cơ sở dữ liệu, loại bỏ nút dừng không hợp lệ.
-- Kiểm tra lại nguồn dữ liệu trước khi thực thi lệnh dừng; nếu nhiệm vụ đã thay đổi sẽ yêu cầu xác nhận.
-- Cảnh báo và lỗi của cơ sở dữ liệu được hiển thị ưu tiên với thời gian giữ lâu hơn.
-- Khi tắt hiển thị pet, cài đặt vẫn cho phép mở cuốn sổ nhỏ và cổng cơ sở dữ liệu; các nút giải trí tạm ẩn.
+- Nút dừng nối thẳng vào cái đuôi Task hiện tại của cơ sở dữ liệu, khỏi có vụ Task dỏm ngồi lên đầu.
+- Rờ chuột vô cái là nó ngó lại nguồn với Task; Nguồn đứt, Task biến hình thì khỏi xài lệnh mốc, nó hỏi dò xem có hốt cái mới không.
+- Cơ sở dữ liệu cập nhật cái tính năng thao tác tắt chứ chả thay đổi chữ thì nó cũng nhặt luôn thao tác mới.
+- Lệnh vỡ mồm thì ghim tầm 8 giây, F5 là điếng người chả đè lên kịp; Lỗi/Báo động của cơ sở dữ liệu ngoi lên trên cùng.
+- Tắt "Hiển thị Erii" thì mớ Setting vẫn gọi được cuốn sổ nháp với Cổng cơ sở dữ liệu; nhưng mất bóng thì đồ chơi giải trí tạch hết.
+- Cái chức năng ngó mép, bê kéo, vỗ vỗ, kể truyện của v0.5.12 giữ sạch; Đéo có cái tính năng lội bộ đâu.
 
-### v0.5.12 · Kéo sát mép để ló đầu ngay (Bản cũ)
+### v0.5.12 · Kéo vào sát mép là ló đầu ra ngay (Bản cũ)
 
-- Loại bỏ thời gian chờ 6 giây: kéo pet sát mép và thả tay là nhân vật sẽ thu mình và ló đầu ra ngay lập tức.
-- Giữ nguyên trạng thái khi rê chuột qua, không tự động hủy tư thế.
-- Tương tác nhấp chuột, kéo thả hoặc nhận nhiệm vụ sẽ khôi phục tư thế đứng thông thường; sau đó nếu vẫn ở sát mép sẽ tiếp tục ló đầu.
+- Bẻ cổ cái đếm lùi 6 giây chờ ngó chỏm; Ném ẻm tới mép buông tay là nó lút thụt chỏm ra.
+- Trỏ chuột vứt vưởng ngay cạnh thì cứ ngó thôi, chả thèm đuổi đi.
+- Nếu ở cái thế mép sẵn rồi thì nó khè luôn, khỏi chờ lết kéo đè lưu.
+- Đang dính mép thì dẹp cái khung chờ êm mông, chuyển dáng lướt qua cái chéo 0.16 giây thôi.
+- Kéo tay vẫn báo là xách cổ, Đụng chạm, chợp mắt, ngó nháp, nhét Task thì nổ trước; Hết việc rớt vô góc thì lại ló đầu ra.
+- Vẫn nén 12 mẩu truyện gốc với nút băm Task của cơ sở dữ liệu; Đếch thèm trả lại tính năng tự thân vận động.
 
-### v0.5.11 · Tư thế ló đầu ở mép và mẩu chuyện nhỏ (Bản cũ)
+### v0.5.11 · Ló đầu ở mép và câu chuyện nhỏ chữa lành (Bản cũ)
 
-- Chuyển nút đóng × lên góc trên bên phải của cuốn sổ nhỏ, tách xa nút mở cơ sở dữ liệu để tránh bấm nhầm.
-- Bổ sung các ảnh WebP trong suốt 512×512 cho cử động ló đầu ở mép màn hình (trái, phải, dưới).
-- Tinh chỉnh tư thế nhân vật gọn gàng, một tay bám mép tự nhiên.
-- Tích hợp 12 mẩu chuyện ngắn tự động kích hoạt sau 5 phút rảnh rỗi.
+- Gim mẹ cái X vào góc trên bên phải của cuốn nháp, kéo xa cái nút chui cổng Cơ sở dữ liệu cho khỏi chọt mù mắt.
+- Cho lên sóng 3 cái WebP trong vắt 512x512 ló đầu mép (trái, phải, đít); Cái mép trên sài lại hình thò đầu xuôi bình thường.
+- Sửa lại cái hình cho anh em la ó: Cái xác nó chui gọn, ló đầu với 1 tay bám mép (tay lột trần), gỡ cái mớ hai tay chèn một ống lồng với cái dáng quặt quẹo.
+- Kéo tống vào góc, 6 giây sau nó thò mặt; Mèo, đụng tay, ấn mút, kéo cổ hoặc dính Task là trở mặt lại.
+- Dồn 12 mẩu chuyện tự kỉ sáng tác; 5 phút không chọc ngoáy là tự nổ, bật tay trên nháp cũng ok.
+- Nhồi nút qua bài, tắt, lơ chuột ngừng, bàn phím chặn, mobile bấm để đọc.
+- Task với Log của cơ sở dữ liệu là nổ trước Story, nút cắt Task vẫn trỏ vào rễ của Cơ sở dữ liệu.
+- Mọc 2 cái công tắc rời rạc; Hình hỏng thì quay về pose cũ.
+- Hành vi không tự bay, bật sổ chuột phải, rúc Tavern 1.14.0 - 1.19.0 từ v0.5.8 vẫn thế.
 
-### v0.5.10 · Căn chỉnh nút bấm trong cuốn sổ nhỏ (Bản cũ)
+### v0.5.10 · Căn chỉnh lại các nút trong cuốn sổ nhỏ (Bản cũ)
 
-- Nút "Tặng cô ấy một bông hoa" đưa vào nhóm nút giải trí, đồng bộ font chữ, viền và trạng thái vô hiệu hóa.
-- Tối ưu hóa bố cục các nút tương tác để tiết kiệm không gian hiển thị.
+- "Tặng cô ấy một bông hoa" chui vô ổ đồ chơi tiêu khiển, từ Font, Viền, Back Color với Mode Disabled đều sài chuẩn chung.
+- Quất cái List "Vươn vai -> Ngủ hờ -> Quăng cái hoa", hốt dọn đi để khỏi nới dòng tốn chỗ.
+- Dịch cái X đóng nháp nhích sang góc xíu xiu, nới cái nút "Chui cổng gốc" xa thêm tí ti cho bớt vồ nhầm.
+- Lối mở chuột phải, cổng vào database hồi v0.5.9 vẫn để mốc.
 
-### v0.5.9 · Phím tắt chuột phải và Lối vào cơ sở dữ liệu (Bản cũ)
+### v0.5.9 · Bật tắt bằng chuột phải và cổng vào cơ sở dữ liệu (Bản cũ)
 
-- Nhấp chuột phải vào pet trên PC để mở hoặc thu gọn nhanh cuốn sổ nhỏ.
-- Tích hợp nút mở trực tiếp cơ sở dữ liệu ngay trên đầu cuốn sổ nhỏ.
-- Hỗ trợ tương thích cả menu V2 `acu-v2-menu-item` và bản cũ `shujuku_v120-menu-item`.
+- Mút chuột phải (PC) vô cái mặt con nhóc: Phát 1 bung sổ, Phát 2 xếp luôn, Đỡ phải lết tay tìm con X.
+- Thổi bay hai nút "Quăng về ổ mặc định", "Đảo bên mông" khỏi cuốn nháp, vì đéo ai dùng tốn space.
+- Kẹp cái "Vô cái lõi cơ sở dữ liệu" thẳng trên đầu sổ nháp, cắm vào cái Extension của cơ sở dữ liệu mà quẩy.
+- Ráp tuốt cái menu V2 `acu-v2-menu-item` với cái đồ cũ `shujuku_v120-menu-item`; Ngó đéo ra mặt cơ sở dữ liệu thì nó chửi mở lên trước.
+- Kèo v0.5.8 bảo trì chuẩn: Nhỏ kia đéo tự thèm nhấc mông, tao bê thì nó mới lết.
 
-### v0.5.8 · Hoàn tác tính năng tự do di chuyển
+### v0.5.8 · Hoàn tác việc tự động di chuyển
 
-- Loại bỏ hoàn toàn các khung hình chạy bộ qua lại.
-- Xóa bỏ logic tự động đi dạo quanh màn hình.
-- Pet chỉ di chuyển vị trí khi người dùng chủ động kéo thả chuột/tay.
-- Tối ưu hóa dung lượng gói cài đặt, loại bỏ các tệp hình ảnh và mã nguồn dư thừa.
+- Đập bay vụ lôi hình chạy qua lại.
+- Xóa sổ bộ logic dạo phố, nhích mông hóng mát.
+- Bé kia đéo thèm chạy hay dời mông tự xưng, chỉ lúc hất tay tao kéo thì nó chịu đi.
+- Giữ cái thói thở khò, chạm vô, ấn lún, xách cổ, móc đồng bộ với trảm Task.
+- Hốt sạch rác rưởi của cái mớ hình lộn xộn, cho file setup nó mỏng đi tí với trừ logic thừa.
 
-### v0.5.7 · Sửa lỗi cập nhật tọa độ khi đi dạo (Bản cũ)
+### v0.5.7 · Sửa lỗi cập nhật vị trí lúc đi dạo (Bản cũ)
 
-- Khắc phục hiện tượng lệch tọa độ thực tế khi nhân vật di chuyển hoạt ảnh.
+- Sửa cái phốt "Dáng thì đang lượn, mà cái hồn vẫn cắm neo yên 1 góc".
+- Mỗi nhịp ném toạ độ đàng hoàng, ẻo lượn mạn trái mạn phải xíu xíu rồi bò về mốc đầu.
 
-*(Lưu ý: Tính năng chủ động đi bộ đã được gỡ bỏ hoàn toàn từ v0.5.8).*
+**Tính năng chủ động đi bộ của bản này đã bị ăn rìu từ bản v0.5.8.**
 
 ### v0.5.6 · Ổn định thời gian hành vi chủ động (Bản cũ)
 
-- Tinh chỉnh khoảng thời gian chờ giữa các hành động ngẫu nhiên để tránh hiện tượng lag giật.
+- Delay mốc đục khoét chập choạng cỡ 12 - 20 giây cho đỡ dính phốt lag.
+- Hốt bớt cái mớ rác của cái timer lách cách đi dạo lúc vứt màn ngâm dấm.
 
-*(Lưu ý: Tính năng chủ động đi bộ đã được gỡ bỏ hoàn toàn từ v0.5.8).*
+**Tính năng chủ động đi bộ của bản này đã bị ăn rìu từ bản v0.5.8.**
 
-### v0.5.5 · Đi bộ chậm rãi (Bản cũ)
+### v0.5.5 · Đi bộ qua lại chầm chậm (Bản cũ)
 
-- Thử nghiệm tính năng di chuyển từng bước nhỏ dựa trên nhịp bước của Naidan.
+- Dựa dẫm vô cái vụ múa chân của con Nai Dan, cứ vắt 260 củ ms nó ếch 8 pixel.
+- Gần tới target rồi thì quay xe đi nhùi cái đường vừa dẫm.
+- Hết dạo thì đóng nguyên chỗ cũ, méo Save cái gốc tào lao.
+- Nút Setting Option chà lại rực sáng cho đỡ lòi mắt.
 
-*(Lưu ý: Tính năng chủ động đi bộ đã được gỡ bỏ hoàn toàn từ v0.5.8).*
+**Tính năng chủ động đi bộ của bản này đã bị ăn rìu từ bản v0.5.8.**
 
-### v0.5.4 · Hoạt ảnh chạy bộ trái phải (Bản cũ)
+### v0.5.4 · Ảnh động chạy bộ trái phải (Bản cũ)
 
-- Bổ sung 2 bộ khung hình chạy bộ 8 frame sang hai bên.
+- Câu vô 2 set chạy bộ 8 khung quẩy qua trái phải.
+- Xách vịt lên đầu ẻm như cũ.
+- Lết xong thả lại điểm xuất, méo Save vào kho.
+- Khung chạy ập vô chung cái lưới Transparent, Trục tâm, Baseline chuẩn đế.
 
-*(Lưu ý: Hoạt ảnh chạy bộ đã được gỡ bỏ hoàn toàn từ v0.5.8).*
+**Tính năng hoạt ảnh chạy bộ của bản này đã bị ăn rìu từ bản v0.5.8.**
 
-### v0.5.3 · Tương tác rảnh rỗi và Tự do di chuyển (Bản cũ)
+### v0.5.3 · Tương tác chủ động và Tự động di chuyển (Bản cũ)
 
-- Tự động thực hiện các cử động uống trà, đọc sách, gấp giấy, ôm vịt vàng khi rảnh rỗi.
-- Thử nghiệm tự động đổi vị trí trong phạm vi an toàn.
+- Ế mốc ra thì tự lấy trà húp, đọc cuốn, múc giấy, bó vịt vàng, xoay mình, dòm nhòm, hất tay.
+- Rảnh quá bứng cả cái mông tự xục 1 nhát trong mốc an toàn.
+- Dính đống Task, bị xách cổ, lôi sổ nháp thì cạch đéo thèm nhích.
 
-*(Lưu ý: Tính năng tự di chuyển đã gỡ bỏ từ v0.5.8; các tương tác rảnh rỗi vẫn được giữ lại).*
+**Tính năng chủ động di chuyển của bản này đã bị ăn rìu từ bản v0.5.8. Đống vẹo tương tác nhàn rỗi thì tha.**
 
-### v0.5.2 · Nút dừng trên bong bóng nhiệm vụ (Bản cũ)
+### v0.5.2 · Thêm nút dừng vào bong bóng nhiệm vụ
 
-- Hiển thị nút dừng trực tiếp trên bong bóng khi cơ sở dữ liệu đang chạy tác vụ hỗ trợ ngắt quãng.
+- Lúc đẩy truyện với cày bảng, nếu Task cơ sở dữ liệu ngầm cho cắt, bong bóng nổ nút Dừng.
+- Nhấp mỏ vô là quăng luồng lệnh dẹp của cơ sở dữ liệu gốc.
+- Đéo có khả năng ngắt thì đéo mọc nút lụi (fake).
 
-### v0.5.1 · Nhấn giữ trên điện thoại để mở cuốn sổ (Bản cũ)
+### v0.5.1 · Nhấn giữ trên điện thoại để mở cuốn sổ nhỏ
 
-- Hỗ trợ thao tác nhấn giữ khoảng 1.4 giây trên màn hình cảm ứng để mở cuốn sổ nhỏ thay cho chuột phải.
+- Trên mobile bói không ra cái Right-Click, thì đè mẹ nó 1.4s sổ nháp phọt lên.
+- Đục ngắn, ấn mù, lút hờ mút dãn, lôi cổ cắt mẹ nó ra rành mạch khỏi tạch thành bật Tab nháp.
 
-### v0.5.0 · Tương thích các phiên bản SillyTavern (Bản cũ)
+### v0.5.0 · Khả năng tương thích Tavern bản cũ
 
-- Tương thích với dải phiên bản SillyTavern 1.14.0–1.19.0.
-- Tự động chờ API khởi tạo của Tavern trên các bản cũ, bổ sung cơ chế Single Instance chống tạo trùng lặp nhân vật.
+- Hướng vào họng súng của SillyTavern 1.14.0–1.19.0.
+- Lướt mượt với mấy đồ xưa đéo có Call-back Start, nốc luôn cả Call-back New-Life.
+- Buff cái Shield né trò khởi tạo trùng cho khỏi mọc nấm hai bé con.
+- Hình chưa Decode lòi thì éo múc con pet cũ của Cơ sở dữ liệu; Hình tạch thì ném cái đồ cổ ra.
+- Trét thêm đống Kill, Cleans, Back Cache Refresh của Trình duyệt vô luồng Hồi sinh.
 
-### v0.4.1 · Kéo dài thời gian chợp mắt và mượt hóa hoạt ảnh (Bản cũ)
+### v0.4.1 · Kéo dài thời gian chợp mắt và nối ảnh động
 
-- Nhấn giữ nửa giây để pet chợp mắt, thả tay ra sẽ tiếp tục nghỉ ngơi khoảng 12 giây mà không bị gián đoạn.
-- Tinh chỉnh trọng tâm (pivot) giúp các cử động nhấc lên, đặt xuống và thở nhịp nhàng hơn.
+- Ấn tầm nửa giây cho bé ngủ, nhả ra cho cày thêm 12 sọc ngủ khì.
+- Khì khì, hất tay, vỗ mỏ thì đéo cho mấy trò linh tinh khác ngắt.
+- Thó mấy chiêu xòe thế, nẩy người, thở chập chùng với nhịp điệu của Nai Dan ráp vào nhịp vung tay, nổ bong bóng, tụt dốc, bó vịt với ngủ ngày.
+- Bốc lên tụt xuống êm ái cái Trọng tâm (Pivot), bóp cổ cái phốt quay vòng mòng.
 
-### v0.4.0 · Tương tác nhấp liên tục và nhấn giữ (Bản cũ)
+### v0.4.0 · Nhấp, liên tục nhấp và nhấn giữ tương tác
 
-- Phân biệt rõ các thao tác: nhấp 1 lần, nhấp đúp, nhấp 3 lần và combo 6 lần.
-- Đổi tên tiêu đề thành "Cuốn sổ nhỏ của Tiểu Erii", bỏ số phiên bản trên thanh tiêu đề.
+- 1 búa thì Hất tay, 2 búa nhồi nhẹ con vịt, 3 búa xúm lấy sổ trốn một tí, 6 nhát nổ chùm pháo hoa (Combination).
+- Đè sâu chui vào nấc Ngủ; Rút rê, quăng mẩu tin, Click thì dọn rành mạch đéo nhầm lộn cuối rê là búa phọt.
+- Cuốn nháp cạo mả đổi thành "Cuốn sổ nhỏ của Tiểu Erii", cạo sạch đuôi version lố lăng trên tít.
+- Menu Task còn giữ được cả quả Click chuột phải, mớ Icon Setting với xài Key nấp.
 
-### v0.3.1 · Tối ưu hiệu năng kéo thả và nâng cấp đồ họa (Bản cũ)
+### v0.3.1 · Giảm gánh nặng kéo, Dọn dẹp đồ cổ với múa khớp
 
-- Tối ưu hóa logic cập nhật tọa độ khi kéo thả, tránh nghẽn layout trình duyệt.
-- Tách riêng nhịp thở sinh học, cử động mượt mà không giật cục.
-- Nâng cấp toàn bộ hình ảnh lên chuẩn WebP 384×384 sắc nét, nền trong suốt hoàn hảo.
+- Lúc kéo, Update mỗi toạ độ với ẻo người thôi, đéo moi họng đo Viewport Size hay nhả thêm chữ Task dỏm.
+- Nhả bay cục bóng chat với sổ nháp khỏi chân con ẻm, lướt êm méo mấp mô giật bọ xít.
+- Hệ Hô hấp chạy riêng con server; Quệt ảnh, nẩy bốc ẻm, rơi uỵch đít nhồi sụn mượt òm.
+- Trị mấy phốt vụn vặt: Bơm record, húp nước chè, oằn lưng, xách lủng lẳng, chạm sàn, thè lè tay, thò mặt ngơ (Bị lem nham rác).
+- Bắt phải xài trọn bộ 384x384 WebP cực trong; Dáng kẹp ẻm vẫn nốc giữ mớ mỏ con vịt vàng.
 
-### v0.3.0 · Kéo thả, Ghi nhớ vị trí và Bộ sưu tập hình ảnh (Bản cũ)
+### v0.3.0 · Kéo, Nhớ vị trí và Bộ sưu tập Full HD
 
-- Cho phép kéo thả tự do, giới hạn cạnh màn hình, tự động tránh khung nhập liệu khi xoay màn hình hoặc bật bàn phím ảo.
-- Bổ sung các tư thế nhấc lên, tiếp đất, hỏi han và bám mép.
+- Lấy sức rinh con chuột với vọc chạm màn, cản mép ranh giới, dí vào góc, lưu mộc toạ.
+- Bị dồn khung, xoay màn nhào ngang xấp ngửa hay lòi Bàn phím thì nó né cục Input.
+- Rớt 4 chiêu: Xách cổ, Chân tiếp địa, Hỏi mào, Dòm bám ngó; Cửa nháp thêm chọt dáng.
+- Nạp sẵn ảnh hông cần la hét, Decode mượt nẩy phím, vả rách nhịp trễ Database Sync cùi.
+- Cho vào đời dàn WebP khủng 384x384 (16 pic), đéo mượn cái đống Pixel 192 chích ép nén bẩn.
 
-### v0.2.0 · Phiên bản Tiện ích độc lập (Bản cũ)
+### v0.2.0 · Phiên bản Tiện ích độc lập
 
-- Tách thành tiện ích mở rộng độc lập cho SillyTavern.
-- Lắng nghe trạng thái cơ sở dữ liệu qua Observer để hiển thị giao diện, không can thiệp logic nội bộ của cơ sở dữ liệu.
+- Lôi đầu từ cái động "Đục khoét DB" rẽ thành cái mác SillyTavern Extension chảnh.
+- Hút chực dữ liệu DB qua cái ống nhòm (Observer) để nẩy bọt UI.
+- Éo Cop DB, đéo độ sọ DB Business, Khỏi xưng API lôi thôi.
+- Tọng Option Setting, Mốc toạ độ, Cửa sổ nháp với Action Task Basic mồi vô.
 
-### v0.1.1 · Bản thử nghiệm Windows (Đã loại bỏ)
+### v0.1.1 · Bản thử nghiệm tương thích Windows (Đã bị vứt)
 
-- Bản adapter thử nghiệm ban đầu dành cho Windows, đã lỗi thời và không còn sử dụng.
+- Cục Adapter bẩn mót làm cho Windows ngày trước, dính rễ đống cắm sạc cùi bắp.
+- Rác rồi, đừng lấy râu ông nọ cắm cằm bà kia (Đéo phải cục trên Git).
 
-### v0.1.0 · Bản thử nghiệm đầu tiên (Đã loại bỏ)
+### v0.1.0 · Bản thử nghiệm đầu tiên (Đã bị vứt)
 
-- Phiên bản sơ khai thử nghiệm can thiệp giao diện cơ sở dữ liệu cũ, đã bị loại bỏ để thay thế bằng kiến trúc độc lập.
-
-## Nâng cấp tệp lưu và Khôi phục bản cũ
-
-Phiên bản v0.9.3 sử dụng `life.schema = 3`, bổ sung thêm các trường `tickets`, `ticketsEarned`, `ticketsSpent` vào ví tiền cũ; hệ thống trang phục dùng `skins.schema = 2`, bổ sung `spentTickets`. Tệp lưu cũ sẽ được tự động nhận diện và nâng cấp, số vé hoa mới mặc định là 0, tuyệt đối không làm mất xu vàng, hoạt động, nhật ký chat, độ thân mật hay các trang phục đã sở hữu.
-
-Các phiên bản cũ không nhận diện được trường vé hoa, **nếu hạ cấp về bản cũ rồi lưu lại dữ liệu, bạn có thể bị mất số dư vé hoa mới, số liệu tích lũy và lịch sử đổi vé**. Hãy sao lưu dữ liệu tài khoản Tavern trước khi có ý định hạ cấp. Thao tác chỉ tắt tiện ích hoặc đổi về trang phục mặc định sẽ không làm mất số dư hay trang phục.
+- Test mẹo cục Patch Interface gốc DB xưa rích.
+- Buộc đục chui đường tắt DB, sau thọt bay nhường ghế cho Standalone.
+- Repo với Note mớ này đéo chơi nữa.
 
 ## Cài đặt và Khôi phục
 
-Sau khi tắt hoặc gỡ bỏ tiện ích này, bạn chỉ cần làm mới lại trang Tavern là pet màn hình gốc của cơ sở dữ liệu sẽ tự động hiển thị lại bình thường. Bản thân cơ sở dữ liệu không cần phải rollback hay khôi phục gì cả; người dùng tuyệt đối không nên dùng các bản vá thử nghiệm cũ đè lên giao diện cơ sở dữ liệu.
+Trong phần cài đặt tiện ích của Tavern, bạn có thể điều chỉnh:
 
-## Phạm vi tương thích và Ranh giới kiểm thử
+## Nâng cấp dữ liệu lưu và Quay về bản cũ
 
-- Phiên bản SillyTavern hỗ trợ: **1.14.0–1.19.0**.
-- 1.14.0–1.16.0: Điểm đầu vào tự động chờ API thiết lập của Tavern sẵn sàng.
-- 1.17.0–1.19.0: Đăng ký thông qua vòng đời chính thức của Tavern, tích hợp cơ chế bảo vệ Single Instance.
-- Chi tiết kỹ thuật bổ sung có thể tham khảo tại [`COMPATIBILITY.md`](COMPATIBILITY.md).
+v0.9.3 sử dụng `life.schema = 3`, bổ sung thêm các trường `tickets`, `ticketsEarned`, `ticketsSpent` vào ví tiền cũ; hệ thống trang phục sử dụng `skins.schema = 2`, bổ sung thêm `spentTickets`. Dữ liệu lưu cũ sẽ tự động đọc, số vé hoa mới mặc định là 0, không làm trống tiền vàng, hoạt động, nhật ký trò chuyện, nuôi dưỡng hay các bộ trang phục đã sở hữu.
 
-Các bài kiểm tra tự động và kịch bản cách ly trên trình duyệt chỉ xác thực mã nguồn, danh mục tệp và bố cục giao diện mô phỏng, không thể thay thế hoàn toàn việc kiểm thử thực tế trên hệ thống Tavern của bạn. Bạn nên tự kiểm tra trên máy các mục sau:
+Bản cũ không nhận diện được các trường vé hoa này, **nếu quay về bản cũ rồi lưu lại lần nữa, có thể sẽ mất số dư vé hoa mới, giá trị tích lũy cũng như nhật ký quy đổi**. Vui lòng sao lưu dữ liệu tài khoản Tavern trước khi có ý định quay về bản cũ. Nếu chỉ tắt tiện ích này hoặc đổi lại trang phục mặc định thì sẽ không làm mất số dư và trang phục.
 
-- Sau khi cập nhật kho lưu trữ, kiểm tra xem Tavern đã thực sự tải đúng phiên bản `0.9.3` chưa;
-- Phiên bản cơ sở dữ liệu của bạn có còn cung cấp cấu hình giao diện tương thích không;
-- Thử nghiệm thực tế các tác vụ thúc đẩy cốt truyện, điền bảng, kiểm tra lỗi và dừng nhiệm vụ;
-- Khi dùng mô hình AI thật, hãy xem xét kỹ lưỡng tính hợp lý của Phiếu chỉnh sửa do chế độ kiểm tu đề xuất trước khi tích chọn áp dụng;
-- Cảm giác vuốt chạm và độ nảy tránh bàn phím ảo trên điện thoại thực tế.
+## Cài đặt và khôi phục
+
+Sau khi tắt hoặc gỡ tiện ích này, chỉ cần làm mới trang Tavern là nó sẽ hồi sinh lại cái pet màn hình gốc của cơ sở dữ liệu. Bản thân cơ sở dữ liệu đéo cần phải Rollback đi đâu cả, mà bạn cũng đừng có lôi cái đống thử nghiệm thời cổ đại mà rải lên cái mặt cổng của cơ sở dữ liệu nghen.
+
+## Phạm vi tương thích và Ranh giới xác nhận
+
+- Mục tiêu SillyTavern: **1.14.0–1.19.0**.
+- 1.14.0–1.16.0: Cổng nạp tự ôm cây đợi API setup của Tavern phọt nảy.
+- 1.17.0–1.19.0: Gắn vô Call-back vòng đời do Tavern bố thí, có chèn luôn khiên Single Instance.
+- Banh mắt dòm thêm chi tiết tại [`COMPATIBILITY.md`](COMPATIBILITY.md).
+
+Vụ Test file với cái trò cách ly check của Trình duyệt chỉ xì ra được mấy cái mã nguồn, list, nhái task với lợp khung bố cục ra sao thôi, méo thể thay bạn tự bê cái Tavern thật ra mà Test được. Bạn vẫn phải tự thọt tay test trên máy bạn mấy cái này:
+
+- Sau khi Update trên GitHub, ngó coi cái Tavern của bạn đã nhai đúng cái Ver `0.9.0` chưa;
+- Cái cơ sở dữ liệu của bạn có còn ban phát cái State giao diện khớp rơ không;
+- Thúc cốt truyện thật, Nhồi bảng biểu thật, Dính Error, Trảm Task;
+- Lúc nạp Model thiệt, cái Danh sách sửa đổi mà màn hình Bảo trì nó rặn ra có xài được không (Trước lúc vọc là phải căng mắt đọc kỹ từng mục rồi hẵng vung tay tích chọn);
+- Cái cảm giác sờ nắn chọc chạm trên Mobile thiệt với lúc cái bàn phím ập lên.
 
 ## Câu hỏi thường gặp
 
-### Tại sao trang phục mới không thể mặc ngay?
+### Tại sao trang phục mới không thể mặc trực tiếp?
 
-Trang phục mới cần phải mua. Hãy vào Sổ tay cuộc sống → Trang phục, đổi xu vàng sang vé hoa rồi nhấn mua; từ 0 vé hoa bạn cần tích lũy 258 xu vàng (tương đương 10.320 vé hoa). Xu vàng trong ví không thanh toán trực tiếp cho bộ đồ này mà bắt buộc phải đổi sang vé hoa trước. Mua xong nhấn "Mặc vào".
+Trang phục cần phải mua. Vào **Sổ tay đời sống → Trang phục**, đổi vé hoa rồi bấm mua; tích lũy từ 0 vé hoa sẽ cần 258 tiền vàng. Tiền vàng trong ví không thể dùng để thanh toán trực tiếp bộ trang phục này, bắt buộc phải đổi sang vé hoa thủ công trước. Sau khi mua xong thì bấm **Mặc lên**.
 
 ### Sau khi cập nhật không thấy trang phục, hoặc đổi trang phục bị thiếu ảnh?
 
-Hãy xác nhận danh sách tiện ích của Tavern đã tải đúng bản `0.9.3`, đồng thời kiểm tra kho lưu trữ GitHub của bạn đã tải lên đầy đủ 27 tệp WebP trong thư mục `assets/skins/erii-purple-night/` chưa. Nếu chỉ cập nhật file code hay README mà thiếu ảnh thì hệ thống không thể tự tạo ảnh. Sau khi tải lên đủ ảnh, hãy cập nhật lại tiện ích và dùng <kbd>Ctrl</kbd>+<kbd>F5</kbd> để làm mới bộ nhớ cache trình duyệt.
+Hãy xác nhận Tavern đã tải đúng phiên bản 0.9.3, và kiểm tra xem kho lưu trữ đã tải lên đầy đủ 27 tệp WebP trong thư mục `assets/skins/erii-purple-night/` chưa. Nếu chỉ cập nhật README, manifest hoặc mã nguồn thì hệ thống không thể tự bù tài nguyên ảnh. Sau khi tải lên đủ thì cập nhật tiện ích và làm mới trang (F5).
 
-### Sau khi cập nhật Tiểu Erii vẫn tự ý đi lại?
+### Sau khi cập nhật Tiểu Erii vẫn tự ý di chuyển?
 
-Hãy kiểm tra số phiên bản trong danh sách tiện ích Tavern. Nếu chưa phải `0.9.3`, chứng tỏ Tavern vẫn đang chạy phiên bản cũ trong bộ nhớ cache; hãy nhấn cập nhật tiện ích và làm mới trang. Logic tự động di chuyển chỉ có ở bản `v0.5.7` trở về trước và đã bị loại bỏ hoàn toàn từ bản `v0.5.8`.
+Trước tiên hãy kiểm tra phiên bản trong danh sách tiện ích của Tavern. Nếu chưa phải bản `0.9.3` mới nhất, nghĩa là Tavern vẫn đang chạy gói cài đặt cũ; hãy nhấn cập nhật lại và làm mới trang. Phiên bản `v0.5.7` trở về trước mới có logic tự ý di chuyển, từ `v0.5.8` trở đi tính năng này đã được gỡ bỏ hoàn toàn.
 
-### Pet hiển thị ngoài màn hình nhưng báo chưa kết nối Cơ sở dữ liệu?
+### Pet lù lù ra đó, mà lại réo chưa kết nối Cơ sở dữ liệu
 
-Hãy kiểm tra xem tiện ích cơ sở dữ liệu gốc đã được bật và đang chạy chưa. Khuyến nghị bạn nên để pet Naidan gốc và bong bóng nhiệm vụ chạy bình thường trong cài đặt cơ sở dữ liệu, sau đó dùng mục ẩn trong cài đặt của tiện ích này để che đi. Nếu cấu trúc DOM của cơ sở dữ liệu bị thay đổi, pet sẽ không thể bắt được dữ liệu và sẽ thông báo không tương thích chứ không làm giả trạng thái kết nối.
+Xác định coi cái cơ sở dữ liệu gốc đang gào mồm chạy chưa, có bị thằng nào dán cái đống nạp Experimental lụi thế vô không. Khuyên chân thành là cứ để kệ cha cái con Nai Dan gốc với bong bóng Task chạy ẩn trong nền, chỉ cần ấn che màn trong phần Option Extension là ngon. Cấu trúc UI DB mà nát, là bé Pet ngậm họng hoặc ném cảnh báo không khớp cọc, đéo thèm giả lụi cái trò "Connected".
 
-### Tại sao không thể chuyển sang nhân vật Naidan?
+### Tại sao không đổi được sang Nai Dan
 
-Hình ảnh của Naidan được đọc trực tiếp từ bộ nhớ của cơ sở dữ liệu đang hoạt động. Vui lòng kiểm tra xem cơ sở dữ liệu đã mở chưa và pet đi kèm của nó có bị tắt hoàn toàn không; nếu không lấy được tài nguyên ảnh, nhà pet sẽ ghi rõ nguyên nhân và giữ nguyên nhân vật hiện tại.
+Cái đống hình chóp của Nai Dan là nhặt từ mồm cơ sở dữ liệu đang thè ra chạy. Vui lòng coi lại xem cơ sở dữ liệu đã mở chưa, và cái đám Pet mặc định của nó có bị ngắt rốn không; Éo vớt được mớ hình thì trong Căn nhà sẽ thét lớn nguyên do, và pet màn hình sẽ lấy cái nhân vật gốc ra đứng bồi tiếp.
 
-### Lỡ áp dụng nhầm đề xuất trong lúc kiểm tu thì xử lý thế nào?
+### Lỡ tay sửa sai trong lúc bảo trì thì sao
 
-Bạn chỉ cần bấm nút **Hoàn tác** ngay phía dưới phiếu chỉnh sửa đó, bảng biểu sẽ được khôi phục về trạng thái ban đầu trước khi sửa. Dữ liệu sao lưu được lưu trong IndexedDB của trình duyệt nên làm mới trang (<kbd>F5</kbd>) vẫn có thể hoàn tác tốt. Nếu cơ sở dữ liệu vô tình có cập nhật mới đè lên sau đó, hệ thống sẽ cảnh báo trước khi bạn nhấn hoàn tác.
+Thì lấy cái nút **Hoàn tác** chọt dô ngay dưới danh sách sửa lỗi đó, bảng tính sẽ hồi quang phản chiếu về lúc chưa lụi. Load lại trang F5 vẫn cứ ok (Bản Backup ghim dưới Cache Browser); mà lỡ Browser nó hãm không cho ghi Local, hệ thống sẽ khều tay kêu gào "Tải cái bản Backup dằn túi đi". Trước khi bấm rút lại, nếu cái bảng tự nhiên nó lại trồi thêm khúc mới (do DB đè), thì hệ thống sẽ xọt mồm nói cho mầy nghe.
 
-### Tại sao tính năng Quan sát trò chuyện không thấy bình luận?
+### Sao thằng Quan sát trò chuyện câm mồm quài thế
 
-Hãy kiểm tra xem trong **Cài đặt tiện ích → Quan sát & Kiểm tu** đã bật tính năng này chưa, và số tầng trò chuyện mới sinh ra đã đạt mốc tần suất quy định chưa. Mỗi lần bình luận cách nhau tối thiểu 60 giây, và nếu cơ sở dữ liệu đang bận điền bảng pet sẽ lùi lại thêm một nhịp. Bạn có thể xem mốc thời gian bình luận gần nhất hoặc nhật ký lỗi trong phần cài đặt.
+Xem kĩ coi cài đặt Tiện ích đã nẩy **Quan sát trò chuyện** lên chưa, mớ chat mới nứt ra từ lúc mở đã vỡ họng đúng cái chỉ số gáy bài (Comment Frequency) chưa; Mỗi lần quăng nùi bình luận phải rớt nhau 60 giây, DB mà mót điền bảng là ẻm nín thêm 1 phát rưỡi. Ngó vô setting Option **Quan sát & Bảo trì**, nó vạch rõ thời gian đợt hót gần nhất hoặc lỗi sập nguồn chưa phọt.
 
-### Điện thoại không có chuột phải thì mở Cuốn sổ nhỏ thế nào?
+### Mobile không có Click Chuột phải, mở Cuốn sổ nhiệm vụ bằng niềm tin à
 
-Chạm nhẹ là tương tác, nhấn giữ khoảng nửa giây là chợp mắt, nhấn giữ lâu khoảng 1.4 giây là cuốn sổ nhỏ sẽ mở lên. Ngoài ra, bạn luôn có thể mở cuốn sổ nhỏ bằng nút bấm trong phần cài đặt tiện ích mở rộng của Tavern.
+Nhấn tí là vỗ ve, dí cái 0.5s là ngáy khì, dặm sâu tầm 1.4s là banh cái Nháp ra liền; Hoặc rặn ra đường Setting Extension múc "Xem cuốn nháp nhiệm vụ" là có lối thoát.
 
-## Tài nguyên & Giấy phép bản quyền
+## Tài nguyên & Cấp phép
 
-Tạo hình của Tiểu Erii được tham khảo từ [Cardwright 绘梨衣桌宠素材](https://github.com/1798547983tt/Cardwright/tree/359019715afc60813384964b023a09c6dd6ed326/assets/pets/erii). Các hình ảnh hành động được tạo bằng ImageGen và tinh chỉnh cục bộ; các ảnh hành động gốc là tệp WebP trong suốt không nén suy hao, các ảnh minh họa sinh hoạt từ v0.7.0 là WebP chất lượng cao có kênh trong suốt. Tài nguyên mỹ thuật là nội dung đồng nhân phi thương mại dựa trên tác phẩm "Long Tộc", tuân thủ điều kiện ghi công phi thương mại trong [`assets/NOTICE.md`](assets/NOTICE.md); mã nguồn chương trình sử dụng giấy phép MIT, giấy phép MIT không bao gồm tài nguyên mỹ thuật. Lễ phục Dạ tím được thiết kế theo hình ảnh trang phục Erii Tsukuyomi trong "Long Tộc" do người dùng cung cấp và sinh qua ImageGen; chi tiết giấy phép xem tại [`Hướng dẫn tư liệu trang phục`](assets/skins/erii-purple-night/NOTICE.md).
+Kiểu dáng Tiểu Erii đúc theo nguồn [Cardwright 绘梨衣桌宠素材](https://github.com/1798547983tt/Cardwright/tree/359019715afc60813384964b023a09c6dd6ed326/assets/pets/erii). Các hình ảnh động do ImageGen tạo và chỉnh sửa cục bộ, các khung hình động gốc là WebP nền trong suốt không nén, hình ảnh đời sống v0.7.0 là WebP nén chất lượng cao có kênh alpha. Toàn bộ tài nguyên mỹ thuật là nội dung đồng nhân không chính thức của "Long Tộc", sử dụng theo điều khoản phi thương mại và ghi nhận nguồn trong [`assets/NOTICE.md`](assets/NOTICE.md); mã nguồn sử dụng giấy phép MIT, MIT không bao gồm tài nguyên mỹ thuật. Trang phục Lễ Phục Dạ Tím tham khảo từ ảnh Tsukuyomi Erii do người dùng cung cấp và được tạo bởi ImageGen; chi tiết và phạm vi sử dụng xem tại [`Hướng dẫn tài nguyên skin`](assets/skins/erii-purple-night/NOTICE.md).
 
-Hình ảnh hành động của Zero được tạo bằng ImageGen dựa trên hai bảng tư thế, nâng độ phân giải qua mô hình Real-ESRGAN (Anime) và cắt bằng công cụ `tools/slice-pose-sheet.py`, điều khoản cấp phép xem tại [`assets/zero/NOTICE.md`](assets/zero/NOTICE.md). Hình ảnh của Naidan thuộc bản quyền của tiện ích cơ sở dữ liệu, tiện ích này chỉ đọc ảnh đã tải lúc runtime, không sao chép và không phân phối lại.
+Hình ảnh hành động của Zero do ImageGen tạo dựa theo 2 bảng tư thế, phóng to bằng Real-ESRGAN (mô hình anime) và cắt bằng `tools/slice-pose-sheet.py`, điều khoản cấp phép xem tại [`assets/zero/NOTICE.md`](assets/zero/NOTICE.md). Hình ảnh của Naidan thuộc bản quyền của tiện ích cơ sở dữ liệu, tiện ích này chỉ đọc ảnh đã nạp lúc runtime, không sao chép và không phân phối lại.
 
 Tham khảo cơ sở dữ liệu: [AlbusKen/shujuku](https://github.com/AlbusKen/shujuku).
