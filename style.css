@@ -108,7 +108,38 @@
 
 /* ---------- Dùng chung: Giấy, biểu tượng, nút bấm, thang đo ---------- */
 .pet-icon { display: inline-grid; place-items: center; width: 1.15em; height: 1.15em; flex: 0 0 auto; line-height: 0; }
-.pet-icon svg { width: 100%; height: 100%; }
+.pet-icon svg { display: block; width: 100%; height: 100%; fill: currentColor !important; }
+.pet-icon svg:not([fill="none"]) path:not([fill="none"]),
+.pet-icon svg:not([fill="none"]) circle:not([fill="none"]),
+.pet-icon svg:not([fill="none"]) rect:not([fill="none"]),
+.pet-icon svg:not([fill="none"]) polygon:not([fill="none"]) {
+  fill: currentColor !important;
+}
+.pet-icon svg[fill="none"],
+.pet-icon svg[stroke]:not([stroke="none"]) {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+/* Định kích thước và màu cho SVG trong các nút điều khiển & thao tác */
+.erii-companion__close svg,
+.erii-chat__close svg,
+.erii-chat__expand svg,
+.erii-life__close svg,
+.erii-house__close svg,
+.erii-companion__story-close svg,
+.erii-house__rename svg {
+  display: block; width: 1em; height: 1em; fill: currentColor;
+}
+.erii-companion__close svg[fill="none"],
+.erii-chat__close svg[fill="none"],
+.erii-chat__expand svg[fill="none"],
+.erii-life__close svg[fill="none"],
+.erii-house__close svg[fill="none"],
+.erii-companion__story-close svg[fill="none"],
+.erii-house__rename svg[fill="none"] {
+  fill: none; stroke: currentColor;
+}
 .pet-grip { display: none; }
 .pet-meter { display: grid; grid-template-columns: auto auto 1fr 2.2em; align-items: center; gap: 6px; font-size: 11px; color: var(--pet-muted); }
 .pet-meter .pet-icon { color: var(--pet-accent); width: 15px; height: 15px; }
@@ -155,7 +186,7 @@
 .erii-nb__hearts, .erii-house__hearts { display: inline-flex; gap: 2px; color: var(--pet-line); }
 .erii-nb__hearts .pet-icon { width: 13px; height: 13px; }
 .erii-nb__hearts .is-on, .erii-house__hearts .is-on { color: var(--pet-accent); }
-.erii-nb__hearts .is-on svg, .erii-house__hearts .is-on svg { fill: currentColor; }
+.erii-nb__hearts .pet-icon svg, .erii-house__hearts .pet-icon svg { fill: currentColor; }
 .erii-nb__mood, .erii-house__mood-stamp {
   flex: 0 0 auto; display: grid; place-items: center; min-width: 42px; height: 42px; padding: 0 4px; border-radius: 50%;
   font: 600 12px/1 var(--pet-hand); color: var(--pet-accent); transform: rotate(9deg);
@@ -584,7 +615,8 @@
 .erii-life .erii-life__person[data-ready="true"] .erii-life__person-state { color: var(--pet-gold-lo); font-weight: 700; }
 .erii-life__wallet { flex: 0 0 auto; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 0 18px; padding: 10px 14px; border-radius: 14px; color: var(--pet-muted);
   background: linear-gradient(135deg, color-mix(in srgb, var(--pet-gold-hi) 45%, var(--pet-card)), var(--pet-card)); border: 1px solid color-mix(in srgb, var(--pet-gold) 45%, var(--pet-line)); }
-.erii-life__coin { width: 22px; height: 22px; color: var(--pet-gold-lo); }
+.erii-life__coin { display: inline-grid; place-items: center; width: 22px; height: 22px; color: var(--pet-gold-lo); fill: currentColor; flex-shrink: 0; }
+.erii-life__coin svg { display: block; width: 100%; height: 100%; fill: currentColor !important; }
 .erii-life__wallet strong { color: var(--pet-gold-lo); font: italic 700 30px/1.05 var(--pet-serif); margin-left: auto; }
 .erii-life__wallet > span:last-child { flex-basis: 100%; color: var(--pet-muted); font-size: 11px; }
 .erii-life__ticket-balance { flex-basis: 100%; display: flex; align-items: baseline; gap: 7px; color: var(--pet-accent-ink); font-size: 12px; }
