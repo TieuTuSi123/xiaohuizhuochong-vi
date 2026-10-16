@@ -921,12 +921,10 @@ body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !im
   .erii-companion *, .erii-chat, .erii-chat *, .erii-life, .erii-life *, .erii-house, .erii-house *, .erii-mall, .erii-mall *, .pet-sheet { animation: none !important; transition: none !important; }
 }
 /* =========================================================================
-   TỐI ƯU THANH CUỘN (SCROLLBAR) CHO MÁY TÍNH & ĐIỆN THOẠI
-   Thanh cuộn thanh mảnh (6px), bo tròn mềm mại, ẩn mũi tên thô kệch,
-   màu sắc hòa hợp tuyệt đối với chất liệu giấy sổ tay và theme nhân vật.
+   GÓI TỐI ƯU TOÀN DIỆN (SỬA THANH KÉO + TĂNG TỐC CHO CẢ LAPTOP & ĐIỆN THOẠI)
    ========================================================================= */
 
-/* Hỗ trợ chuẩn CSS hiện đại (Firefox & Chrome mới) */
+/* --- 1. SỬA LỖI THANH KÉO: Nhỏ gọn (6px), bo tròn, bỏ nút mũi tên xám thô --- */
 .erii-companion, .erii-companion *,
 .erii-chat, .erii-chat *,
 .erii-life, .erii-life *,
@@ -936,7 +934,6 @@ body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !im
   scrollbar-color: color-mix(in srgb, var(--pet-muted) 35%, transparent) transparent !important;
 }
 
-/* Tùy chỉnh thanh cuộn cho WebKit / Chromium (Chrome, Edge, SillyTavern trên Windows) */
 .erii-companion::-webkit-scrollbar, .erii-companion *::-webkit-scrollbar,
 .erii-chat::-webkit-scrollbar, .erii-chat *::-webkit-scrollbar,
 .erii-life::-webkit-scrollbar, .erii-life *::-webkit-scrollbar,
@@ -946,7 +943,6 @@ body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !im
   height: 6px !important;
 }
 
-/* Ẩn hoàn toàn 2 nút mũi tên thô kệch ở 2 đầu thanh cuộn */
 .erii-companion::-webkit-scrollbar-button, .erii-companion *::-webkit-scrollbar-button,
 .erii-chat::-webkit-scrollbar-button, .erii-chat *::-webkit-scrollbar-button,
 .erii-life::-webkit-scrollbar-button, .erii-life *::-webkit-scrollbar-button,
@@ -957,7 +953,6 @@ body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !im
   height: 0 !important;
 }
 
-/* Rãnh trượt trong suốt, không che nền giấy */
 .erii-companion::-webkit-scrollbar-track, .erii-companion *::-webkit-scrollbar-track,
 .erii-chat::-webkit-scrollbar-track, .erii-chat *::-webkit-scrollbar-track,
 .erii-life::-webkit-scrollbar-track, .erii-life *::-webkit-scrollbar-track,
@@ -966,7 +961,6 @@ body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !im
   background: transparent !important;
 }
 
-/* Con trượt thanh mảnh, bo tròn viền mềm mại */
 .erii-companion::-webkit-scrollbar-thumb, .erii-companion *::-webkit-scrollbar-thumb,
 .erii-chat::-webkit-scrollbar-thumb, .erii-chat *::-webkit-scrollbar-thumb,
 .erii-life::-webkit-scrollbar-thumb, .erii-life *::-webkit-scrollbar-thumb,
@@ -976,7 +970,6 @@ body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !im
   border-radius: 99px !important;
 }
 
-/* Đổi màu thanh cuộn khi rê chuột vào */
 .erii-companion::-webkit-scrollbar-thumb:hover, .erii-companion *::-webkit-scrollbar-thumb:hover,
 .erii-chat::-webkit-scrollbar-thumb:hover, .erii-chat *::-webkit-scrollbar-thumb:hover,
 .erii-life::-webkit-scrollbar-thumb:hover, .erii-life *::-webkit-scrollbar-thumb:hover,
@@ -985,26 +978,40 @@ body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !im
   background: color-mix(in srgb, var(--pet-accent) 60%, transparent) !important;
 }
 
-/* Góc giao nhau giữa cuộn dọc và cuộn ngang */
-.erii-companion::-webkit-scrollbar-corner, .erii-companion *::-webkit-scrollbar-corner,
-.erii-chat::-webkit-scrollbar-corner, .erii-chat *::-webkit-scrollbar-corner,
-.erii-life::-webkit-scrollbar-corner, .erii-life *::-webkit-scrollbar-corner,
-.erii-house::-webkit-scrollbar-corner, .erii-house *::-webkit-scrollbar-corner,
-.erii-mall::-webkit-scrollbar-corner, .erii-mall *::-webkit-scrollbar-corner {
-  background: transparent !important;
+/* Sửa lỗi tự bung thanh cuộn ở màn hình chào mừng cửa sổ chat */
+.erii-chat__welcome { padding: 16px 6px 10px !important; }
+.erii-chat__welcome img { width: 90px !important; height: 90px !important; margin: 0 auto 8px !important; }
+.erii-chat__starters { margin-top: 12px !important; }
+
+
+/* --- 2. TĂNG TỐC ĐỒ HỌA: Tắt bộ lọc SVG nặng, nhẹ máy cả trên Laptop lẫn Mobile --- */
+.erii-companion__notebook,
+.erii-chat,
+.erii-life,
+.erii-house,
+.erii-mall,
+.erii-repair__ticket,
+.erii-chat__log,
+.erii-companion__story {
+  background-image: none !important;
 }
 
-/* =========================================================================
-   SỬA LỖI TỰ HIỆN THANH CUỘN KHI CHƯA CÓ TIN NHẮN CHAT (ẢNH 3)
-   ========================================================================= */
-.erii-chat__welcome {
-  padding: 16px 6px 10px !important;
+/* Đơn giản hóa đổ bóng phức tạp: Giúp kéo thả cửa sổ & pet không bị khựng */
+.erii-companion__notebook,
+.erii-chat,
+.erii-life,
+.erii-house,
+.erii-mall {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.22) !important;
 }
-.erii-chat__welcome img {
-  width: 90px !important;
-  height: 90px !important;
-  margin: 0 auto 8px !important;
-}
-.erii-chat__starters {
-  margin-top: 12px !important;
+
+/* Tăng tốc phần cứng GPU cho thao tác di chuyển chuột và trượt ngăn kéo */
+.erii-companion,
+.erii-chat,
+.erii-life,
+.erii-house,
+.erii-mall,
+.pet-sheet {
+  will-change: transform;
+  transform: translateZ(0);
 }
