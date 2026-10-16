@@ -1,4 +1,4 @@
-// Bộ icon nét mảnh, nét vẽ (stroke) đồng nhất để tránh việc emoji hiển thị không nhất quán trên các nền tảng khác nhau. Chỉ chèn SVG cố định trong file này.
+// 一套细线图标，统一描边，避免各平台 emoji 渲染不一致。只插入本文件里的固定 SVG。
 const PATHS = {
   heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
   bowl: '<path d="M4 11h16a8 8 0 0 1-16 0z"/><path d="M8.5 7.5c0-1 1-1.4 1-2.4M12 7.5c0-1 1-1.4 1-2.4M15.5 7.5c0-1 1-1.4 1-2.4"/>',
@@ -23,6 +23,7 @@ const PATHS = {
   stop: '<rect x="7" y="7" width="10" height="10" rx="1.5"/>',
   look: '<circle cx="11" cy="11" r="6"/><path d="M15.5 15.5L20 20"/>',
   shirt: '<path d="M9 4.5L4.5 7l1.6 3 1.9-.9V19h8v-9.9l1.9.9 1.6-3L15 4.5a3 3 0 0 1-6 0z"/>',
+  shop: '<path d="M4 10h16l-2-5H6zM5 10v10h14V10M9 20v-6h6v6M4 10v2a2 2 0 0 0 4 0v-2M8 10v2a2 2 0 0 0 4 0v-2M12 10v2a2 2 0 0 0 4 0v-2M16 10v2a2 2 0 0 0 4 0v-2"/>',
 };
 
 export function icon(doc, name, className = '') {

@@ -1,5 +1,10 @@
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
+export function normalizeSize(value) {
+  const size=Number(value);
+  return clamp(Math.round((Number.isFinite(size) && size>0 ? size : 88)/4)*4,56,112);
+}
+
 // Positions are ratios within the usable viewport, so rotation/keyboard changes stay safe.
 export function readBounds(host, doc, preferredSize) {
   const view = host.visualViewport;
@@ -7,7 +12,7 @@ export function readBounds(host, doc, preferredSize) {
   const height = view?.height || host.innerHeight;
   const left = view?.offsetLeft || 0;
   const top = view?.offsetTop || 0;
-  const size = Math.min(width <= 640 ? Math.min(preferredSize, 72) : preferredSize, width - 16, height - 16);
+  const size = Math.max(1,Math.min(normalizeSize(preferredSize),width-16,height-16));
   const send = doc.getElementById('send_form')?.getBoundingClientRect();
   const inputVisible = send && send.width > 0 && send.height > 0 && send.bottom > top && send.top < top + height;
   const bottom = inputVisible && send.bottom >= top + height - 4 ? Math.max(top + size + 16, send.top - 12) : top + height - 12;

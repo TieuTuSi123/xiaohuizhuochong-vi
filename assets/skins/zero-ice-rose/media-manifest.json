@@ -1,0 +1,411 @@
+{
+  "schemaVersion": 1,
+  "cardId": "zero-ice-rose",
+  "assets": [
+    {
+      "id": "idle",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "idle.webp"
+      },
+      "bytes": 209892,
+      "sha256": "9f14b54331380dc4afff7b2db55ba7c832874571b45dbc0bc43988b341644974",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "received",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "received.webp"
+      },
+      "bytes": 212682,
+      "sha256": "743884d30363b02801c00ba94f4c9e5f4cd66133e1611606efd4fc7ce14f3449",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "writing",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "writing.webp"
+      },
+      "bytes": 213328,
+      "sha256": "ce6de9e09d343f65a8ef230fef45be72fb32b2fc382da17288875fdbb3c15932",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "complete",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "complete.webp"
+      },
+      "bytes": 213298,
+      "sha256": "3282f51e80a3e179749a14b6c6ea5f39a4ed81d03216764c23e723447d9fabf2",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "error",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "error.webp"
+      },
+      "bytes": 208910,
+      "sha256": "3bfc5173af65cdfc3a02e9a499146f78c04b906d22da903d84afc4fa81da04b3",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "tea",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "tea.webp"
+      },
+      "bytes": 211232,
+      "sha256": "3e79bb2325c1f4cd66170e0598c56d47e95fe7bc2868c5988c25d2f5e320a133",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "reading",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "reading.webp"
+      },
+      "bytes": 209532,
+      "sha256": "13b6d9f5198ad82eabf4c4e77149d7f0d3c3622a281f1d641df179c05dd6c0f4",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "origami",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "origami.webp"
+      },
+      "bytes": 220570,
+      "sha256": "85158a3697d52858c8c48fbfbc3890d36d45d82318f59acbd94ebc9a62e4be5e",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "duck",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "duck.webp"
+      },
+      "bytes": 223540,
+      "sha256": "039a52f73aff469e3317c739a6dc7b88a2f0a5dcc79e71c848f982467222d49c",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "stretch",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "stretch.webp"
+      },
+      "bytes": 219232,
+      "sha256": "ec71220a30e551ae56c8f36b178bea2f69f05583a97a018c9b8661bb9eac6686",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "rest",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "rest.webp"
+      },
+      "bytes": 219412,
+      "sha256": "0de8e2315e7d40d966a8377637b20803a3761323bd6945e6e39e590d37ec523a",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "gift",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "gift.webp"
+      },
+      "bytes": 213486,
+      "sha256": "8ee3352c496a732cf75077156645ecf684329178a6a160f12acb4b808904ad97",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "lifted",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "lifted.webp"
+      },
+      "bytes": 218052,
+      "sha256": "d38ea5cd2c83c110c376c251ebb941f8a667506d07bb5885a171586d0e24968f",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "land",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "land.webp"
+      },
+      "bytes": 225548,
+      "sha256": "787a8f8c3513a3198870586c17b43a14eb79b2f11655837d6f6b7576c7450d57",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "wave",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "wave.webp"
+      },
+      "bytes": 228348,
+      "sha256": "e1345d8852139d8c37423d2f80c43367dc1e663a2c63871edbaa8310c999e1e6",
+      "width": 960,
+      "height": 960,
+      "preload": "eager",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "peek",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "peek.webp"
+      },
+      "bytes": 201602,
+      "sha256": "91a5a486e70472a1cbaa12eca4a5d53348949f88cef31041bdce9b0d53a53de6",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "edge-left",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "edge-left.webp"
+      },
+      "bytes": 160070,
+      "sha256": "4a64ee45dca94c2f4320e622bcc21625b605245bf9857865f163f138f3923733",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "edge-right",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "edge-right.webp"
+      },
+      "bytes": 173416,
+      "sha256": "882d2bf0f61ccc8e845119090ea7d045deec4ac2dd9fa3fcee823fda8b172e3a",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "edge-bottom",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "edge-bottom.webp"
+      },
+      "bytes": 211496,
+      "sha256": "3f2abb0b545c03c16acf0f1584a6f5078c5b018d17601a1775bb1ad0245111bf",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "edge-top",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "edge-top.webp"
+      },
+      "bytes": 231554,
+      "sha256": "16ed156aeb414317f9b22a617f7d36939917207cf0c6f7823dd65c5ab04a1c1b",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "work-bookshop",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "work-bookshop.webp"
+      },
+      "bytes": 202642,
+      "sha256": "718184e58be694311ece8307534df411dd9029ba855e0a81b1580b24f857b611",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "work-bakery",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "work-bakery.webp"
+      },
+      "bytes": 209064,
+      "sha256": "3feec5d7c807cc6313172abb78377aded88dd6adf61ce65950a87a06b52a1149",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "work-florist",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "work-florist.webp"
+      },
+      "bytes": 208794,
+      "sha256": "05e576dd651a1a8b14759fb2b26edd8be2727d6d2afb1fc6fd7406fc67a494bd",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "eat-pudding",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "eat-pudding.webp"
+      },
+      "bytes": 207690,
+      "sha256": "61a8ca748dec788d8c0143881b0046eed3409b066b99eddd25991ac4ea04b288",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "eat-riceball",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "eat-riceball.webp"
+      },
+      "bytes": 219696,
+      "sha256": "559cbb00bc9f60f4adc55879158ee2b8d78b622cf047598f7251987e85e38343",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "eat-omurice",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "eat-omurice.webp"
+      },
+      "bytes": 220742,
+      "sha256": "727e083c4b3d8b537473b6287a3106109966e0befed1d7d75c728f184f5defae",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    },
+    {
+      "id": "eat-ramen",
+      "kind": "image",
+      "source": {
+        "type": "local",
+        "path": "eat-ramen.webp"
+      },
+      "bytes": 217200,
+      "sha256": "3801f5cf91f500c7fe4ed24fae717db6545b178e9a72b50e098b57efe295db9c",
+      "width": 960,
+      "height": 960,
+      "preload": "on-demand",
+      "lifetime": "card",
+      "fallbackAssetId": null
+    }
+  ]
+}
