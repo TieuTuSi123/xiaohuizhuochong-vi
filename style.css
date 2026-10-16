@@ -920,3 +920,91 @@ body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !im
   .erii-companion__breath { animation: none !important; }
   .erii-companion *, .erii-chat, .erii-chat *, .erii-life, .erii-life *, .erii-house, .erii-house *, .erii-mall, .erii-mall *, .pet-sheet { animation: none !important; transition: none !important; }
 }
+/* =========================================================================
+   TỐI ƯU THANH CUỘN (SCROLLBAR) CHO MÁY TÍNH & ĐIỆN THOẠI
+   Thanh cuộn thanh mảnh (6px), bo tròn mềm mại, ẩn mũi tên thô kệch,
+   màu sắc hòa hợp tuyệt đối với chất liệu giấy sổ tay và theme nhân vật.
+   ========================================================================= */
+
+/* Hỗ trợ chuẩn CSS hiện đại (Firefox & Chrome mới) */
+.erii-companion, .erii-companion *,
+.erii-chat, .erii-chat *,
+.erii-life, .erii-life *,
+.erii-house, .erii-house *,
+.erii-mall, .erii-mall * {
+  scrollbar-width: thin !important;
+  scrollbar-color: color-mix(in srgb, var(--pet-muted) 35%, transparent) transparent !important;
+}
+
+/* Tùy chỉnh thanh cuộn cho WebKit / Chromium (Chrome, Edge, SillyTavern trên Windows) */
+.erii-companion::-webkit-scrollbar, .erii-companion *::-webkit-scrollbar,
+.erii-chat::-webkit-scrollbar, .erii-chat *::-webkit-scrollbar,
+.erii-life::-webkit-scrollbar, .erii-life *::-webkit-scrollbar,
+.erii-house::-webkit-scrollbar, .erii-house *::-webkit-scrollbar,
+.erii-mall::-webkit-scrollbar, .erii-mall *::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+/* Ẩn hoàn toàn 2 nút mũi tên thô kệch ở 2 đầu thanh cuộn */
+.erii-companion::-webkit-scrollbar-button, .erii-companion *::-webkit-scrollbar-button,
+.erii-chat::-webkit-scrollbar-button, .erii-chat *::-webkit-scrollbar-button,
+.erii-life::-webkit-scrollbar-button, .erii-life *::-webkit-scrollbar-button,
+.erii-house::-webkit-scrollbar-button, .erii-house *::-webkit-scrollbar-button,
+.erii-mall::-webkit-scrollbar-button, .erii-mall *::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Rãnh trượt trong suốt, không che nền giấy */
+.erii-companion::-webkit-scrollbar-track, .erii-companion *::-webkit-scrollbar-track,
+.erii-chat::-webkit-scrollbar-track, .erii-chat *::-webkit-scrollbar-track,
+.erii-life::-webkit-scrollbar-track, .erii-life *::-webkit-scrollbar-track,
+.erii-house::-webkit-scrollbar-track, .erii-house *::-webkit-scrollbar-track,
+.erii-mall::-webkit-scrollbar-track, .erii-mall *::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+/* Con trượt thanh mảnh, bo tròn viền mềm mại */
+.erii-companion::-webkit-scrollbar-thumb, .erii-companion *::-webkit-scrollbar-thumb,
+.erii-chat::-webkit-scrollbar-thumb, .erii-chat *::-webkit-scrollbar-thumb,
+.erii-life::-webkit-scrollbar-thumb, .erii-life *::-webkit-scrollbar-thumb,
+.erii-house::-webkit-scrollbar-thumb, .erii-house *::-webkit-scrollbar-thumb,
+.erii-mall::-webkit-scrollbar-thumb, .erii-mall *::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--pet-muted) 35%, transparent) !important;
+  border-radius: 99px !important;
+}
+
+/* Đổi màu thanh cuộn khi rê chuột vào */
+.erii-companion::-webkit-scrollbar-thumb:hover, .erii-companion *::-webkit-scrollbar-thumb:hover,
+.erii-chat::-webkit-scrollbar-thumb:hover, .erii-chat *::-webkit-scrollbar-thumb:hover,
+.erii-life::-webkit-scrollbar-thumb:hover, .erii-life *::-webkit-scrollbar-thumb:hover,
+.erii-house::-webkit-scrollbar-thumb:hover, .erii-house *::-webkit-scrollbar-thumb:hover,
+.erii-mall::-webkit-scrollbar-thumb:hover, .erii-mall *::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--pet-accent) 60%, transparent) !important;
+}
+
+/* Góc giao nhau giữa cuộn dọc và cuộn ngang */
+.erii-companion::-webkit-scrollbar-corner, .erii-companion *::-webkit-scrollbar-corner,
+.erii-chat::-webkit-scrollbar-corner, .erii-chat *::-webkit-scrollbar-corner,
+.erii-life::-webkit-scrollbar-corner, .erii-life *::-webkit-scrollbar-corner,
+.erii-house::-webkit-scrollbar-corner, .erii-house *::-webkit-scrollbar-corner,
+.erii-mall::-webkit-scrollbar-corner, .erii-mall *::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+/* =========================================================================
+   SỬA LỖI TỰ HIỆN THANH CUỘN KHI CHƯA CÓ TIN NHẮN CHAT (ẢNH 3)
+   ========================================================================= */
+.erii-chat__welcome {
+  padding: 16px 6px 10px !important;
+}
+.erii-chat__welcome img {
+  width: 90px !important;
+  height: 90px !important;
+  margin: 0 auto 8px !important;
+}
+.erii-chat__starters {
+  margin-top: 12px !important;
+}

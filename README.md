@@ -1,3 +1,5 @@
+# Link gốc: https://github.com/dzsks/xiaohuizhuochong
+
 # Erii · Pet Màn Hình Cơ Sở Dữ Liệu
 
 Đây là tiện ích mở rộng (extension) pet màn hình độc lập cài đặt cho SillyTavern. Tiện ích này đọc trạng thái nhiệm vụ và thông báo kết quả đang hiển thị từ tiện ích «Long Huyết Huyền Hoàng · Cơ Sở Dữ Liệu», từ đó cho phép pet màn hình phản hồi bằng các động tác riêng, tương tác khi nhấp chuột, bong bóng nhiệm vụ và lời thoại. Bạn có thể chuyển đổi giữa Erii (Tiểu Hội), Zero và Naidan; mỗi nhân vật đều sở hữu tính cách, lời thoại, hồ sơ nuôi dưỡng và lịch sử trò chuyện độc lập. Bạn cũng có thể mở cửa sổ độc lập để trò chuyện cùng pet bằng API hiện tại của SillyTavern hoặc API cấu hình riêng.
