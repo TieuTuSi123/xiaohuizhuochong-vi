@@ -9,7 +9,7 @@ export function viewport(host) {
   return { left: view?.offsetLeft || 0, top: view?.offsetTop || 0, width: view?.width || host.innerWidth, height: view?.height || host.innerHeight };
 }
 
-export function createSheet(host, root, { grip = null, drag = [], desktop = null, onDismiss = () => {} } = {}) {
+export function createSheet(host, root, { grip = null, drag = [], dragSelector = null, desktop = null, onDismiss = () => {} } = {}) {
   const listeners = [];
   let position = null, moving = null, pulling = null, destroyed = false;
   const listen = (target, type, callback, options) => { target.addEventListener(type, callback, options); listeners.push(() => target.removeEventListener(type, callback, options)); };
@@ -39,6 +39,7 @@ export function createSheet(host, root, { grip = null, drag = [], desktop = null
   }
   function down(event) {
     if (event.button !== 0 || event.target.closest?.(INTERACTIVE)) return;
+    if (dragSelector && event.currentTarget !== grip && !event.target.closest?.(dragSelector)) return;
     const rect = root.getBoundingClientRect();
     if (isSheet()) pulling = { id: event.pointerId, y: event.clientY, at: event.timeStamp, height: rect.height, dy: 0 };
     else if (desktop) moving = { id: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top };

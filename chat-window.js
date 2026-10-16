@@ -18,7 +18,7 @@ function keepHistory(list, max, tickets = false) {
 }
 export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getContext, saved = {}, persist, onState, onOpen, onReply, onStopTask, onOpenDatabase, returnFocus,
   repair = null, onUserMessage, onRepairDone,
-  windowId = 'erii-database-pet-chat', conversationId = 'main', conversationTitle = '原有对话', windowOffset = 0,
+  windowId = 'erii-database-pet-chat', conversationId = 'main', conversationTitle = '原有对话', frame = null,
   onNew, onSelect, onImport, onRename, onDelete, onFocus, initialApiKey = '' }) {
   const doc = host.document;
   const listeners = [];
@@ -41,6 +41,7 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
   let expanded = false;
   let draftTimer = null;
   let unreadReply = false;
+  let opened = false, reading = null;
   let title = conversationTitle, importRecord = null, importing = false, importSerial = 0, confirmDelete = false;
   let editingIndex = Number.isInteger(saved.editIndex) && saved.editIndex >= 0 && saved.editIndex === lastUserIndex() ? saved.editIndex : null;
   let draftBeforeEdit = String(saved.draftBeforeEdit || '').slice(0, 4000);
@@ -80,9 +81,9 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
     listeners.push(() => target.removeEventListener(type, callback, options));
   };
   const button = (text, name) => { const b = node('button', text, name); b.type = 'button'; return b; };
-  const root = node('section', undefined, 'erii-chat');
+  const root = node('section', undefined, frame ? 'erii-chat__session' : 'erii-chat');
   root.id = windowId; root.hidden = true; root.dataset.character = character.id; root.dataset.conversation = conversationId;
-  root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', `和${fullName}聊天`);
+  if (!frame) root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', `和${fullName}聊天`);
   const grip = node('div', undefined, 'pet-grip'); grip.setAttribute('aria-hidden', 'true');
   const header = node('header', undefined, 'erii-chat__header');
   const avatar = node('img'); avatar.src = avatarUrl() || ''; avatar.alt = '';
@@ -194,11 +195,13 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
   const test = button('测试连接'); const apply = button('保存设置', 'erii-chat__send');
   settingsActions.append(test, apply); settingsPanel.append(settingsActions);
   settingsPanel.append(node('small', '测试会发送一次简短请求，不加入聊天记录。单独配置的接口由运行酒馆的设备连接。'));
-  root.append(grip, header, conversationBar, toolbar, modeBar, scope, environment, taskBar, importPanel, fileInput, log, latest, settingsPanel, status, composer); doc.body.append(root);
-  const sheet = createSheet(host, root, { grip, drag: [header], onDismiss: () => hide(),
-    desktop: () => ({ width: expanded ? 600 : 440, height: expanded ? 760 : 660, align: 'right', offset:windowOffset }) });
+  if (!frame) root.append(grip);
+  root.append(header, conversationBar, toolbar, modeBar, scope, environment, taskBar, importPanel, fileInput, log, latest, settingsPanel, status, composer);
+  if (!frame) doc.body.append(root);
+  const sheet = frame || createSheet(host, root, { grip, drag: [header], onDismiss: () => hide(),
+    desktop: () => ({ width: expanded ? 600 : 440, height: expanded ? 760 : 660, align: 'right' }) });
 
-  function notify() { onState?.({ open: !root.hidden, busy: Boolean(operation) }); }
+  function notify() { onState?.({ open: !root.hidden && (!frame || !frame.root.hidden), busy: Boolean(operation) }); }
   function trim(which, max, budget) {
     let list = lists[which];
     let removed = Math.max(0, list.length - max);
@@ -237,9 +240,19 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
     cancelEditButton.disabled = pending;
     input.readOnly = pending && operation.kind === 'edit';
     editBar.hidden = editingIndex === null;
+    expanded = frame?.expanded ?? expanded;
+    expand.setAttribute('aria-label', expanded ? '恢复聊天窗口大小' : '展开聊天窗口');
+    expand.title = expanded ? '恢复聊天窗口大小' : '展开聊天窗口';
     root.classList.toggle('erii-chat--expanded', expanded);
     root.dataset.busy = String(pending);
     root.dataset.mode = view;
+    if (frame && !root.hidden) {
+      frame.root.dataset.conversation = conversationId;
+      frame.root.dataset.busy = String(pending);frame.root.dataset.mode = view;
+      frame.root.dataset.loadingModels = String(listing);
+      frame.root.classList.toggle('erii-chat--expanded', expanded);
+      frame.root.setAttribute('aria-label', `和${fullName}聊天 · ${title}`);
+    }
     connection.textContent = config.mode === 'custom' ? `单独连接 · ${config.model || '尚未设置'}` : '酒馆当前 API';
     const repairing = view === 'repair';
     for (const tab of [chatTab, repairTab]) { tab.setAttribute('aria-pressed', String(tab.dataset.mode === view)); tab.disabled = pending || ticketBusy; }
@@ -295,7 +308,11 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
     for (let i = items.length - 1; i >= 0; i--) if (items[i].role === 'user') return i;
     return -1;
   }
-  function nearBottom() { return log.scrollHeight - log.scrollTop - log.clientHeight < 70; }
+  function nearBottom() {
+    if(root.hidden || log.hidden || (frame && frame.root.hidden))return reading?.follow ?? true;
+    return log.scrollHeight - log.scrollTop - log.clientHeight < 70;
+  }
+  function rememberReading() { if(!root.hidden && !log.hidden && (!frame || !frame.root.hidden))reading={top:log.scrollTop,follow:nearBottom()}; }
   function scrollToLatest() { log.scrollTop = log.scrollHeight; unreadReply = false; latest.hidden = true; }
   function syncLatest() { latest.hidden = log.hidden || !unreadReply || nearBottom(); }
   function renderHistory(forceBottom = false) {
@@ -423,6 +440,7 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
     const height=host.visualViewport?.height || host.innerHeight,compact=height<480,tiny=height<300;
     root.dataset.compact=String(compact);
     root.dataset.tiny=String(tiny);
+    if(frame){frame.root.dataset.compact=String(compact);frame.root.dataset.tiny=String(tiny);}
     if(compact){manageBody.append(toolbar,modeBar,scope);}
     else {root.insertBefore(toolbar,environment);root.insertBefore(modeBar,environment);root.insertBefore(scope,environment);}
     if(tiny)manageBody.append(taskBar);else root.insertBefore(taskBar,importPanel);
@@ -431,10 +449,13 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
     resizeInput();
   }
   function settingsVisible(show) {
+    if(show)rememberReading();
+    const resume=!show && log.hidden ? reading : null;
     if (!show) stopModels();
     settingsPanel.hidden = !show; log.hidden = show; composer.hidden = show;
     settingsButton.textContent = show ? '返回聊天' : '连接设置';
     settingsButton.setAttribute('aria-expanded', String(show));
+    if(resume){if(resume.follow)scrollToLatest();else log.scrollTop=resume.top;}
     syncLatest();
     if (show) fillSettings();
   }
@@ -529,9 +550,13 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
   }
   function open({ reply = false } = {}) {
     if (destroyed) return;
+    rememberReading();const resume=opened && !reply ? reading : null;
     if (reply) setMode('chat');
     databaseBusy = Boolean(repair?.busy());
-    onOpen?.(); root.hidden = false; root.classList.remove('is-leaving'); avatar.src = avatarUrl() || avatar.src; settingsVisible(false); renderScope(); renderHistory(true); syncControls(); layout();
+    onOpen?.();
+    if(frame){frame.root.append(root);frame.root.hidden=false;frame.root.classList.remove('is-leaving');}
+    root.hidden = false; root.classList.remove('is-leaving'); avatar.src = avatarUrl() || avatar.src; settingsVisible(false); renderScope();syncControls();layout();
+    renderHistory(!resume || resume.follow);if(resume && !resume.follow){log.scrollTop=resume.top;syncLatest();}opened=true;reading=null;
     // Mobile opens without summoning the keyboard over the greeting; replying to her comment is a deliberate request to type.
     if (reply || host.innerWidth >= 640) input.focus({ preventScroll: true }); else close.focus({ preventScroll: true });
   }
@@ -584,9 +609,14 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
     save(); renderHistory();
   }
   function hide() {
+    if(frame){frame.close();return;}
     if (root.hidden) return;
     stopRequest(); stopModels(); flushDraft();
     leave(host, root, () => { const regain=root.contains(doc.activeElement)||doc.activeElement===doc.body;root.hidden = true; notify(); if(regain)returnFocus?.(); });
+  }
+  function resetConfirmations() {
+    if(confirmClear || confirmDelete)say('');
+    confirmClear=false;confirmDelete=false;clear.textContent='清空记录';deleteButton.textContent='删除此对话';more.open=false;
   }
   listen(root,'pointerdown',()=>onFocus?.());listen(root,'focusin',()=>onFocus?.());
   listen(newButton,'click',()=>{const result=onNew?.();if(result && !result.ok)say(result.reason,'error');});
@@ -610,8 +640,8 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
   listen(importConfirm,'click',()=>{if(!importRecord || importing)return;const result=onImport?.(importRecord);if(!result?.ok){say(result?.reason || '现在无法导入。','error');return;}importRecord=null;importPanel.hidden=true;say('已另存并打开导入的对话。');});
   listen(close, 'click', hide);
   listen(expand, 'click', () => {
-    expanded = !expanded; expand.setAttribute('aria-label', expanded ? '恢复聊天窗口大小' : '展开聊天窗口');
-    expand.title = expanded ? '恢复聊天窗口大小' : '展开聊天窗口'; layout(); syncControls();
+    if(frame)frame.expand();else expanded = !expanded;
+    syncControls();layout();
   });
   listen(exportButton, 'click', exportHistory);
   listen(latest, 'click', scrollToLatest);
@@ -720,12 +750,12 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
   }
   fillSettings(); renderHistory(); syncControls(); if(keyNotice)say(keyNotice);
   return { open, close: hide, comment, cancelComment, setMode,
-    front(z){root.style.zIndex=String(z);},
-    cover(){flushDraft();root.hidden=true;notify();},
+    stop(){stopRequest();stopModels();flushDraft();rememberReading();resetConfirmations();},
+    cover(){flushDraft();rememberReading();settingsVisible(false);resetConfirmations();root.hidden=true;if(frame)root.remove();notify();},
     sessionKey:()=>apiKey,
-    setConversations(items,nextTitle){title=nextTitle;if(doc.activeElement!==titleInput)titleInput.value=title;conversationSelect.replaceChildren();for(const item of items){const option=node('option',item.title);option.value=item.id;conversationSelect.append(option);}conversationSelect.value=conversationId;root.setAttribute('aria-label',`和${fullName}聊天 · ${title}`);},
+    setConversations(items,nextTitle){title=nextTitle;if(doc.activeElement!==titleInput)titleInput.value=title;conversationSelect.replaceChildren();for(const item of items){const option=node('option',item.title);option.value=item.id;conversationSelect.append(option);}conversationSelect.value=conversationId;root.setAttribute('aria-label',`和${fullName}聊天 · ${title}`);if(frame && !root.hidden)frame.root.setAttribute('aria-label',`和${fullName}聊天 · ${title}`);},
     contextChanged() { if (operation?.repairing) stopRequest('已切换聊天，检修请求已停止。请在当前聊天重新检查。'); },
-    get view() { return view; }, get visible() { return !root.hidden; }, get busy() { return Boolean(operation); },
+    get view() { return view; }, get visible() { return !root.hidden && (!frame || !frame.root.hidden); }, get busy() { return Boolean(operation); },
     setTask(task) {
       // 数据库忙闲变化时重画检修记录，让修改单的“应用”按钮跟着可用或停用。
       const busyNow = Boolean(repair?.busy());
@@ -744,7 +774,7 @@ export function createChatWindow(host, { character, avatarUrl, welcomeUrl, getCo
       if (operation) { host.clearTimeout(operation.timer); operation.controller.abort(); operation = null; }
       if (modelOperation) { host.clearTimeout(modelOperation.timer); modelOperation.controller.abort(); modelOperation = null; }
       cancelComment();
-      serial++; apiKey = ''; sheet.destroy();
+      serial++; apiKey = ''; if(!frame)sheet.destroy();
       for (const timer of feedbackTimers) host.clearTimeout(timer); feedbackTimers.clear();
       for (const address of downloadURLs) host.URL.revokeObjectURL(address); downloadURLs.clear();
       for (const remove of listeners) remove(); root.remove();

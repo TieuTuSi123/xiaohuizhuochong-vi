@@ -1,6 +1,6 @@
 import { CompanionModel } from './model.js';
 import { createDatabaseObserver, readDeskPetImages, readDatabaseView } from './database-observer.js';
-import { readBounds, fromRatio, toRatio, constrain, dockEdge } from './position.js';
+import { readBounds, fromRatio, toRatio, constrain, dockEdge, normalizeSize } from './position.js';
 import { createMotion } from './motion.js';
 import { StoryCarousel } from './stories.js';
 import { createChatWorkspace } from './chat-workspace.js';
@@ -23,7 +23,7 @@ import { createTicket, describeErrors, describeFloors, describeTables, recentFlo
 import { WATCH, clampEvery, createFloorCounter, decideWatch, shouldAsk, watchMessages } from './watch.js';
 
 const ID = 'erii-database-pet';
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 const defaults = { enabled: true, idleActions: true, edgePeeks: true, healingStories: true, hideOriginal: true, taskDetails: false, size: 88, side: 'right', position: null,
   character: DEFAULT_CHARACTER, taskTalk: true, needs: true, effects: 'auto', watch: false, watchEvery: WATCH.every, repairFloors: 3 };
 const CHAT_CONNECTION = ['mode', 'url', 'model', 'maxTokens', 'rememberKey', 'replyStyle', 'nickname'];
@@ -43,7 +43,7 @@ export function createCompanion(host, context) {
   const store = context.extensionSettings;
   const firstCareRun = !store[ID]?.care;
   const settings = { ...defaults, ...(store[ID] || {}) };
-  settings.size = Math.min(112, Math.max(56, Number(settings.size) || 88));
+  settings.size = normalizeSize(settings.size);
   settings.side = settings.side === 'left' ? 'left' : 'right';
   if (!CHARACTER_IDS.includes(settings.character)) settings.character = DEFAULT_CHARACTER;
   if (!['auto', 'off', 'simple', 'fancy'].includes(settings.effects)) settings.effects = 'auto';
@@ -876,12 +876,23 @@ export function createCompanion(host, context) {
     toggle(display, 'idleActions', '空闲时做小动作、偶尔说说话');
     toggle(display, 'edgePeeks', '拖到边缘后探头');
     toggle(display, 'healingStories', '空闲时讲治愈小故事');
-    const sizeRow = el(doc, 'label', undefined, 'pet-settings__range');
+    const sizeRow = el(doc, 'div', undefined, 'pet-settings__range');
+    const sizeLabel = el(doc, 'label', '桌宠大小');
     const range = el(doc, 'input');
     range.type = 'range'; range.min = '56'; range.max = '112'; range.step = '4'; range.value = String(settings.size);
-    sizeRow.append(el(doc, 'span', '桌宠大小'), range);
+    range.id=`${ID}-size`;range.setAttribute('aria-label','桌宠大小');sizeLabel.htmlFor=range.id;
+    const sizeValue=el(doc,'output',`${settings.size} px`,'pet-settings__size-value');sizeValue.htmlFor=range.id;
+    const resetSize=el(doc,'button','恢复默认大小');resetSize.type='button';
+    sizeRow.append(sizeLabel,sizeValue,range,resetSize);
     display.append(sizeRow);
-    listen(range, 'input', () => { settings.size = Number(range.value); save(); });
+    function resizePet(value) {
+      settings.size=normalizeSize(value);range.value=String(settings.size);
+      sizeValue.textContent=`${settings.size} px`;range.setAttribute('aria-valuetext',`${settings.size} 像素`);
+      // 连续拖动只在下一帧重排一次；保存仍使用酒馆自己的合并保存接口。
+      scheduleLayout(true);persistStore();
+    }
+    listen(range,'input',()=>resizePet(range.value));listen(range,'change',()=>resizePet(range.value));
+    listen(resetSize,'click',()=>resizePet(defaults.size));
     const database = group('数据库');
     toggle(database, 'hideOriginal', '隐藏数据库原桌宠和原气泡');
     toggle(database, 'taskTalk', '任务时说话');
@@ -938,7 +949,8 @@ export function createCompanion(host, context) {
     settingsMount.append(hint);
     settingsControls = { sync() {
       for (const [key, input] of fields) input.checked = settings[key] === true;
-      range.value = String(settings.size); taskMode.value = settings.taskDetails ? 'full' : 'brief'; fxMode.value = settings.effects;
+      range.value = String(settings.size);sizeValue.textContent=`${settings.size} px`;range.setAttribute('aria-valuetext',`${settings.size} 像素`);
+      taskMode.value = settings.taskDetails ? 'full' : 'brief'; fxMode.value = settings.effects;
       everySelect.value = String(settings.watchEvery); floorsSelect.value = String(settings.repairFloors);
       companionNote.textContent = `旁观陪聊和检修都会把正文（检修还会带上表格）发给${character.name}聊天用的接口（聊天窗“连接设置”里那个），会产生调用费用。旁观陪聊默认关闭；检修写入前都会先问你。`;
       const watchState = watchOf(character.id);

@@ -310,6 +310,7 @@
 }
 .erii-chat, .erii-chat *, .erii-chat *::before, .erii-chat *::after { box-sizing: border-box; }
 .erii-chat[hidden], .erii-chat [hidden] { display: none !important; }
+.erii-chat__session { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
 .erii-chat button, .erii-chat input, .erii-chat textarea, .erii-chat select {
   font: inherit; text-shadow: none !important; box-shadow: none !important; margin: 0;
 }
@@ -877,7 +878,12 @@
 .erii-companion-settings { padding: 8px 0; color: inherit; }
 .erii-companion-settings summary { cursor: pointer; padding: 6px 0; font-weight: 700; }
 .erii-companion-settings label { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
-.erii-companion-settings .pet-settings__range input { max-width: 150px; }
+.erii-companion-settings .pet-settings__range { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 4px 8px; margin: 10px 0; }
+.erii-companion-settings .pet-settings__range label { margin: 0; }
+.pet-settings__size-value { justify-self: end; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.erii-companion-settings .pet-settings__range input { grid-column: 1 / -1; width: 100%; min-width: 0; max-width: none; min-height: 36px; margin: 0; touch-action: pan-y; }
+.erii-companion-settings .pet-settings__range button { grid-column: 1 / -1; justify-self: start; min-height: 36px; }
+@media(max-width:639px) { .erii-companion-settings .pet-settings__range input, .erii-companion-settings .pet-settings__range button { min-height: 44px; } }
 .erii-companion-settings .pet-settings__select { flex-wrap: wrap; }
 .erii-companion-settings select { max-width: 230px; border-radius: 8px; padding: 5px 8px; }
 .pet-settings__group { margin: 10px 0 0; padding: 4px 12px 6px; border: 1px solid rgba(127,127,127,.35); border-radius: 12px; }
