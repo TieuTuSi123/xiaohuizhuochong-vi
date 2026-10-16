@@ -68,10 +68,11 @@ export function createNotebook(doc, { id, actions }) {
   company.append(chips, story);
 
   const rooms = el('nav', undefined, 'erii-nb__rooms'); rooms.setAttribute('aria-label', '窗口');
+  const mall = button('商场 · 买新衣服', 'erii-nb__room erii-nb__mall', 'shop'); mall.setAttribute('aria-controls', `${id}-mall`);
   const chat = button('和小绘聊天', 'erii-nb__room', 'chat'); chat.setAttribute('aria-controls', `${id}-chat`);
   const life = button('生活手帐', 'erii-nb__room', 'coin'); life.setAttribute('aria-controls', `${id}-life`);
   const house = button('桌宠小屋', 'erii-nb__room', 'house'); house.setAttribute('aria-controls', `${id}-house`);
-  rooms.append(chat, life, house);
+  rooms.append(mall, chat, life, house);
 
   const records = section('最近的记录', 'erii-nb__records');
   const history = el('div', undefined, 'erii-companion__history');
@@ -89,6 +90,7 @@ export function createNotebook(doc, { id, actions }) {
   listen(story, 'click', () => actions.story());
   listen(chat, 'click', () => actions.chat());
   listen(life, 'click', () => actions.life());
+  listen(mall, 'click', () => actions.mall());
   listen(house, 'click', () => actions.house());
 
   let lastTasks = '', lastHistory = '';

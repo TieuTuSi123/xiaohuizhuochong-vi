@@ -23,6 +23,7 @@ const PATHS = {
   stop: '<rect x="7" y="7" width="10" height="10" rx="1.5"/>',
   look: '<circle cx="11" cy="11" r="6"/><path d="M15.5 15.5L20 20"/>',
   shirt: '<path d="M9 4.5L4.5 7l1.6 3 1.9-.9V19h8v-9.9l1.9.9 1.6-3L15 4.5a3 3 0 0 1-6 0z"/>',
+  shop: '<path d="M4 10h16l-2-5H6zM5 10v10h14V10M9 20v-6h6v6M4 10v2a2 2 0 0 0 4 0v-2M8 10v2a2 2 0 0 0 4 0v-2M12 10v2a2 2 0 0 0 4 0v-2M16 10v2a2 2 0 0 0 4 0v-2"/>',
 };
 
 export function icon(doc, name, className = '') {

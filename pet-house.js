@@ -212,7 +212,7 @@ export function createPetHouse(host, { characters, currentId, care, portraits, a
     if (destroyed || root.hidden) return;
     finishRename(false);
     host.clearInterval(ticker); ticker = null;
-    leave(host, root, () => { root.hidden = true; aurora?.stop(); say(''); actions.onClose?.(); returnFocus?.(); });
+    leave(host, root, () => { const regain=root.contains(doc.activeElement)||doc.activeElement===doc.body;root.hidden = true; aurora?.stop(); say(''); actions.onClose?.(); if(regain)returnFocus?.(); });
   }
   listen(close, 'click', hide);
   listen(ribbons, 'click', event => { const ribbon = event.target.closest?.('button[data-id]'); if (ribbon) focus(ribbon.dataset.id); });

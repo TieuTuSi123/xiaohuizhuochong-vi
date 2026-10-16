@@ -45,8 +45,8 @@ export function normalizeLife(saved = {}) {
 // 每个角色同一时间只进行一项活动，用经过的真实时间计算。下班的工作一直保留到领取；
 // 领取时先清掉活动再记账，重复点击不会领两次。没有自动重复工作、隐藏 AI 调用或数据库写入。
 export class LifeModel {
-  constructor(saved, {now = () => Date.now(), persist = () => {}} = {}) {
-    this.state = normalizeLife(saved); this.now = now; this.persist = persist; this.serial = 0;
+  constructor(saved, {now = () => Date.now(), persist = () => {}, onMeal = () => {}} = {}) {
+    this.state = normalizeLife(saved); this.now = now; this.persist = persist; this.onMeal = onMeal; this.serial = 0;
   }
   save() { this.persist(JSON.parse(JSON.stringify(this.state))); }
   record(kind, text, who) { this.state.journal.unshift({kind,text,at:this.now(),...(who ? {who} : {})}); this.state.journal.length = Math.min(20,this.state.journal.length); }
@@ -119,7 +119,7 @@ export class LifeModel {
       this.setActivity(who, null); this.state.meals = integer(this.state.meals + 1);
       this.record('meal',`${view.item.name}吃完啦。${view.item.line}`, who); finished.push({who, item:view.item});
     }
-    if (finished.length) this.save();
+    if (finished.length) { this.save(); for(const meal of finished)this.onMeal(meal); }
     return finished;
   }
 }

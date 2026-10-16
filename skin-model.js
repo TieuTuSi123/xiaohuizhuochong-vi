@@ -4,6 +4,7 @@
 // 把图放进 assets/skins/<皮肤 id>/，别的代码不用改。
 export const DEFAULT_SKIN = 'default';
 export const SKIN_ID = /^[a-z][a-z0-9-]{0,39}$/;
+export const ZERO_SECRET = '这一路上我们不会彼此抛弃，不彼此出卖，直到死亡的尽头';
 const MAX_OWNED = 200;
 
 // 皮肤条目的写法（示例，没有真正上架）：
@@ -30,6 +31,14 @@ const CATALOG = [{
     'work-bookshop', 'work-bakery', 'work-florist', 'eat-pudding', 'eat-riceball', 'eat-omurice', 'eat-ramen',
   ].map(pose => [pose, `${pose}.webp`])) },
   theme: { colors: ['#b892e5', '#eadcfa', '#ceaeed'] },
+}, {
+  id:'zero-ice-rose',name:'皇女零 · 冰蓝蔷薇',
+  description:'浅金长发、冰蓝蔷薇与黑白礼裙。用你们约定的密语，解锁这一套装扮。',
+  unlock:{type:'phrase',phrase:ZERO_SECRET},price:null,currency:null,characters:['zero'],
+  assets:{base:'assets/skins/zero-ice-rose/',poses:Object.fromEntries([
+    'idle','received','writing','complete','error','tea','reading','origami','duck','stretch','rest','gift','lifted','land','wave','peek',
+    'edge-left','edge-right','edge-bottom','edge-top','work-bookshop','work-bakery','work-florist','eat-pudding','eat-riceball','eat-omurice','eat-ramen',
+  ].map(pose=>[pose,`${pose}.webp`]))},theme:{colors:['#7daede','#d8ebfa','#a6cbe8']},
 }];
 
 const integer = value => Math.min(1000000000, Math.max(0, Math.floor(Number(value) || 0)));
@@ -40,8 +49,13 @@ const validId = id => typeof id === 'string' && SKIN_ID.test(id) && id !== DEFAU
 export function validSkin(skin) {
   if (!skin || typeof skin !== 'object' || !validId(skin.id)) return false;
   if (typeof skin.name !== 'string' || !skin.name.trim()) return false;
-  if (!Number.isInteger(skin.price) || skin.price < 0) return false;
-  if (skin.currency !== undefined && !['coins', 'tickets'].includes(skin.currency)) return false;
+  if(skin.unlock !== undefined){
+    if(skin.unlock?.type !== 'phrase' || typeof skin.unlock.phrase !== 'string' || !skin.unlock.phrase.trim() || skin.unlock.phrase.length>200) return false;
+    if(skin.price != null || skin.currency != null)return false;
+  } else {
+    if (!Number.isInteger(skin.price) || skin.price < 0) return false;
+    if (skin.currency !== undefined && !['coins', 'tickets'].includes(skin.currency)) return false;
+  }
   if (!(skin.characters === '*' || (Array.isArray(skin.characters) && skin.characters.length > 0 && skin.characters.every(validWho)))) return false;
   if (skin.assets !== undefined && skin.assets !== null) {
     if (typeof skin.assets !== 'object') return false;
@@ -57,7 +71,7 @@ export function normalizeCatalog(list, warn = () => {}) {
   for (const skin of Array.isArray(list) ? list : []) {
     if (!validSkin(skin)) { warn(skin); continue; }
     if (seen.has(skin.id)) { warn(skin); continue; }
-    seen.add(skin.id); result.push(Object.freeze({ ...skin, currency: skin.currency || 'coins', description: typeof skin.description === 'string' ? skin.description : '' }));
+    seen.add(skin.id); result.push(Object.freeze({ ...skin, currency: skin.unlock ? null : skin.currency || 'coins', description: typeof skin.description === 'string' ? skin.description : '' }));
   }
   return Object.freeze(result);
 }
@@ -102,8 +116,8 @@ export class SkinModel {
     const current = this.equippedId(who);
     return [defaultEntry(), ...this.available(who)].map(skin => {
       const owned = this.owns(who, skin.id);
-      const currency = skin.currency || 'coins', balance = integer(currency === 'tickets' ? tickets : coins);
-      return { id: skin.id, skin, price: skin.price, currency, balance, owned, equipped: skin.id === current, affordable: owned || balance >= skin.price };
+      const currency = skin.unlock ? null : skin.currency || 'coins', balance = integer(currency === 'tickets' ? tickets : coins);
+      return { id: skin.id, skin, price: skin.price, currency, balance, owned, equipped: skin.id === current, affordable: owned || (!skin.unlock && balance >= skin.price) };
     });
   }
   // pay(price, skin) 负责真正扣钱并返回是否成功（例如 LifeModel.spend）；这里只管“能不能买”和记账。
@@ -112,6 +126,7 @@ export class SkinModel {
     const skin = this.find(id);
     if (!skin || !fits(skin, who)) return { ok: false, reason: 'missing' };
     if (this.owns(who, id)) return { ok: false, reason: 'owned' };
+    if (skin.unlock) return {ok:false,reason:'phrase'};
     if (this.ownedIds(who).length >= MAX_OWNED) return { ok: false, reason: 'full' };
     if (typeof pay !== 'function' || pay(skin.price, skin) !== true) return { ok: false, reason: skin.currency === 'tickets' ? 'tickets' : 'coins' };
     (this.state.owned[who] ||= []).push(id);
@@ -119,6 +134,15 @@ export class SkinModel {
     if (skin.currency === 'tickets') this.state.spentTickets = integer(this.state.spentTickets + skin.price);
     else this.state.spent = integer(this.state.spent + skin.price);
     this.save(); return { ok: true, skin };
+  }
+  unlock(who,id,phrase){
+    if(!validWho(who))return {ok:false,reason:'who'};
+    const skin=this.find(id);
+    if(!skin || !fits(skin,who) || skin.unlock?.type !== 'phrase')return {ok:false,reason:'missing'};
+    if(this.owns(who,id))return {ok:false,reason:'owned'};
+    if(this.ownedIds(who).length>=MAX_OWNED)return {ok:false,reason:'full'};
+    if(typeof phrase !== 'string' || phrase.trim().normalize('NFC') !== skin.unlock.phrase)return {ok:false,reason:'phrase'};
+    (this.state.owned[who] ||= []).push(id);this.save();return {ok:true,skin};
   }
   // 换上已拥有的皮肤；传 DEFAULT_SKIN 换回默认。没有变化时返回 false。
   equip(who, id) {

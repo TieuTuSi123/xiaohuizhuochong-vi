@@ -16,7 +16,7 @@ const JOB_NAMES = { bookshop: '书店', bakery: '甜品店', florist: '花店' }
 
 const count = value => Math.min(1e9, Math.max(0, Math.floor(Number(value) || 0)));
 const level = value => Math.min(100, Math.max(0, Number.isFinite(Number(value)) ? Number(value) : 80));
-const time = value => Number.isFinite(value) && value > 0 ? value : 0;
+const time = value => Number.isFinite(value) && value > 0 && Number.isFinite(new Date(value).getTime()) ? value : 0;
 export function dayKey(ms) {
   const date = new Date(ms);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -24,6 +24,7 @@ export function dayKey(ms) {
 export const tierOf = affection => TIERS.reduce((found, need, index) => affection >= need ? index : found, 0);
 
 function normalizeCharacter(saved = {}, now) {
+  if(!saved || typeof saved !== 'object')saved={};
   const counts = saved.counts || {};
   const bag = value => Object.fromEntries(Object.entries(value && typeof value === 'object' ? value : {}).map(([key, n]) => [String(key).slice(0, 20), count(n)]).slice(0, 20));
   return {
@@ -33,7 +34,7 @@ function normalizeCharacter(saved = {}, now) {
     nickname: typeof saved.nickname === 'string' ? saved.nickname.trim().slice(0, 12) : '',
     daily: { date: typeof saved.daily?.date === 'string' ? saved.daily.date : '', counts: bag(saved.daily?.counts) },
     counts: { tasks: count(counts.tasks), gifts: count(counts.gifts), cleans: count(counts.cleans), chats: count(counts.chats), meals: bag(counts.meals), jobs: bag(counts.jobs) },
-    diary: Array.isArray(saved.diary) ? saved.diary.filter(item => item && typeof item.text === 'string' && Number.isFinite(item.at))
+    diary: Array.isArray(saved.diary) ? saved.diary.filter(item => item && typeof item.text === 'string' && Number.isFinite(item.at) && Number.isFinite(new Date(item.at).getTime()))
       .slice(0, 120).map(item => ({ at: item.at, kind: String(item.kind || 'note').slice(0, 20), text: item.text.slice(0, 120) })) : [],
     marks: Object.fromEntries(Object.entries(saved.marks && typeof saved.marks === 'object' ? saved.marks : {}).filter(([, at]) => Number.isFinite(at)).slice(0, 200)),
     seeded: saved.seeded === true,

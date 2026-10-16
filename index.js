@@ -3,9 +3,10 @@ import { createDatabaseObserver, readDeskPetImages, readDatabaseView } from './d
 import { readBounds, fromRatio, toRatio, constrain, dockEdge } from './position.js';
 import { createMotion } from './motion.js';
 import { StoryCarousel } from './stories.js';
-import { createChatWindow } from './chat-window.js';
+import { createChatWorkspace } from './chat-workspace.js';
 import { LifeModel } from './life-model.js';
 import { createLifeWindow } from './life-window.js';
+import { createMallWindow } from './mall-window.js';
 import { CHARACTERS, CHARACTER_IDS, DEFAULT_CHARACTER, resolveCharacter, imageUrls, assetUrl, themeOf, usesDatabaseArt, poseLabel } from './characters.js';
 import { SkinModel } from './skin-model.js';
 import { CareModel, MOOD_NAMES, dayKey } from './care-model.js';
@@ -22,7 +23,7 @@ import { createTicket, describeErrors, describeFloors, describeTables, recentFlo
 import { WATCH, clampEvery, createFloorCounter, decideWatch, shouldAsk, watchMessages } from './watch.js';
 
 const ID = 'erii-database-pet';
-const VERSION = '0.9.3';
+const VERSION = '1.0.0';
 const defaults = { enabled: true, idleActions: true, edgePeeks: true, healingStories: true, hideOriginal: true, taskDetails: false, size: 88, side: 'right', position: null,
   character: DEFAULT_CHARACTER, taskTalk: true, needs: true, effects: 'auto', watch: false, watchEvery: WATCH.every, repairFloors: 3 };
 const CHAT_CONNECTION = ['mode', 'url', 'model', 'maxTokens', 'rememberKey', 'replyStyle', 'nickname'];
@@ -67,7 +68,11 @@ export function createCompanion(host, context) {
   let chat = null;
   let life = null;
   let house = null;
-  const lifeModel = new LifeModel(settings.life, {persist:value => { settings.life = value; persistStore(); }});
+  let mall = null;
+  const lifeModel = new LifeModel(settings.life, {persist:value => { settings.life = value; persistStore(); },onMeal:done=>{
+    const result=care.feed(done.who,done.item.id);
+    if(done.who===character.id){say('care.mealDone',4600);if(result.tierUp)celebrate(result.tierUp);}
+  }});
   if (firstCareRun) {
     // 老用户升级：按已有的聊天、打工、吃饭记录给小绘折算初始亲密度，最多到「熟悉」档。
     const history = Array.isArray(settings.chat?.history) ? settings.chat.history : [];
@@ -221,7 +226,7 @@ export function createCompanion(host, context) {
   const notebook = createNotebook(doc, { id: ID, actions: {
     close: () => setNotebook(false), shortcut: page => openPage(page), leisure: pose => { if (model.leisure(pose)) { setNotebook(false); update(); } },
     gift: () => giveGift(), clean: () => cleanCharacter(character.id), story: () => tellStory(),
-    chat: () => chat?.open(), life: () => life?.open(), house: () => house?.open(),
+    chat: () => chat?.open(), life: () => life?.open(), house: () => house?.open(), mall: () => mall?.open(),
   } });
   const notebookRoot = notebook.root;
   portrait.setAttribute('aria-controls', notebookRoot.id);
@@ -327,7 +332,7 @@ export function createCompanion(host, context) {
     update();
   }
   function setNotebook(open) {
-    if (open) { chat?.close(); life?.close(); house?.close(); storyteller.dismiss(); }
+    if (open) { chat?.close(); life?.close(); house?.close(); mall?.close(false); storyteller.dismiss(); }
     notebookRoot.hidden = !open;
     if (open) overlay.hidden = false;
     portrait.setAttribute('aria-expanded', String(open));
@@ -453,7 +458,7 @@ export function createCompanion(host, context) {
   }
   function storyBlocked() {
     return settings.enabled === false || yielded || doc.hidden || model.snapshot.silent || model.snapshot.busy
-      || Date.now() < terminalUntil || !model.canInteract() || !notebookRoot.hidden || chat?.visible || life?.visible || house?.visible
+      || Date.now() < terminalUntil || !model.canInteract() || !notebookRoot.hidden || chat?.visible || life?.visible || house?.visible || mall?.visible
       || Boolean(lifeModel.activity(character.id)) || Boolean(dragging);
   }
   function tellStory() {
@@ -616,7 +621,7 @@ export function createCompanion(host, context) {
     persistStore(); settingsControls?.sync();
     if (who.id === character.id && !switching && settings.enabled !== false) {
       storyteller.dismiss();
-      speech = { text: result.text, until: Date.now() + 9000, reply: true, watch: true };
+      speech = { text: result.text, until: Date.now() + 9000, reply: true, watch: true, conversationId:result.conversationId };
       update();
     }
   }
@@ -635,10 +640,7 @@ export function createCompanion(host, context) {
     overlay.hidden = root.hidden && notebookRoot.hidden;
     const snapshot = model.snapshot;
     const now = Date.now();
-    for (const done of lifeModel.tick()) {
-      const result = care.feed(done.who, done.item.id);
-      if (done.who === character.id) { say('care.mealDone', 4600); if (result.tierUp) celebrate(result.tierUp); }
-    }
+    lifeModel.tick();
     const activity = lifeModel.view(character.id);
     for (const id of CHARACTER_IDS) {
       const view = id === character.id ? activity : lifeModel.view(id);
@@ -650,7 +652,7 @@ export function createCompanion(host, context) {
     }
     const localPose = model.pose();
     const canPeek = settings.enabled && settings.edgePeeks && !dragging && !yielded
-      && notebookRoot.hidden && !chat?.busy && !activity.active && !life?.visible && localPose === 'idle' && !snapshot.busy && !doc.hidden;
+      && notebookRoot.hidden && !chat?.busy && !activity.active && !life?.visible && !mall?.visible && localPose === 'idle' && !snapshot.busy && !doc.hidden;
     const edge = canPeek ? dockEdge(point, bounds) : null;
     const edgePose = edge && `edge-${edge}`;
     const pose = dragging?.moved ? 'lifted' : edgePose && edgePose !== failedEdge ? edgePose
@@ -711,11 +713,11 @@ export function createCompanion(host, context) {
       id: activeTask?.id, kind: feedback ? feedback.kind : failureNotice ? newest.kind : '',
       canStop: Boolean(hasTaskMessage && activeTask?.action?.run), pending: taskStopBusy,
     } : null;
-    chat?.setTask(panelTask); life?.setTask(panelTask); life?.render();
+    chat?.setTask(panelTask); life?.setTask(panelTask); mall?.setTask(panelTask); life?.render(); mall?.render();
     const hadLifeBubble = !lifeBubble.hidden;
     const focus = lifeFocus();
     lifeBubble.hidden = !settings.enabled || yielded || snapshot.silent || !message.hidden || Boolean(dragging)
-      || !notebookRoot.hidden || chat?.visible || life?.visible || house?.visible || !focus;
+      || !notebookRoot.hidden || chat?.visible || life?.visible || house?.visible || mall?.visible || !focus;
     if (!lifeBubble.hidden) {
       const seconds = Math.ceil(focus.remaining / 1000);
       const who = nameOf(resolveCharacter(focus.who));
@@ -763,12 +765,12 @@ export function createCompanion(host, context) {
   }
   function makeChat() {
     const id = character.id;
-    return createChatWindow(host, {
+    return createChatWorkspace(host, {
       character, avatarUrl: () => images.idle, welcomeUrl: () => images.reading || images.idle,
       getContext: () => host.SillyTavern?.getContext?.() || context,
       saved: chatSaved(id),
       persist: value => { if (id === DEFAULT_CHARACTER) settings.chat = value; else settings.chats[id] = value; persistStore(); },
-      onOpen: () => { life?.close(); house?.close(); setNotebook(false); storyteller.dismiss(); },
+      onOpen: () => { life?.close(); house?.close(); mall?.close(false); setNotebook(false); storyteller.dismiss(); },
       onState: () => { if (point) update(); },
       onReply: () => { const result = care.chatRound(id); if (model.canInteract()) model.leisure('wave'); if (result.tierUp) celebrate(result.tierUp); },
       onStopTask: stopDatabaseTask,
@@ -853,6 +855,9 @@ export function createCompanion(host, context) {
     const houseSetting = el(doc, 'button', '桌宠小屋', 'pet-settings__house'); houseSetting.type = 'button';
     houseSetting.setAttribute('aria-controls', `${ID}-house`); roster.append(houseSetting);
     listen(houseSetting, 'click', () => house?.open());
+    const mallSetting = el(doc, 'button', '商场 · 买衣服', 'pet-settings__mall'); mallSetting.type = 'button';
+    mallSetting.setAttribute('aria-controls', `${ID}-mall`); mallSetting.setAttribute('aria-label','打开商场');
+    roster.append(mallSetting); listen(mallSetting,'click',()=>mall?.open());
     settingsMount.append(roster);
     const fields = [];
     const group = title => { const box = el(doc, 'fieldset', undefined, 'pet-settings__group'); box.append(el(doc, 'legend', title)); settingsMount.append(box); return box; };
@@ -977,7 +982,8 @@ export function createCompanion(host, context) {
   });
   listen(messageReply, 'click', event => {
     event.stopPropagation();
-    speech = null; chat?.open({ reply: true }); update();
+    const conversationId=speech?.conversationId;
+    speech = null; chat?.open({ reply: true,conversationId }); update();
   });
   // The hot path writes only the pet transform and sway. No panel rendering or layout reads.
   function flushDrag() {
@@ -1134,6 +1140,7 @@ export function createCompanion(host, context) {
   });
   listen(doc, 'keydown', event => {
     if (event.key !== 'Escape') return;
+    if (mall?.visible) { mall.close(); return; }
     if (house?.visible) { house.close(); return; }
     if (life?.visible) { life.close(); return; }
     if (chat?.visible) { chat.close(); return; }
@@ -1154,7 +1161,7 @@ export function createCompanion(host, context) {
     const timer = host.setTimeout(() => {
       timers.delete(timer);
       if (destroyed) return;
-      if (!doc.hidden && settings.enabled && settings.idleActions && !yielded && !dragging && notebookRoot.hidden && !chat?.visible && !life?.visible && !house?.visible
+      if (!doc.hidden && settings.enabled && settings.idleActions && !yielded && !dragging && notebookRoot.hidden && !chat?.visible && !life?.visible && !house?.visible && !mall?.visible
         && !lifeModel.activity(character.id) && !storyteller.current && model.pose() === 'idle' && !root.dataset.edge) {
         if (Math.random() < 0.28) { model.tap(); }
         else {
@@ -1172,17 +1179,25 @@ export function createCompanion(host, context) {
   // 换装桥：买皮肤的钱从生活手帐的钱包里扣，并记进小账本；皮肤目录和拥有状态都在 skinModel。
   const skinBridge = {
     list: (who, options) => skinModel.list(who, options),
+    unlock: (who,id,phrase) => skinModel.unlock(who,id,phrase),
     equippedId: who => skinModel.equippedId(who),
     buy: (who, id) => skinModel.buy(who, id, (price, skin) => skin.currency === 'tickets'
       ? lifeModel.spendTickets(price, `花 ${price} 张花票买了皮肤「${skin.name}」。`, who)
       : lifeModel.spend(price, `花 ${price} 金币买了皮肤「${skin.name}」。`, who)),
     equip: (who, id) => skinModel.equip(who, id),
   };
+  function skinChanged(who, detail) {
+    const mine = who === character.id;
+    if (mine && detail.action === 'equipped') refreshArt();
+    if (mine && detail.action !== 'unlocked') { say(detail.action === 'bought' ? 'care.skinBought' : 'care.skinEquipped', 4200, true); if (detail.action === 'equipped') sparkle(null, 14); }
+    house?.render();
+  }
   life = createLifeWindow(host, {
     model:lifeModel, skins:skinBridge, characters:CHARACTER_IDS.map(id => CHARACTERS[id]), currentId:() => character.id,
     art:(item, pose) => artFor(item)[pose] || null, nameOf,
     skinArt:(item, skin, pose) => assetUrl(item, pose, usesDatabaseArt(item) ? readArt() : null, skin),
-    onOpen:() => {chat?.close(); house?.close(); setNotebook(false); storyteller.dismiss();},
+    onOpen:() => {chat?.close(); house?.close(); mall?.close(false); setNotebook(false); storyteller.dismiss();},
+    onOpenMall:id => mall?.open(id),
     onChange:() => {if (point) update();},
     onEvent:(type, who, detail) => {
       const mine = who === character.id;
@@ -1191,17 +1206,21 @@ export function createCompanion(host, context) {
       if (type === 'wage') { const result = care.wage(who, detail.id); if (mine) { say('care.wage', 4200, true); if (result.tierUp) celebrate(result.tierUp); } }
       if (type === 'welfare') say('care.welfare', 4200, true);
       if (type === 'wage' || type === 'welfare') { const rect = life.coinAnchor(); effects.burst('coins', rect.x, rect.y, ['#f2c14e', '#e0a526', '#ffe08a'], 12); }
-      if (type === 'skin') {
-        if (detail.action === 'bought') { const rect = life.coinAnchor(); effects.burst('coins', rect.x, rect.y, ['#f2c14e', '#e0a526', '#ffe08a'], 12); }
-        if (mine && detail.action === 'equipped') refreshArt();
-        if (mine) { say(detail.action === 'bought' ? 'care.skinBought' : 'care.skinEquipped', 4200, true); if (detail.action === 'equipped') sparkle(null, 14); }
-        house?.render();
-      }
+      if (type === 'skin') skinChanged(who,detail);
     },
     blocked:() => model.snapshot.busy || chat?.busy,
     onStopTask:stopDatabaseTask,
     onOpenDatabase:() => openPage('form-fill'),
     returnFocus:returnToPet,
+  });
+  mall = createMallWindow(host, {
+    model:lifeModel, skins:skinBridge, character:CHARACTERS.erii, characters:CHARACTER_IDS.map(id=>CHARACTERS[id]),currentId:()=>character.id, nameOf,
+    skinArt:(item,skin,pose)=>assetUrl(item,pose,null,skin),
+    onOpen:()=>{chat?.close(); life?.close(); house?.close(); setNotebook(false); storyteller.dismiss();},
+    onClose:()=>{if(point)update();}, onChange:()=>{if(point)update();},
+    onEvent:(_type,who,detail)=>skinChanged(who,detail),
+    onWardrobe:id=>life.open(id,'skins'), onWork:id=>life.open(id,'jobs'),
+    onStopTask:stopDatabaseTask, onOpenDatabase:()=>openPage('form-fill'), returnFocus:returnToPet,
   });
   house = createPetHouse(host, {
     characters: CHARACTER_IDS.map(id => CHARACTERS[id]), currentId: () => character.id, care,
@@ -1219,7 +1238,7 @@ export function createCompanion(host, context) {
         return changed;
       },
       needsEnabled: () => settings.needs !== false,
-      onOpen: () => { chat?.close(); life?.close(); setNotebook(false); storyteller.dismiss(); },
+      onOpen: () => { chat?.close(); life?.close(); mall?.close(false); setNotebook(false); storyteller.dismiss(); },
       onClose: () => update(),
     },
     returnFocus: returnToPet,
@@ -1245,6 +1264,7 @@ export function createCompanion(host, context) {
     model,
     get chat() { return chat; },
     life,
+    mall,
     lifeModel,
     skins: skinModel,
     care,
@@ -1258,6 +1278,7 @@ export function createCompanion(host, context) {
       repairService.invalidate();
       chat?.destroy();
       life.destroy();
+      mall.destroy();
       house.destroy();
       notebookSheet.destroy();
       effects.destroy();

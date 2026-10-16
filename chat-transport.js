@@ -1,3 +1,4 @@
+import {splitReasoning} from './chat-history.js';
 // Version authority: official 1.14.0–1.19.0 openai.js and the installed 1.17.0 source.
 // Each request owns its AbortSignal. No global generation/stop events or setting edits.
 export const CHAT_DEFAULTS = { mode: 'current', url: '', model: '', nickname: '', relationship: '恋人', maxTokens: 768, rememberKey: false, replyStyle: 'natural', memory: '' };
@@ -7,7 +8,7 @@ export function normalizeChatConfig(value = {}, defaults = {}) {
   return { ...CHAT_DEFAULTS, mode: value.mode === 'custom' ? 'custom' : 'current',
     url: String(value.url || '').trim().slice(0, 1000), model: String(value.model || '').trim().slice(0, 200),
     nickname: String(value.nickname || '').trim().slice(0, 40), relationship: String(value.relationship || relationship).trim().slice(0, 80),
-    maxTokens: Math.min(4096, Math.max(128, Number(value.maxTokens) || 768)), rememberKey: value.rememberKey === true,
+    maxTokens: Math.min(4096, Math.max(128, Math.floor(Number(value.maxTokens) || 768))), rememberKey: value.rememberKey === true,
     replyStyle: ['natural', 'short', 'detailed'].includes(value.replyStyle) ? value.replyStyle : 'natural',
     memory: String(value.memory || '').trim().slice(0, 2000) };
 }
@@ -21,14 +22,28 @@ export function apiBase(value) {
   return url.href.replace(/\/$/, '');
 }
 
-export function responseText(data) {
-  const parts = value => typeof value === 'string' ? value : Array.isArray(value)
-    ? value.filter(p => p.type !== 'thinking' && p.type !== 'reasoning').map(p => p.text || '').join('') : '';
-  return parts(data?.choices?.[0]?.message?.content) || data?.choices?.[0]?.text
-    || parts(data?.content) || data?.candidates?.[0]?.content?.parts?.filter(p => !p.thought).map(p => p.text || '').join('')
-    || data?.results?.[0]?.text || data?.output?.filter(p => p.type === 'message').map(p => parts(p.content)).join('')
-    || data?.response || '';
+export function responseMessage(data) {
+  if (typeof data === 'string') return splitReasoning(data);
+  const message=data?.choices?.[0]?.message;
+  const thoughts=[];
+  const parts=value=>typeof value === 'string' ? value : Array.isArray(value) ? value.map(part=> {
+    if (['thinking','reasoning','reasoning_text'].includes(part?.type) || part?.thought === true) {
+      const text=part.thinking || part.text; if (typeof text === 'string') thoughts.push(text); return '';
+    }
+    return typeof part?.text === 'string' ? part.text : '';
+  }).join('') : '';
+  const metadata=message?.reasoning_content || message?.reasoning || data?.reasoning_content;
+  if (typeof metadata === 'string') thoughts.push(metadata);
+  const output=Array.isArray(data?.output) ? data.output : [];
+  for (const part of output) if (part.type === 'reasoning') {
+    const text=parts(part.summary || part.content); if(text)thoughts.push(text);
+  }
+  const content=parts(message?.content) || data?.choices?.[0]?.text || parts(data?.content)
+    || parts(data?.candidates?.[0]?.content?.parts) || data?.results?.[0]?.text
+    || output.filter(part=>part.type === 'message').map(part=>parts(part.content)).join('') || data?.response || '';
+  return splitReasoning(typeof content === 'string' ? content : '', thoughts.join('\n\n'));
 }
+export const responseText = data => responseMessage(data).content;
 
 export function safeChatError(error, key = '') {
   let text = typeof error === 'string' ? error : error?.message || '连接没有成功，请检查 API 设置后重试。';
@@ -70,7 +85,7 @@ export async function requestModelList(host, context, config, { signal, apiKey =
   return models;
 }
 
-export async function requestChat(host, context, config, messages, { signal, apiKey = '', loadModule } = {}) {
+export async function requestChat(host, context, config, messages, { signal, apiKey = '', loadModule, includeReasoning = false } = {}) {
   signal?.throwIfAborted();
   if (context.eriiPreviewMode === 'live' && config.mode !== 'custom')
     throw new Error('独立预览页无法读取酒馆当前 API，请在连接设置中选择“单独配置 API”。安装到酒馆后可使用当前连接。');
@@ -108,7 +123,8 @@ export async function requestChat(host, context, config, messages, { signal, api
     data = await fetchJSON(core.getGenerateUrl(context.mainApi), body);
   } else throw new Error(`当前连接类型 ${context.mainApi} 暂不支持独立聊天，请使用聊天补全、文本补全或单独配置 API。`);
   signal?.throwIfAborted();
-  const text = String(responseText(data)).trim();
-  if (!text) throw new Error('接口返回了空回复，请检查模型或提高回复长度后重试。');
-  return text.slice(0, 16000);
+  const result = responseMessage(data);
+  if (!result.content && !(includeReasoning && result.reasoning)) throw new Error('接口没有返回正文，请提高回复长度后重试。');
+  result.content=result.content.slice(0,16000);
+  return includeReasoning ? result : result.content;
 }

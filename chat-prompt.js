@@ -67,7 +67,7 @@ export function chatMessages(config, context, history, persona = ERII) {
   const selected = [];
   let characters = 0;
   for (const item of history.slice(-40).reverse()) {
-    if (!['user', 'assistant'].includes(item.role) || typeof item.content !== 'string') continue;
+    if (!['user', 'assistant'].includes(item.role) || typeof item.content !== 'string' || !item.content.trim()) continue;
     if (selected.length && characters + item.content.length > 24000) break;
     selected.unshift({ role: item.role, content: item.content });
     characters += item.content.length;
