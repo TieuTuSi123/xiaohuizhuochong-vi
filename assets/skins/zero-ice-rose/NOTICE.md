@@ -1,11 +1,11 @@
-# 皇女零 · 冰蓝蔷薇
+# Hoàng Nữ Zero · Băng Lam Tường Vi (Hoa Hồng Xanh Băng)
 
-27 张透明 WebP，同人桌宠皮肤；基于用户提供的皇女零服装参考和已确认母图生成。
+27 ảnh WebP nền trong suốt, skin nuôi pet ảo màn hình (doujin desktop pet); được tạo dựa trên tư liệu tham khảo trang phục của Hoàng Nữ Zero do người dùng cung cấp và ảnh gốc đã xác nhận.
 
-原始 PNG、具体提示词、生成与筛选记录由维护素材目录 `Zero-Skin-Ice-Rose` 保留。
-发布图等比例缩至 960×960。抱天鹅选用修正后的第二版；只保留怀中一只，其他姿势头顶保留一只黑天鹅。
-右手短黑手套、左手裸手。四个探头方向、三种工作与四种食物均有各自配图。
-头顶探头图为正向源图，由插件在运行时旋转，不重复旋转素材。
+File PNG gốc, prompt chi tiết, cùng lịch sử tạo và lọc ảnh được lưu trữ tại thư mục tài nguyên `Zero-Skin-Ice-Rose`.
+Ảnh phát hành được thu nhỏ theo tỷ lệ chuẩn 960×960. Dáng ôm thiên nga sử dụng bản thứ hai đã chỉnh sửa; chỉ giữ lại một con trong lòng, các tư thế khác sẽ giữ một con thiên nga đen trên đầu.
+Tay phải đeo găng tay ngắn màu đen, tay trái để trần. Bốn hướng thò đầu/nhìn ngó, ba trạng thái làm việc và bốn loại thức ăn đều có ảnh minh họa riêng.
+Ảnh thò đầu từ trên xuống là ảnh nguồn hướng thẳng, plugin sẽ tự xoay trong quá trình chạy, không lưu trùng lặp tài nguyên xoay.
 
-获取方式：在商场选择零，输入用户指定密语解锁；不售卖、不扣金币或花票。拥有与穿着按角色保存。
-本说明不授予原作或参考图的商业使用权。素材指纹及尺寸见同目录 `media-manifest.json`。
+Cách nhận: Chọn Zero trong Thương Thành, nhập mật khẩu người dùng chỉ định để mở khóa; không bán, không trừ vàng hay vé hoa. Quyền sở hữu và trạng thái mặc được lưu riêng theo từng nhân vật.
+Mô tả này không cấp quyền thương mại cho tác phẩm gốc hoặc ảnh tham khảo. Mã vân tay tài nguyên (fingerprint/hash) và kích thước vui lòng xem tại `media-manifest.json` trong cùng thư mục.

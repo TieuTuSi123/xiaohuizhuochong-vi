@@ -7,7 +7,7 @@
   "version": "1.0.1",
   "minimum_client_version": "1.14.0",
   "auto_update": true,
-  "homePage": "https://github.com/dzsks/xiaohuizhuochong",
+  "homePage": "https://github.com/TieuTuSi123/xiaohuizhuochong-vi",
   "hooks": {
     "activate": "onActivate",
     "enable": "onEnable",

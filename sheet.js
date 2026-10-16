@@ -1,4 +1,4 @@
-// 窗口外形：电脑上是可拖动的浮窗；手机（可见宽度 < 640）上是从底部拉起的面板，按住顶部往下拉即可关闭。
+// Kiểu dáng cửa sổ: Trên máy tính là cửa sổ nổi có thể kéo thả; trên điện thoại (độ rộng nhìn thấy < 640) là bảng kéo lên từ đáy, nhấn giữ phần đỉnh rồi kéo xuống là có thể đóng.
 export const MOBILE_WIDTH = 640;
 const INTERACTIVE = 'button, input, textarea, select, a, label, [role="tab"], [contenteditable="true"]';
 const leaving = new WeakMap();
@@ -16,7 +16,7 @@ export function createSheet(host, root, { grip = null, drag = [], dragSelector =
   const isSheet = () => viewport(host).width < MOBILE_WIDTH;
   function layout() {
     if (destroyed || root.hidden) return;
-    // open() 已移除离场样式：撤销上一次关闭，防止旧回调把新打开的窗口关掉。
+    // open() đã gỡ bỏ class rời khỏi: Hủy bỏ lần đóng trước đó, tránh callback cũ đóng nhầm cửa sổ mới mở.
     if (!root.classList.contains('is-leaving')) cancelLeave(root);
     const view = viewport(host);
     const sheet = view.width < MOBILE_WIDTH;
@@ -76,7 +76,7 @@ export function createSheet(host, root, { grip = null, drag = [], dragSelector =
   };
 }
 
-// 关闭前播放离场动画（减少动态效果时直接关闭）。
+// Phát hoạt ảnh rời khỏi trước khi đóng (khi giảm hiệu ứng động thì đóng trực tiếp).
 export function leave(host, root, done) {
   cancelLeave(root);
   const reduced = host.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;

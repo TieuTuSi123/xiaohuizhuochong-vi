@@ -1,32 +1,32 @@
-# 绘梨衣桌宠动作图
+# Ảnh động tác pet ảo màn hình (Desktop Pet) - Erii
 
-角色：上杉绘梨衣，《龙族》非官方同人。
+Nhân vật: Uesugi Erii, tác phẩm doujin không chính thức của《Long Tộc / Dragon Raja》.
 
-造型参考：顾清寒，Cardwright 绘梨衣桌宠素材。
-原素材：https://github.com/1798547983tt/Cardwright/tree/359019715afc60813384964b023a09c6dd6ed326/assets/pets/erii
-原素材许可：CC BY-NC 4.0，https://creativecommons.org/licenses/by-nc/4.0/
+Tham khảo tạo hình: Cố Thanh Hàn, tài nguyên desktop pet Erii từ Cardwright.
+Tài nguyên gốc: https://github.com/1798547983tt/Cardwright/tree/359019715afc60813384964b023a09c6dd6ed326/assets/pets/erii
+Giấy phép tài nguyên gốc: CC BY-NC 4.0, https://creativecommons.org/licenses/by-nc/4.0/
 
-原有 16 张动作图由 ImageGen 根据上述参考生成，再切分为 384×384 透明无损 WebP。
-v0.3.0 的被拎起、坐稳、招呼、探头 4 张图为新增互动姿势。抱鸭动作沿用当时的修订素材。
-v0.3.1 对写记录、喝茶、伸懒腰、被拎起、坐稳、招呼、探头七张图分别使用内置 ImageGen 修正邻格残片及裁切边缘，再按统一大小与基线导出；保留透明通道。
-保留原作者署名；本包美术素材按 CC BY-NC 4.0 仅供非商业使用。
-角色及相关商标归原权利人所有。本项目不代表原作或官方授权。
+16 ảnh động tác ban đầu do ImageGen tạo dựa trên các tài liệu tham khảo nêu trên, sau đó được cắt thành file WebP trong suốt, không nén (lossless) kích thước 384×384.
+Ở phiên bản v0.3.0, 4 ảnh gồm: bị nhấc bổng, ngồi vững, vẫy tay chào và thò đầu nhìn ngó là các tư thế tương tác mới được thêm vào. Động tác ôm vịt vẫn dùng tài nguyên đã chỉnh sửa ở thời điểm đó.
+Ở phiên bản v0.3.1, đối với 7 ảnh gồm: ghi chép, uống trà, vươn vai, bị nhấc bổng, ngồi vững, vẫy tay chào và thò đầu nhìn ngó, ImageGen tích hợp đã được dùng để khử mảnh vụn từ ô lân cận và chỉnh lại viền cắt, sau đó xuất ra theo kích thước và đường cơ sở (baseline) đồng nhất; kênh trong suốt (alpha channel) được giữ nguyên.
+Giữ nguyên ghi nhận tác giả gốc (credit); tài nguyên mỹ thuật trong gói này tuân theo giấy phép CC BY-NC 4.0, chỉ dành cho mục đích phi thương mại.
+Nhân vật và nhãn hiệu liên quan thuộc quyền sở hữu của chủ bản quyền gốc. Dự án này không đại diện cho tác phẩm gốc hoặc sự ủy quyền chính thức.
 
-v0.5.11 新增 edge-left-v2.webp、edge-right-v2.webp、edge-bottom.webp 三张探头图，由内置 ImageGen 分别生成，再等比例缩小为 512×512 透明无损 WebP。三张图均保留头顶小黄鸭，裸手不戴手套。左右探头根据用户反馈重新绘制，改成身体藏在边缘后、只露一只扶边手的自然姿势。上方探头由浏览器旋转正面素材显示。提示词与原始 PNG 在维护工作区“outputs/小绘探头素材-v0.5.11”保存，不放入轻量安装包。造型参考与非商业许可继续沿用本文件说明。
-
-
-v0.7.0 新增 assets/life/work-bookshop.webp、work-bakery.webp、work-florist.webp、eating.webp。内置 ImageGen 参考本项目现有 idle.webp 的角色与画风，分别生成书店、甜品店、花店和吃饭的新姿势；保留头顶小黄鸭，裸手不戴手套。原图为独立透明 PNG，发布版仅等比例缩小并压缩为 768×768 WebP（质量 90，透明通道保留），没有再次抠图或改画。原图和完整提示词保存在维护工作区，不进入轻量安装包。造型参考署名及非商业使用条件沿用本文件。
+v0.5.11 Thêm mới 3 ảnh thò đầu nhìn ngó gồm edge-left-v2.webp, edge-right-v2.webp, edge-bottom.webp, được tạo riêng biệt bằng ImageGen tích hợp, sau đó thu nhỏ theo tỷ lệ chuẩn thành ảnh WebP trong suốt, không nén kích thước 512×512. Cả ba ảnh đều giữ chú vịt vàng nhỏ trên đầu, tay trần không đeo găng. Động tác thò đầu từ hai bên trái/phải được vẽ lại dựa trên phản hồi của người dùng, đổi thành tư thế tự nhiên hơn với cơ thể giấu sau mép màn hình và chỉ để lộ một tay bám mép. Động tác thò đầu từ phía trên được trình duyệt xoay từ tài nguyên mặt trước để hiển thị. Prompt và file PNG gốc được lưu trong không gian làm việc bảo trì “outputs/小绘探头素材-v0.5.11”, không đưa vào gói cài đặt rút gọn. Tham khảo tạo hình và giấy phép phi thương mại tiếp tục tuân theo bản mô tả này.
 
 
-v0.7.1 新增 assets/life/eat-pudding.webp、eat-riceball.webp、eat-omurice.webp、eat-ramen.webp 四张独立吃饭图。内置 ImageGen 根据本项目 idle.webp 的角色画风及原 eating.webp 的自然坐姿参考分别生成；各自呈现布丁、海苔饭团、蛋包饭、筷子夹拉面，不戴手套，头顶小黄鸭保留。发布版只等比例缩小并压缩为 768×768 透明 WebP。原图与完整提示词保存在工作区 outputs/Erii-Food-Art-v0.7.1 和“小绘-v0.7.1-四种吃饭配图提示词.md”，不进入安装包；署名及非商业条件沿用上文。
+v0.7.0 Thêm mới assets/life/work-bookshop.webp, work-bakery.webp, work-florist.webp, eating.webp. ImageGen tích hợp tham khảo nhân vật và phong cách của idle.webp hiện có trong dự án để tạo các tư thế mới tương ứng với: hiệu sách, tiệm bánh ngọt, tiệm hoa và đang ăn; giữ lại chú vịt vàng nhỏ trên đầu, tay trần không đeo găng. Ảnh gốc là file PNG nền trong suốt độc lập, bản phát hành chỉ được thu nhỏ theo tỷ lệ và nén thành WebP 768×768 (chất lượng 90, giữ nguyên kênh trong suốt), không thực hiện tách nền hay vẽ lại lần hai. Ảnh gốc và prompt hoàn chỉnh được lưu trong không gian làm việc bảo trì, không đưa vào gói cài đặt rút gọn. Việc ghi nhận tạo hình tham khảo và điều kiện phi thương mại tiếp tục tuân theo văn bản này.
 
 
-v0.8.0 新增的零的动作图在 assets/zero/，署名与许可见 assets/zero/NOTICE.md。奶蛋的图属于龙血玄黄·数据库，本扩展只在运行时读取数据库已经加载的图片，不在本包内。
+v0.7.1 Thêm mới 4 ảnh ăn uống độc lập gồm assets/life/eat-pudding.webp, eat-riceball.webp, eat-omurice.webp, eat-ramen.webp. ImageGen tích hợp tạo các ảnh này dựa trên phong cách nhân vật từ idle.webp của dự án và tham khảo tư thế ngồi tự nhiên từ eating.webp gốc; lần lượt thể hiện các món bánh pudding, cơm nắm rong biển, cơm cuộn trứng (omurice), đũa gắp mì ramen, không đeo găng tay, giữ chú vịt vàng nhỏ trên đầu. Bản phát hành chỉ thu nhỏ theo tỷ lệ và nén thành WebP trong suốt kích thước 768×768. Ảnh gốc và prompt đầy đủ được lưu tại thư mục làm việc outputs/Erii-Food-Art-v0.7.1 và “小绘-v0.7.1-四种吃饭配图提示词.md”, không đưa vào gói cài đặt; việc ghi nhận tác giả và điều kiện phi thương mại áp dụng như trên.
 
 
-v0.9.3 新增月读命·紫夜礼裙，27 张透明动作/生活图在 `assets/skins/erii-purple-night/`。服装参考用户提供图片，由 ImageGen 生成，发布版仅等比例缩小压缩为 960×960 WebP。新皮肤保留手丝；抱鸭图只有怀中鸭子，其他图保留头顶鸭子。新皮肤的来源与使用边界见 [单独说明](skins/erii-purple-night/NOTICE.md)。原默认皮肤图片字节未变。
+v0.8.0 Các ảnh động tác mới thêm của Zero nằm ở assets/zero/, thông tin tác giả và giấy phép vui lòng xem tại assets/zero/NOTICE.md. Ảnh của Trứng Sữa (奶蛋) thuộc về Cơ sở dữ liệu Long Huyết Huyền Hoàng, tiện ích mở rộng này chỉ đọc các hình ảnh đã được cơ sở dữ liệu tải sẵn trong quá trình chạy, không đính kèm trong gói này.
 
 
-## v1.0.0 零的皇女皮肤
+v0.9.3 Thêm mới skin Tsukuyomi-no-Mikoto · Dạ Tử Lễ Phục, gồm 27 ảnh động tác/sinh hoạt nền trong suốt tại `assets/skins/erii-purple-night/`. Trang phục tham khảo hình ảnh do người dùng cung cấp, được tạo bởi ImageGen, bản phát hành chỉ thu nhỏ theo tỷ lệ và nén thành WebP 960×960. Skin mới vẫn giữ chi tiết tất tay ren; ảnh ôm vịt chỉ có vịt trong lòng, các ảnh khác giữ vịt trên đầu. Nguồn gốc và phạm vi sử dụng của skin mới vui lòng xem tại [Bản thuyết minh riêng](skins/erii-purple-night/NOTICE.md). Dữ liệu byte của các ảnh skin mặc định ban đầu không đổi.
 
-新增 `skins/zero-ice-rose/` 27 张960×960透明WebP和媒体清单。沿用用户确认母图的同人造型，原图和提示词在维护素材目录留存；获取方式为用户指定密语解锁，非购买。详情见该目录NOTICE.md。
+
+## v1.0.0 Skin Hoàng Nữ của Zero
+
+Thêm mới 27 ảnh WebP nền trong suốt 960×960 và danh sách media tại `skins/zero-ice-rose/`. Tiếp tục sử dụng tạo hình doujin từ ảnh gốc đã được người dùng xác nhận, ảnh gốc và prompt được lưu trữ trong thư mục tài nguyên bảo trì; cách thức sở hữu là nhập mật khẩu người dùng chỉ định để mở khóa, không phải mua bán. Chi tiết vui lòng xem tại NOTICE.md trong thư mục đó.

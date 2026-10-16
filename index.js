@@ -56,7 +56,7 @@ export function createCompanion(host, context) {
   let character = resolveCharacter(settings.character);
   let databaseArt = null;
   let artCheckedAt = 0;
-  // 换装：买过的皮肤和正在穿的皮肤按角色存在 settings.skins；钱从生活手帐的钱包里扣。
+  // Đổi trang phục: Trang phục đã mua và đang mặc được lưu theo nhân vật tại settings.skins; tiền được trừ từ ví trong sổ tay đời sống.
   const skinModel = new SkinModel(settings.skins, { persist: value => { settings.skins = value; persistStore(); } });
   const skinOf = id => skinModel.equipped(id);
   let images = imageUrls(character, null, skinOf(character.id));
@@ -74,7 +74,7 @@ export function createCompanion(host, context) {
     if(done.who===character.id){say('care.mealDone',4600);if(result.tierUp)celebrate(result.tierUp);}
   }});
   if (firstCareRun) {
-    // 老用户升级：按已有的聊天、打工、吃饭记录给小绘折算初始亲密度，最多到「熟悉」档。
+    // Nâng cấp người dùng cũ: Quy đổi các bản ghi trò chuyện, làm việc, ăn uống sẵn có thành độ thân mật ban đầu cho Erii, tối đa đạt mức "Quen thuộc".
     const history = Array.isArray(settings.chat?.history) ? settings.chat.history : [];
     const stamps = [...history.map(item => Date.parse(item?.at)), ...lifeModel.state.journal.map(item => item.at)].filter(Number.isFinite);
     care.seed('erii', { chats: history.filter(item => item?.role === 'assistant').length, jobs: lifeModel.state.jobs, meals: lifeModel.state.meals,
@@ -84,7 +84,7 @@ export function createCompanion(host, context) {
   const timers = new Set();
   const fxTier = () => resolveTier(settings.effects, host);
   const effects = createEffects(host, { tier: fxTier });
-  // 检修：写入前的备份存在浏览器本地；写入只走数据库公开接口。旁观陪聊：只数开启后新出现的楼层。
+  // Bảo trì: Bản sao lưu trước khi ghi được lưu cục bộ trong trình duyệt; thao tác ghi chỉ thông qua API công khai của CSDL. Quan sát đồng hành: Chỉ đếm các tầng bài mới xuất hiện sau khi bật.
   const backups = createBackupStore(host);
   const databaseBusy = () => {
     try { return readDatabaseView(doc).busy || Boolean(model.snapshot.busy); }
@@ -145,7 +145,7 @@ export function createCompanion(host, context) {
   root.dataset.version = VERSION;
   root.dataset.pose = 'idle';
   root.style.transition = 'none';
-  // Panels are siblings: a transformed ancestor would change their fixed coordinates.
+  // Các panel nằm cùng cấp: nếu có phần tử cha bị transform sẽ làm lệch tọa độ fixed của chúng.
   const overlay = el(doc, 'div', undefined, 'erii-companion erii-companion--ui');
   overlay.id = `${ID}-ui`;
   const portrait = el(doc, 'button', undefined, 'erii-companion__portrait');
@@ -176,7 +176,7 @@ export function createCompanion(host, context) {
     return loaded.get(pose);
   }
   function preloadArt() {
-    // 新皮肤只先准备任务和拖动常用图，其余按需加载，减少手机首屏解码。
+    // Trang phục mới chỉ chuẩn bị trước ảnh nhiệm vụ và kéo thả thông dụng, còn lại tải theo nhu cầu để giảm tải giải mã ở màn hình đầu trên điện thoại.
     const poses = skinOf(character.id) ? ['idle','received','writing','complete','error','wave','lifted','land'] : Object.keys(images);
     for (const pose of poses) loadAsset(pose);
   }
@@ -191,7 +191,7 @@ export function createCompanion(host, context) {
     }
     const next = shownSprite === 0 ? 1 : 0;
     sprites[next].src = images[pose];
-    try { await sprites[next].decode?.(); } catch { /* preloaded image remains usable */ }
+    try { await sprites[next].decode?.(); } catch { /* ảnh tải trước vẫn dùng được */ }
     if (destroyed || version !== swapVersion) return;
     root.dataset.pose = pose;
     root.dataset.edge = pose.startsWith('edge-') ? pose.slice(5) : '';
@@ -210,16 +210,16 @@ export function createCompanion(host, context) {
   const messageLine = el(doc, 'p', '', 'erii-bubble__line');
   const messageText = el(doc, 'span', undefined, 'erii-companion__message-text');
   const messageActions = el(doc, 'div', undefined, 'erii-bubble__actions');
-  const messageStop = el(doc, 'button', '停止', 'erii-companion__message-action');
+  const messageStop = el(doc, 'button', 'Dừng', 'erii-companion__message-action');
   messageStop.type = 'button';
   messageStop.hidden = true;
-  messageStop.setAttribute('aria-label', '停止数据库任务');
+  messageStop.setAttribute('aria-label', 'Dừng nhiệm vụ CSDL');
   const messageLook = el(doc, 'button', undefined, 'erii-companion__message-action erii-bubble__look');
   messageLook.type = 'button'; messageLook.hidden = true;
-  messageLook.append(icon(doc, 'look'), el(doc, 'span', '去看看'));
+  messageLook.append(icon(doc, 'look'), el(doc, 'span', 'Đi xem thử'));
   const messageReply = el(doc, 'button', undefined, 'erii-companion__message-action erii-bubble__reply');
   messageReply.type = 'button'; messageReply.hidden = true;
-  const messageReplyText = el(doc, 'span', '回她');
+  const messageReplyText = el(doc, 'span', 'Đáp lời');
   messageReply.append(icon(doc, 'chat'), messageReplyText);
   messageActions.append(messageStop, messageLook, messageReply);
   message.append(messageName, messageLine, messageText, messageActions);
@@ -234,22 +234,22 @@ export function createCompanion(host, context) {
   const lifeBubble = el(doc, 'div', undefined, 'erii-companion__life-bubble');
   lifeBubble.hidden = true;
   const lifeText = el(doc, 'span', undefined, 'erii-companion__life-text');
-  const lifeClaim = el(doc, 'button', '领工资', 'erii-companion__life-claim'); lifeClaim.type = 'button';
-  lifeClaim.setAttribute('aria-label', '领取工资（桌宠气泡）'); lifeBubble.append(lifeText, lifeClaim);
+  const lifeClaim = el(doc, 'button', 'Nhận lương', 'erii-companion__life-claim'); lifeClaim.type = 'button';
+  lifeClaim.setAttribute('aria-label', 'Nhận tiền lương (bong bóng pet)'); lifeBubble.append(lifeText, lifeClaim);
   const storyBubble = el(doc, 'section', undefined, 'erii-companion__story');
   storyBubble.hidden = true;
   const storyHeading = el(doc, 'div', undefined, 'erii-companion__story-heading');
   const storyTitle = el(doc, 'strong');
   const storyClose = el(doc, 'button', '×', 'erii-companion__story-close');
-  storyClose.type = 'button'; storyClose.setAttribute('aria-label', '收起小故事');
+  storyClose.type = 'button'; storyClose.setAttribute('aria-label', 'Thu gọn mẩu chuyện');
   storyHeading.append(storyTitle, storyClose);
   const storyText = el(doc, 'p');
-  // Update only when a new story starts, rather than announcing every sample.
+  // Chỉ cập nhật khi một câu chuyện mới bắt đầu, không thông báo ở mỗi mẫu nhỏ.
   storyText.setAttribute('aria-live', 'polite');
-  const storyNext = el(doc, 'button', '换一篇', 'erii-companion__story-next');
+  const storyNext = el(doc, 'button', 'Đổi câu chuyện', 'erii-companion__story-next');
   storyNext.type = 'button';
   const storyFoot = el(doc, 'div', undefined, 'erii-companion__story-foot');
-  storyFoot.append(el(doc, 'span', '每 30 秒换一篇'), storyNext);
+  storyFoot.append(el(doc, 'span', 'Đổi chuyện mỗi 30 giây'), storyNext);
   storyBubble.append(storyHeading, storyText, storyFoot);
   root.append(portrait);
   overlay.append(message, notebookRoot, storyBubble, lifeBubble);
@@ -274,7 +274,7 @@ export function createCompanion(host, context) {
     state.unanswered = Math.max(0, Number(state.unanswered) || 0); state.askedAt = Number(state.askedAt) || 0;
     return state;
   }
-  // 回她的评论、摸摸、送礼都算“理她了”，委屈就消了。
+  // Trả lời bình luận, xoa đầu, tặng quà đều tính là "đã để ý đến cô ấy", cảm giác tủi thân sẽ biến mất.
   function answered(id = character.id) {
     const state = watchOf(id);
     if (!state.unanswered) return;
@@ -323,7 +323,7 @@ export function createCompanion(host, context) {
     if (item.id === character.id) return images;
     return imageUrls(item, usesDatabaseArt(item) ? readArt() : null, skinOf(item.id));
   }
-  // 换装后清掉旧图缓存，再准备常用图；当前姿势会换成新图。
+  // Sau khi đổi trang phục, xóa bộ đệm ảnh cũ rồi chuẩn bị các ảnh thường dùng; tư thế hiện tại sẽ đổi sang ảnh mới.
   function refreshArt() {
     images = imageUrls(character, usesDatabaseArt(character) ? readArt(true) : null, skinOf(character.id));
     loaded.clear(); failedEdge = null; assetFailed = false; lastPose = '';
@@ -351,7 +351,7 @@ export function createCompanion(host, context) {
     if (!model.ingest(snapshot)) return;
     if (model.history.length && model.history[0]?.id !== previousHistory) {
       previousHistory = model.history[0].id;
-      // 出错时多留一会儿，给用户点“去看看”的时间。
+      // Khi xảy ra lỗi sẽ giữ lại lâu hơn một chút để người dùng có thời gian nhấn "Đi xem thử".
       terminalUntil = Date.now() + (['error', 'warning'].includes(model.history[0].kind) ? 9000 : 4500);
     }
     update();
@@ -363,17 +363,17 @@ export function createCompanion(host, context) {
   }
   function connectionText(snapshot) {
     if (connectionNote?.until > Date.now()) return connectionNote.text;
-    if (yielded) return `${character.fullName}的图要从数据库读取。请保持数据库运行并开启它自带的桌宠；读到之前由数据库原桌宠陪你。`;
-    return assetFailed ? '动作素材加载失败，请更新扩展后刷新页面' :
-      snapshot.connected ? snapshot.busy ? '数据库正在处理任务' : snapshot.activityKnown === false ? '已连接数据库 · 等待任务通知' : '已连接数据库 · 现在空闲' :
-      root.dataset.source === 'unsupported-view' ? '当前数据库界面版本暂不兼容，请反馈版本' : '等待原数据库加载；保持原数据库脚本启用即可';
+    if (yielded) return `Ảnh của ${character.fullName} cần đọc từ CSDL. Vui lòng duy trì CSDL hoạt động và bật pet mặc định của nó; trước khi đọc được sẽ do pet gốc của CSDL đồng hành cùng bạn.`;
+    return assetFailed ? 'Tải tài nguyên động tác thất bại, vui lòng cập nhật tiện ích rồi tải lại trang' :
+      snapshot.connected ? snapshot.busy ? 'CSDL đang xử lý nhiệm vụ' : snapshot.activityKnown === false ? 'Đã kết nối CSDL · Đang đợi thông báo nhiệm vụ' : 'Đã kết nối CSDL · Hiện đang rảnh' :
+      root.dataset.source === 'unsupported-view' ? 'Phiên bản giao diện CSDL hiện tại tạm thời chưa tương thích, vui lòng báo cáo phiên bản' : 'Đang đợi CSDL gốc tải; chỉ cần duy trì script CSDL gốc được bật';
   }
   function renderNotebook() {
     if (notebookRoot.hidden) return;
     const snapshot = model.snapshot;
     const view = care.view(character.id, moodExtra(character.id));
     notebook.render({
-      title: care.state(character.id).nickname ? `${care.state(character.id).nickname}的小本子` : character.notebookTitle,
+      title: care.state(character.id).nickname ? `Cuốn sổ nhỏ của ${care.state(character.id).nickname}` : character.notebookTitle,
       care: { ...view, honor: character.titles[view.tier], moodName: MOOD_NAMES[view.mood] },
       needsEnabled: settings.needs !== false, connection: connectionText(snapshot), connected: snapshot.connected,
       tasks: snapshot.tasks, history: model.history, busy: snapshot.busy, enabled: settings.enabled !== false,
@@ -437,7 +437,7 @@ export function createCompanion(host, context) {
       else if (x - offsetLeft - 12 >= pw + 10) { px = x - pw - 10; py = y + size / 2 - ph / 2; }
       else if (offsetLeft + width - x - size - 12 >= pw + 10) { px = x + size + 10; py = y + size / 2 - ph / 2; }
       else {
-        // In narrow views scroll the notebook instead of placing it over her face.
+        // Trong góc nhìn hẹp, cuộn cuốn sổ thay vì đặt đè lên mặt cô ấy.
         const upwards = above >= below;
         panel.style.maxHeight = `${Math.max(48, (upwards ? above : below) - 10)}px`;
         ph = panel.offsetHeight;
@@ -447,7 +447,7 @@ export function createCompanion(host, context) {
       const top = Math.min(Math.max(offsetTop + 12, py), offsetTop + height - ph - 12);
       panel.style.left = `${left}px`;
       panel.style.top = `${top}px`;
-      // 气泡尾巴指向桌宠。
+      // Đuôi bong bóng hướng về phía pet.
       panel.style.setProperty('--tail-x', `${Math.min(pw - 18, Math.max(18, x + size / 2 - left))}px`);
       panel.dataset.place = top + ph <= y + 4 ? 'above' : top >= y + size - 4 ? 'below' : 'side';
     }
@@ -462,7 +462,7 @@ export function createCompanion(host, context) {
       || Boolean(lifeModel.activity(character.id)) || Boolean(dragging);
   }
   function tellStory() {
-    // Close the notebook first, so the bubble has room to sit beside her.
+    // Đóng cuốn sổ trước để bong bóng có không gian ngồi cạnh cô ấy.
     if (!model.canInteract() || model.snapshot.silent || settings.enabled === false) return;
     setNotebook(false);
     if (storyBlocked()) return;
@@ -470,10 +470,10 @@ export function createCompanion(host, context) {
     storyteller.show(); update();
   }
   function currentTask() {
-    // Cached carousel observations are notebook records, never stop targets.
+    // Các quan sát dạng carousel được cache lại là bản ghi sổ tay, không phải đối tượng để dừng.
     return model.snapshot.tasks.find(task => task.id === model.snapshot.activeTaskId && task.busy) || null;
   }
-  // 任务台词：接到任务说一句，处理中约每 15 秒换一句，完成、出错、被停止各说一句。
+  // Lời thoại nhiệm vụ: Khi nhận nhiệm vụ nói một câu, đang xử lý khoảng mỗi 15 giây đổi một câu, hoàn thành, gặp lỗi hoặc bị dừng đều nói một câu.
   function followTask(snapshot, activeTask, now) {
     const newest = model.history[0];
     if (newest && newest.id !== lastNoticeId) {
@@ -502,9 +502,9 @@ export function createCompanion(host, context) {
   }
   function statusOf(id) {
     const view = lifeModel.view(id);
-    const doing = view.ready ? '下班了，等你领工资' : view.active?.kind === 'job' ? `在${view.item.name}打工` : view.active ? `在吃${view.item.name}` : '';
-    if (id === character.id) return doing ? `陪伴中 · ${doing}` : '正在陪你';
-    return doing || '在家休息';
+    const doing = view.ready ? 'Đã tan ca, đang đợi bạn nhận lương' : view.active?.kind === 'job' ? `Đang làm thêm ở ${view.item.name}` : view.active ? `Đang ăn ${view.item.name}` : '';
+    if (id === character.id) return doing ? `Đang ở bên bạn · ${doing}` : 'Đang ở bên bạn';
+    return doing || 'Đang nghỉ ở nhà';
   }
   function lifeFocus() {
     const own = lifeModel.view(character.id);
@@ -526,7 +526,7 @@ export function createCompanion(host, context) {
     if (result.tierUp) host.setTimeout(() => celebrate(result.tierUp), 1800);
   }
   const recentErrors = () => model.history.filter(item => item.kind === 'error' || item.kind === 'warning').slice(0, REPAIR_LIMITS.errors);
-  // 聊天窗检修模式用的桥：读资料、出修改单、写入和撤销都在这里转给 database-repair.js。
+  // Cầu nối dùng cho chế độ bảo trì trong cửa sổ chat: Đọc tài liệu, xuất phiếu chỉnh sửa, ghi và hoàn tác đều chuyển tiếp cho database-repair.js tại đây.
   function repairBridge(who) {
     const persona = { prompt: who.persona, relationship: who.relationship };
     return {
@@ -536,7 +536,7 @@ export function createCompanion(host, context) {
       scope() {
         const available = repairService.available();
         let tables = 0;
-        try { if (available) tables = sheetsOf(host.AutoCardUpdaterAPI.exportTableAsJson()).length; } catch { /* 读不到时显示 0 张 */ }
+        try { if (available) tables = sheetsOf(host.AutoCardUpdaterAPI.exportTableAsJson()).length; } catch { /* không đọc được thì hiện 0 bảng */ }
         return { available, tables, floors: settings.repairFloors, errors: recentErrors().length };
       },
       setFloors(count) { settings.repairFloors = Math.min(REPAIR_LIMITS.floors, Math.max(0, Math.round(Number(count) || 0))); save(); },
@@ -553,7 +553,7 @@ export function createCompanion(host, context) {
       backup: id => backups.get(id),
     };
   }
-  // ---- 旁观陪聊：楼层事件只用来数数；评论在 update 里按时机决定 ----
+  // ---- Quan sát đồng hành: Sự kiện tầng bài chỉ dùng để đếm số; bình luận được quyết định theo thời điểm trong update ----
   function chatKeyOf(ctx) {
     try { return String(ctx?.getCurrentChatId?.() ?? ctx?.chatId ?? ''); } catch { return ''; }
   }
@@ -562,7 +562,7 @@ export function createCompanion(host, context) {
     if (!ctx) return;
     floorCounter.observe(chatKeyOf(ctx), ctx.chat);
     if (kind === 'changed') { repairService.invalidate(); chat?.contextChanged(); cancelWatch(); }
-    // 只在角色回复写完后考虑评论，用户刚发出消息时正文还不完整。
+    // Chỉ xem xét bình luận sau khi nhân vật đã viết xong phản hồi, khi người dùng vừa gửi tin nhắn thì nội dung chính vẫn chưa đầy đủ.
     if (kind === 'received' && settings.watch && floorCounter.pending >= settings.watchEvery) watchDue ||= Date.now() + WATCH.settle;
   }
   function cancelWatch() {
@@ -662,7 +662,7 @@ export function createCompanion(host, context) {
     if (pose !== lastPose && !yielded) {
       lastPose = pose;
       showPose(pose);
-      portrait.title = `${poseLabel(character, pose)} · 轻点互动 · 拖动移动 · 右键看小本子`;
+      portrait.title = `${poseLabel(character, pose)} · Chạm nhẹ để tương tác · Kéo để di chuyển · Chuột phải xem sổ tay`;
     }
     root.dataset.interaction = model.lastInteraction;
     const replace = settings.enabled !== false && settings.hideOriginal && snapshot.connected && hasDecodedPose && !assetFailed && !yielded;
@@ -679,8 +679,8 @@ export function createCompanion(host, context) {
     const feedback = stopFeedback?.until > now && snapshot.busy
       && (!snapshot.activeTaskId || stopFeedback.taskId === snapshot.activeTaskId) ? stopFeedback : null;
     const taskDisplay = activeTask ? settings.taskDetails
-      ? [activeTask.feature || '数据库任务', activeTask.detail].filter(Boolean).join('\n')
-      : `正在${activeTask.feature || '处理任务'}…` : '数据库正在处理任务，等待进度同步…';
+      ? [activeTask.feature || 'Nhiệm vụ CSDL', activeTask.detail].filter(Boolean).join('\n')
+      : `Đang ${activeTask.feature || 'xử lý nhiệm vụ'}…` : 'CSDL đang xử lý nhiệm vụ, đang đợi đồng bộ tiến độ…';
     const showTask = snapshot.connected && !snapshot.silent && (hasTaskMessage || hasNoticeMessage);
     if (speech && speech.until <= now) speech = null;
     const showSpeech = Boolean(speech) && !showTask;
@@ -701,11 +701,11 @@ export function createCompanion(host, context) {
       messageStop.hidden = !canStop;
       messageStop.dataset.taskId = activeTask?.id || '';
       messageStop.disabled = taskStopBusy;
-      messageStop.textContent = taskStopBusy ? '停止中…' : (activeTask?.action?.label || '停止');
+      messageStop.textContent = taskStopBusy ? 'Đang dừng…' : (activeTask?.action?.label || 'Dừng');
       messageLook.hidden = !(showTask && failureNotice && !feedback);
       messageLook.dataset.page = failureNotice ? pageForNotice(newest.text) : '';
       messageReply.hidden = !(showSpeech && speech?.reply);
-      messageReplyText.textContent = `回${character.pronoun}`;
+      messageReplyText.textContent = `Đáp lời ${character.pronoun}`;
       messageActions.hidden = messageStop.hidden && messageLook.hidden && messageReply.hidden;
     }
     const panelTask = showTask ? {
@@ -721,9 +721,9 @@ export function createCompanion(host, context) {
     if (!lifeBubble.hidden) {
       const seconds = Math.ceil(focus.remaining / 1000);
       const who = nameOf(resolveCharacter(focus.who));
-      const text = focus.ready ? `${focus.who === character.id ? '下班啦' : `${who}下班了`}，${focus.item.reward} 金币等你来领。`
-        : focus.active?.kind === 'job' ? `${who}在${focus.item.name}帮忙 · ${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')} 后下班`
-        : `${who}在吃${focus.item.name} · 还有 ${seconds} 秒`;
+      const text = focus.ready ? `${focus.who === character.id ? 'Tan ca rồi' : `${who} đã tan ca rồi`}, ${focus.item.reward} vàng đang đợi bạn nhận.`
+        : focus.active?.kind === 'job' ? `${who} đang giúp việc ở ${focus.item.name} · Còn ${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')} nữa sẽ tan ca`
+        : `${who} đang ăn ${focus.item.name} · Còn ${seconds} giây`;
       if (lifeText.textContent !== text) {lifeText.textContent = text; changed = true;}
       lifeClaim.hidden = !focus.ready; lifeClaim.dataset.who = focus.who;
     }
@@ -747,17 +747,17 @@ export function createCompanion(host, context) {
   function applyCharacterTexts() {
     root.dataset.character = character.id; overlay.dataset.character = character.id;
     root.dataset.skin = skinModel.equippedId(character.id); overlay.dataset.skin = root.dataset.skin;
-    portrait.setAttribute('aria-label', `${character.fullName}：单击、连点或长按互动；手机长按打开小本子，电脑右键查看任务`);
-    portrait.title = '轻点互动 · 连点有不同反应 · 手机长按打开小本子 · 拖动移动 · 电脑右键看小本子';
-    lifeBubble.setAttribute('aria-label', `${character.name}的生活进度`);
-    storyBubble.setAttribute('aria-label', `${character.name}的治愈小故事`);
+    portrait.setAttribute('aria-label', `${character.fullName}: Nhấp một lần, nhấp liên tục hoặc nhấn giữ để tương tác; nhấn giữ trên điện thoại để mở sổ tay, nhấp chuột phải trên máy tính để xem nhiệm vụ`);
+    portrait.title = 'Chạm nhẹ để tương tác · Nhấp liên tục có phản ứng khác nhau · Nhấn giữ trên điện thoại mở sổ tay · Kéo để di chuyển · Chuột phải trên máy tính xem sổ tay';
+    lifeBubble.setAttribute('aria-label', `Tiến độ đời sống của ${character.name}`);
+    storyBubble.setAttribute('aria-label', `Mẩu chuyện chữa lành của ${character.name}`);
     notebook.setCharacter(character, images.idle);
     settingsControls?.sync();
   }
   function chatSaved(id) {
     if (id === DEFAULT_CHARACTER) return settings.chat || {};
     if (!settings.chats[id]) {
-      // 第一次和新角色聊天：沿用小绘的连接设置，不用重填接口；聊天记录和人设各自独立。
+      // Lần đầu trò chuyện với nhân vật mới: Kế thừa cài đặt kết nối của Erii, không cần điền lại API; lịch sử trò chuyện và nhân cách hoàn toàn độc lập.
       const base = settings.chat || {};
       settings.chats[id] = { ...Object.fromEntries(CHAT_CONNECTION.filter(key => key in base).map(key => [key, base[key]])), relationship: resolveCharacter(id).relationship, history: [] };
     }
@@ -802,7 +802,7 @@ export function createCompanion(host, context) {
       chat?.destroy(); chat = makeChat(); if (chatWasOpen) chat.open();
       life?.setCharacter(character.id);
       landingUntil = Date.now() + 1100; switching = false;
-      // 今天见过就说一句“我来了”；没见过的话，下面的 update 会改成当天第一次见面的问候。
+      // Nếu hôm nay đã gặp thì nói câu "Tôi đến rồi"; nếu chưa gặp thì update bên dưới sẽ đổi thành lời chào lần đầu gặp trong ngày.
       if (seenToday) speech = { text: line('switchIn'), until: Date.now() + 3600 };
       save();
       sparkle(null, 18);
@@ -841,7 +841,7 @@ export function createCompanion(host, context) {
     const summary = el(doc, 'summary', '');
     settingsMount.append(summary);
     const roster = el(doc, 'div', undefined, 'pet-settings__roster');
-    roster.setAttribute('role', 'group'); roster.setAttribute('aria-label', '当前桌宠');
+    roster.setAttribute('role', 'group'); roster.setAttribute('aria-label', 'Pet hiện tại');
     const rosterButtons = CHARACTER_IDS.map(id => {
       const item = CHARACTERS[id];
       const control = el(doc, 'button', undefined, 'pet-settings__pick'); control.type = 'button'; control.dataset.id = id; control.dataset.character = id;
@@ -852,11 +852,11 @@ export function createCompanion(host, context) {
       });
       return control;
     });
-    const houseSetting = el(doc, 'button', '桌宠小屋', 'pet-settings__house'); houseSetting.type = 'button';
+    const houseSetting = el(doc, 'button', 'Ngôi nhà Pet', 'pet-settings__house'); houseSetting.type = 'button';
     houseSetting.setAttribute('aria-controls', `${ID}-house`); roster.append(houseSetting);
     listen(houseSetting, 'click', () => house?.open());
-    const mallSetting = el(doc, 'button', '商场 · 买衣服', 'pet-settings__mall'); mallSetting.type = 'button';
-    mallSetting.setAttribute('aria-controls', `${ID}-mall`); mallSetting.setAttribute('aria-label','打开商场');
+    const mallSetting = el(doc, 'button', 'Cửa hàng · Mua sắm', 'pet-settings__mall'); mallSetting.type = 'button';
+    mallSetting.setAttribute('aria-controls', `${ID}-mall`); mallSetting.setAttribute('aria-label','Mở cửa hàng');
     roster.append(mallSetting); listen(mallSetting,'click',()=>mall?.open());
     settingsMount.append(roster);
     const fields = [];
@@ -871,52 +871,52 @@ export function createCompanion(host, context) {
       listen(input, 'change', () => { settings[key] = input.checked; after?.(); save(); });
       fields.push([key, input]);
     };
-    const display = group('桌宠');
-    toggle(display, 'enabled', '显示桌宠', () => { if (!settings.enabled) cancelWatch(); });
-    toggle(display, 'idleActions', '空闲时做小动作、偶尔说说话');
-    toggle(display, 'edgePeeks', '拖到边缘后探头');
-    toggle(display, 'healingStories', '空闲时讲治愈小故事');
+    const display = group('Desktop Pet');
+    toggle(display, 'enabled', 'Hiển thị pet', () => { if (!settings.enabled) cancelWatch(); });
+    toggle(display, 'idleActions', 'Tự động làm cử chỉ nhỏ, thỉnh thoảng nói chuyện khi rảnh');
+    toggle(display, 'edgePeeks', 'Thò đầu khi kéo vào cạnh mép màn hình');
+    toggle(display, 'healingStories', 'Kể mẩu chuyện chữa lành khi rảnh');
     const sizeRow = el(doc, 'div', undefined, 'pet-settings__range');
-    const sizeLabel = el(doc, 'label', '桌宠大小');
+    const sizeLabel = el(doc, 'label', 'Kích thước pet');
     const range = el(doc, 'input');
     range.type = 'range'; range.min = '56'; range.max = '112'; range.step = '4'; range.value = String(settings.size);
-    range.id=`${ID}-size`;range.setAttribute('aria-label','桌宠大小');sizeLabel.htmlFor=range.id;
+    range.id=`${ID}-size`;range.setAttribute('aria-label','Kích thước pet');sizeLabel.htmlFor=range.id;
     const sizeValue=el(doc,'output',`${settings.size} px`,'pet-settings__size-value');sizeValue.htmlFor=range.id;
-    const resetSize=el(doc,'button','恢复默认大小');resetSize.type='button';
+    const resetSize=el(doc,'button','Khôi phục kích thước mặc định');resetSize.type='button';
     sizeRow.append(sizeLabel,sizeValue,range,resetSize);
     display.append(sizeRow);
     function resizePet(value) {
       settings.size=normalizeSize(value);range.value=String(settings.size);
-      sizeValue.textContent=`${settings.size} px`;range.setAttribute('aria-valuetext',`${settings.size} 像素`);
-      // 连续拖动只在下一帧重排一次；保存仍使用酒馆自己的合并保存接口。
+      sizeValue.textContent=`${settings.size} px`;range.setAttribute('aria-valuetext',`${settings.size} pixel`);
+      // Kéo thả liên tục chỉ sắp xếp lại một lần ở khung hình tiếp theo; việc lưu vẫn dùng API lưu gộp sẵn có của SillyTavern.
       scheduleLayout(true);persistStore();
     }
     listen(range,'input',()=>resizePet(range.value));listen(range,'change',()=>resizePet(range.value));
     listen(resetSize,'click',()=>resizePet(defaults.size));
-    const database = group('数据库');
-    toggle(database, 'hideOriginal', '隐藏数据库原桌宠和原气泡');
-    toggle(database, 'taskTalk', '任务时说话');
+    const database = group('Cơ sở dữ liệu');
+    toggle(database, 'hideOriginal', 'Ẩn pet gốc và bong bóng gốc của CSDL');
+    toggle(database, 'taskTalk', 'Nói chuyện khi có nhiệm vụ');
     const taskRow = el(doc, 'label', undefined, 'pet-settings__select');
-    const taskMode = el(doc, 'select'); taskMode.setAttribute('aria-label', '任务内容显示');
-    for (const [value, caption] of [['brief', '简略版'], ['full', '完整版（真实工作内容）']]) {
+    const taskMode = el(doc, 'select'); taskMode.setAttribute('aria-label', 'Hiển thị nội dung nhiệm vụ');
+    for (const [value, caption] of [['brief', 'Bản rút gọn'], ['full', 'Bản đầy đủ (nội dung công việc thực tế)']]) {
       const option = el(doc, 'option', caption); option.value = value; taskMode.append(option);
     }
     taskMode.value = settings.taskDetails ? 'full' : 'brief';
-    taskRow.append(el(doc, 'span', '任务内容显示'), taskMode); database.append(taskRow);
+    taskRow.append(el(doc, 'span', 'Hiển thị nội dung nhiệm vụ'), taskMode); database.append(taskRow);
     listen(taskMode, 'change', () => { settings.taskDetails = taskMode.value === 'full'; save(); });
-    const nurture = group('养成与外观');
-    toggle(nurture, 'needs', '需求值（饱腹、清洁会随时间下降，没有惩罚）', () => care.setNeedsEnabled(settings.needs));
+    const nurture = group('Nuôi dưỡng & Ngoại hình');
+    toggle(nurture, 'needs', 'Chỉ số nhu cầu (No bụng, Vệ sinh giảm theo thời gian, không có hình phạt)', () => care.setNeedsEnabled(settings.needs));
     const fxRow = el(doc, 'label', undefined, 'pet-settings__select');
-    const fxMode = el(doc, 'select'); fxMode.setAttribute('aria-label', '特效');
-    for (const [value, caption] of [['auto', '自动（电脑华丽、手机简约）'], ['fancy', '华丽'], ['simple', '简约'], ['off', '关闭']]) {
+    const fxMode = el(doc, 'select'); fxMode.setAttribute('aria-label', 'Hiệu ứng');
+    for (const [value, caption] of [['auto', 'Tự động (Máy tính lộng lẫy, Điện thoại đơn giản)'], ['fancy', 'Lộng lẫy'], ['simple', 'Đơn giản'], ['off', 'Tắt']]) {
       const option = el(doc, 'option', caption); option.value = value; fxMode.append(option);
     }
     fxMode.value = settings.effects;
-    fxRow.append(el(doc, 'span', '特效'), fxMode); nurture.append(fxRow);
+    fxRow.append(el(doc, 'span', 'Hiệu ứng'), fxMode); nurture.append(fxRow);
     listen(fxMode, 'change', () => { settings.effects = fxMode.value; save(); house?.refreshEffects(); });
-    const companion = group('陪聊与检修');
-    // 开启时重新起算：只评论开启之后新出现的楼层。
-    toggle(companion, 'watch', '旁观陪聊：隔几层看看正文，说说感想', () => { cancelWatch(); observeChat('toggle'); floorCounter.reset(); });
+    const companion = group('Đồng hành & Bảo trì');
+    // Tính lại từ đầu khi bật: Chỉ bình luận các tầng bài mới xuất hiện sau khi bật.
+    toggle(companion, 'watch', 'Quan sát đồng hành: Sau vài tầng xem nội dung chính và chia sẻ cảm nghĩ', () => { cancelWatch(); observeChat('toggle'); floorCounter.reset(); });
     const select = (box, label, options, value, change) => {
       const row = el(doc, 'label', undefined, 'pet-settings__select');
       const control = el(doc, 'select'); control.setAttribute('aria-label', label);
@@ -926,22 +926,22 @@ export function createCompanion(host, context) {
       listen(control, 'change', () => { change(control.value); save(); });
       return control;
     };
-    const everySelect = select(companion, '评论频率', Array.from({ length: WATCH.max }, (_, i) => [i + 1, `每 ${i + 1} 层`]), settings.watchEvery,
+    const everySelect = select(companion, 'Tần suất bình luận', Array.from({ length: WATCH.max }, (_, i) => [i + 1, `Mỗi ${i + 1} tầng`]), settings.watchEvery,
       value => { settings.watchEvery = clampEvery(value); });
-    const floorsSelect = select(companion, '检修时附上的正文', Array.from({ length: REPAIR_LIMITS.floors + 1 }, (_, i) => [i, i ? `最近 ${i} 层` : '不附正文']), settings.repairFloors,
+    const floorsSelect = select(companion, 'Nội dung chính đính kèm khi bảo trì', Array.from({ length: REPAIR_LIMITS.floors + 1 }, (_, i) => [i, i ? `${i} tầng gần nhất` : 'Không đính kèm']), settings.repairFloors,
       value => { settings.repairFloors = Math.min(REPAIR_LIMITS.floors, Math.max(0, Number(value) || 0)); });
     const companionNote = el(doc, 'p', '', 'pet-settings__note');
     const watchStatus = el(doc, 'p', '', 'pet-settings__note');
     companion.append(companionNote, watchStatus);
     const buttons = el(doc, 'div', undefined, 'pet-settings__buttons');
-    const resetSetting = el(doc, 'button', '重置桌宠位置'); resetSetting.type = 'button';
+    const resetSetting = el(doc, 'button', 'Đặt lại vị trí pet'); resetSetting.type = 'button';
     listen(resetSetting, 'click', resetPosition);
-    const openBook = el(doc, 'button', '查看任务小本子'); openBook.type = 'button';
+    const openBook = el(doc, 'button', 'Xem sổ tay nhiệm vụ'); openBook.type = 'button';
     openBook.setAttribute('aria-controls', notebookRoot.id);
     listen(openBook, 'click', () => setNotebook(true));
-    const chatSetting = el(doc, 'button', '和小绘聊天'); chatSetting.type = 'button';
+    const chatSetting = el(doc, 'button', 'Trò chuyện cùng Erii'); chatSetting.type = 'button';
     chatSetting.setAttribute('aria-controls', `${ID}-chat`); listen(chatSetting, 'click', () => chat?.open());
-    const lifeSetting = el(doc, 'button', '生活手帐'); lifeSetting.type = 'button';
+    const lifeSetting = el(doc, 'button', 'Sổ tay đời sống'); lifeSetting.type = 'button';
     lifeSetting.setAttribute('aria-controls', `${ID}-life`); listen(lifeSetting, 'click', () => life?.open());
     buttons.append(resetSetting, openBook, chatSetting, lifeSetting);
     settingsMount.append(buttons);
@@ -949,16 +949,16 @@ export function createCompanion(host, context) {
     settingsMount.append(hint);
     settingsControls = { sync() {
       for (const [key, input] of fields) input.checked = settings[key] === true;
-      range.value = String(settings.size);sizeValue.textContent=`${settings.size} px`;range.setAttribute('aria-valuetext',`${settings.size} 像素`);
+      range.value = String(settings.size);sizeValue.textContent=`${settings.size} px`;range.setAttribute('aria-valuetext',`${settings.size} pixel`);
       taskMode.value = settings.taskDetails ? 'full' : 'brief'; fxMode.value = settings.effects;
       everySelect.value = String(settings.watchEvery); floorsSelect.value = String(settings.repairFloors);
-      companionNote.textContent = `旁观陪聊和检修都会把正文（检修还会带上表格）发给${character.name}聊天用的接口（聊天窗“连接设置”里那个），会产生调用费用。旁观陪聊默认关闭；检修写入前都会先问你。`;
+      companionNote.textContent = `Cả tính năng quan sát đồng hành và bảo trì đều sẽ gửi nội dung chính (bảo trì còn mang theo bảng) tới API trò chuyện của ${character.name} (cấu hình trong "Cài đặt kết nối" của cửa sổ chat), có thể phát sinh chi phí gọi API. Quan sát đồng hành mặc định tắt; bảo trì luôn hỏi ý kiến bạn trước khi ghi.`;
       const watchState = watchOf(character.id);
-      watchStatus.textContent = !settings.watch ? '' : watchState.error && watchState.errorAt >= (watchState.lastAt || 0) ? `上次评论没成功：${watchState.error}`
-        : watchState.lastAt ? `上次评论：${new Date(watchState.lastAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false })}${watchState.unanswered ? ` · 已经 ${watchState.unanswered} 条没回了` : ''}` : '开启后，从新出现的楼层开始数。';
-      summary.textContent = `${character.fullName} · 数据库桌宠`;
-      chatSetting.textContent = `和${character.name}聊天`;
-      hint.textContent = `轻点或连点${character.name}可互动；普通长按让${character.pronoun}放松，手机长按约 1.4 秒打开小本子。电脑可右键打开，或使用这里的按钮。`;
+      watchStatus.textContent = !settings.watch ? '' : watchState.error && watchState.errorAt >= (watchState.lastAt || 0) ? `Lần bình luận trước thất bại: ${watchState.error}`
+        : watchState.lastAt ? `Bình luận lần trước: ${new Date(watchState.lastAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })}${watchState.unanswered ? ` · Đã ${watchState.unanswered} tin nhắn chưa trả lời` : ''}` : 'Sau khi bật, bắt đầu đếm từ các tầng bài mới xuất hiện.';
+      summary.textContent = `${character.fullName} · Desktop Pet CSDL`;
+      chatSetting.textContent = `Trò chuyện cùng ${character.name}`;
+      hint.textContent = `Chạm nhẹ hoặc nhấp liên tục vào ${character.name} để tương tác; nhấn giữ thông thường giúp ${character.pronoun} thư giãn, nhấn giữ trên điện thoại khoảng 1.4 giây để mở sổ tay. Trên máy tính có thể nhấp chuột phải để mở, hoặc dùng các nút tại đây.`;
       for (const control of rosterButtons) control.setAttribute('aria-pressed', String(control.dataset.id === character.id));
     } };
     settingsControls.sync();
@@ -976,12 +976,12 @@ export function createCompanion(host, context) {
     dataSource?.refresh();
     const task = currentTask();
     if (!task?.action?.run || task.id !== displayedId) {
-      stopFeedback = { taskId: task?.id || '', text: '任务提示已更新，请确认后再停止。', kind: 'warning', until: Date.now() + 8000 };
+      stopFeedback = { taskId: task?.id || '', text: 'Thông báo nhiệm vụ đã được cập nhật, vui lòng xác nhận trước khi dừng.', kind: 'warning', until: Date.now() + 8000 };
       update(); return;
     }
     taskStopBusy = true; stopFeedback = null; update();
     try { await task.action.run(); if (settings.taskTalk) taskTalk = { key: `stopped:${task.id}`, text: line('task.stopped.any'), at: Date.now(), kind: lastTaskKind }; }
-    catch { stopFeedback = { taskId: task.id, text: '停止任务失败，请重试或打开数据库面板。', kind: 'error', until: Date.now() + 8000 }; }
+    catch { stopFeedback = { taskId: task.id, text: 'Dừng nhiệm vụ thất bại, vui lòng thử lại hoặc mở bảng CSDL.', kind: 'error', until: Date.now() + 8000 }; }
     finally { taskStopBusy = false; dataSource?.refresh(); update(); }
   }
   listen(messageStop, 'click', event => {
@@ -997,7 +997,7 @@ export function createCompanion(host, context) {
     const conversationId=speech?.conversationId;
     speech = null; chat?.open({ reply: true,conversationId }); update();
   });
-  // The hot path writes only the pet transform and sway. No panel rendering or layout reads.
+  // Luồng xử lý nhanh (hot path) chỉ cập nhật transform và độ nghiêng của pet. Không vẽ lại panel hay đọc bố cục.
   function flushDrag() {
     dragFrame = null;
     if (!dragging?.moved || destroyed) return;
@@ -1013,7 +1013,7 @@ export function createCompanion(host, context) {
     dragging = null;
     longPressed = false; mobileBookOpened = false;
     root.dataset.dragging = 'false'; root.style.setProperty('--erii-tilt', '0deg');
-    try { if (pointerId !== undefined && portrait.hasPointerCapture(pointerId)) portrait.releasePointerCapture(pointerId); } catch { /* capture already released */ }
+    try { if (pointerId !== undefined && portrait.hasPointerCapture(pointerId)) portrait.releasePointerCapture(pointerId); } catch { /* capture đã được giải phóng */ }
   }
   function finishDrag(event, cancelled = false) {
     if (!dragging) return;
@@ -1026,7 +1026,7 @@ export function createCompanion(host, context) {
       return;
     }
     if (moved) {
-      // Pointer-up can arrive before the scheduled frame. Never drop its final coordinate.
+      // Pointer-up có thể đến trước frame đã lên lịch. Không được bỏ qua tọa độ cuối cùng của nó.
       if (event && !cancelled) dragging.pending = {
         x: dragging.origin.x + event.clientX - dragging.startX,
         y: dragging.origin.y + event.clientY - dragging.startY,
@@ -1068,7 +1068,7 @@ export function createCompanion(host, context) {
     point = constrain({ x: rendered.x, y: rendered.y }, bounds);
     dragging = { id: event.pointerId, startX: event.clientX, startY: event.clientY, origin: { ...point }, pending: { ...point }, moved: false, lastX: event.clientX, tilt: 0 };
     storyteller.dismiss(); update();
-    try { portrait.setPointerCapture(event.pointerId); } catch { /* keyboard/synthetic test may have no live pointer */ }
+    try { portrait.setPointerCapture(event.pointerId); } catch { /* test bàn phím/giả lập có thể không có con trỏ trực tiếp */ }
     holdTimer = host.setTimeout(() => {
       holdTimer = null;
       if (!dragging || dragging.moved) return;
@@ -1144,7 +1144,7 @@ export function createCompanion(host, context) {
   listen(storyBubble, 'focusout', event => {
     if (!storyBubble.contains(event.relatedTarget)) storyteller.resume('focus');
   });
-  // On a phone, touching the text freezes expiry until it is deliberately closed.
+  // Trên điện thoại, chạm vào nội dung sẽ đóng băng thời gian hết hạn cho đến khi người dùng chủ động đóng.
   listen(storyBubble, 'pointerdown', event => { if (event.pointerType === 'touch') storyteller.pause('touch'); });
   listen(message, 'click', event => {
     if (event.target.closest?.('button') || message.dataset.tone !== 'speech') return;
@@ -1188,14 +1188,14 @@ export function createCompanion(host, context) {
   }
   const returnToPet = () => (settings.enabled === false || yielded ? settingsMount?.querySelector('button[aria-controls]') : portrait)?.focus({preventScroll:true});
   chat = makeChat();
-  // 换装桥：买皮肤的钱从生活手帐的钱包里扣，并记进小账本；皮肤目录和拥有状态都在 skinModel。
+  // Cầu nối đổi trang phục: Tiền mua trang phục trừ từ ví trong sổ tay đời sống và ghi vào sổ chi tiêu; danh mục và trạng thái sở hữu đều nằm ở skinModel.
   const skinBridge = {
     list: (who, options) => skinModel.list(who, options),
     unlock: (who,id,phrase) => skinModel.unlock(who,id,phrase),
     equippedId: who => skinModel.equippedId(who),
     buy: (who, id) => skinModel.buy(who, id, (price, skin) => skin.currency === 'tickets'
-      ? lifeModel.spendTickets(price, `花 ${price} 张花票买了皮肤「${skin.name}」。`, who)
-      : lifeModel.spend(price, `花 ${price} 金币买了皮肤「${skin.name}」。`, who)),
+      ? lifeModel.spendTickets(price, `Đã dùng ${price} vé hoa mua trang phục「${skin.name}」.`, who)
+      : lifeModel.spend(price, `Đã dùng ${price} vàng mua trang phục「${skin.name}」.`, who)),
     equip: (who, id) => skinModel.equip(who, id),
   };
   function skinChanged(who, detail) {
@@ -1237,7 +1237,7 @@ export function createCompanion(host, context) {
   house = createPetHouse(host, {
     characters: CHARACTER_IDS.map(id => CHARACTERS[id]), currentId: () => character.id, care,
     portraits: item => { const art = artFor(item); return art.idle ? { idle: art.idle, wave: art.wave || art.idle } : null; },
-    available: item => usesDatabaseArt(item) && !readArt() ? { ok: false, reason: '奶蛋的图来自正在运行的数据库。请启用龙血玄黄·数据库，并打开它自带的桌宠。' } : { ok: true },
+    available: item => usesDatabaseArt(item) && !readArt() ? { ok: false, reason: 'Ảnh của Nono lấy từ CSDL đang chạy. Vui lòng bật Long Huyết Huyền Hoàng · CSDL và mở pet đi kèm của nó.' } : { ok: true },
     moodExtra, nameOf, statusOf, fxTier, themeOf: item => themeOf(item, skinOf(item.id)),
     actions: {
       switchTo: id => switchCharacter(id),
@@ -1269,7 +1269,7 @@ export function createCompanion(host, context) {
   applyCharacterTexts();
   preloadArt();
   connect(); mountSettings(); watchInput(); bindChatEvents(); position(); scheduleLeisure();
-  // Establish the saved location before enabling movement easing (no fly-in from 0,0).
+  // Xác định vị trí đã lưu trước khi bật hiệu ứng chuyển động mượt (tránh bị bay từ tọa độ 0,0 vào).
   root.getBoundingClientRect();
   root.style.transition = '';
   return {
@@ -1314,12 +1314,12 @@ function bootstrap(attempt = 0) {
   bootTimer = null;
   if (stopped || active) return;
   let context;
-  try { context = window.SillyTavern?.getContext?.(); } catch { /* host starting */ }
+  try { context = window.SillyTavern?.getContext?.(); } catch { /* host đang khởi động */ }
   if (context?.extensionSettings && typeof context.saveSettingsDebounced === 'function') {
     active = createCompanion(window, context);
     window.addEventListener('pagehide', onPageHide);
   } else if (attempt < 100) bootTimer = setTimeout(() => bootstrap(attempt + 1), 200);
-  else console.warn('[数据库桌宠] 酒馆设置接口尚未就绪，重新启用插件可重试。');
+  else console.warn('[Desktop Pet CSDL] API cài đặt của SillyTavern chưa sẵn sàng, hãy bật lại tiện ích để thử lại.');
 }
 export function onActivate() { stopped = false; if (!active && bootTimer === null) bootTimer = setTimeout(() => bootstrap(), 0); }
 export function onEnable() { onActivate(); }
@@ -1332,6 +1332,6 @@ export function onDisable() {
 }
 export function onClean() { onDisable(); }
 
-// 1.14–1.16 load the entry module without an activate hook. Newer hosts also
-// invoke onActivate; its guards keep both routes on the same single instance.
+// Bản 1.14–1.16 tải module khởi chạy mà không có hook activate. Các host mới hơn cũng
+// gọi onActivate; các guard ở đây giúp giữ cả hai cách gọi trên cùng một thực thể duy nhất.
 if (typeof window !== 'undefined' && typeof window.SillyTavern?.getContext === 'function') onActivate();

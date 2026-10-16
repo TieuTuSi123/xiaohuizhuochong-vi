@@ -1,4 +1,4 @@
-// 聊天正文与接口明确返回的思考内容分开保存；不推测或补写未返回的内容。
+// Nội dung trò chuyện chính và nội dung suy nghĩ (thinking/reasoning) do API trả về rõ ràng được lưu riêng; không suy đoán hoặc tự ý điền thêm nội dung không được trả về.
 export const HISTORY_LIMIT = 100;
 export const HISTORY_BUDGET = 128000;
 export const IMPORT_BYTES = 2 * 1024 * 1024;
@@ -16,7 +16,7 @@ export function splitReasoning(value, extra = '') {
     cursor = closing ? end.lastIndex : content.length; opening.lastIndex = cursor;
   }
   result += content.slice(cursor);
-  // 部分兼容接口省去开头的 think 标签，只留下结尾。
+  // Một số API tương thích lược bỏ thẻ think mở đầu, chỉ để lại thẻ đóng.
   const orphan = !thoughts.length && /<\/(?:think|thinking|analysis|reasoning)\s*>/i.exec(result);
   if (orphan) { thoughts.push(result.slice(0, orphan.index).trim()); result = result.slice(orphan.index + orphan[0].length); }
   return {content:result.trim(), reasoning:[...new Set(thoughts.filter(Boolean))].join('\n\n').slice(0,32000)};
@@ -31,25 +31,25 @@ export function normalizeMessage(item) {
 }
 
 export function chatExport(character, title, history) {
-  return {format:'erii-pet-chat',version:1,character:{id:character.id,name:character.fullName},title:String(title || '聊天记录').slice(0,40),
+  return {format:'erii-pet-chat',version:1,character:{id:character.id,name:character.fullName},title:String(title || 'Lịch sử trò chuyện').slice(0,40),
     exportedAt:new Date().toISOString(),messages:history.map(normalizeMessage).filter(Boolean)};
 }
 
-// 只导入文字、角色、时间与思考内容。不接收接口设置、密钥或可执行的数据库修改单。
+// Chỉ nhập văn bản, vai trò, thời gian và nội dung suy nghĩ. Không tiếp nhận cài đặt API, API key hoặc lệnh chỉnh sửa cơ sở dữ liệu có thể thực thi.
 export function parseChatImport(text, character) {
-  if (typeof text !== 'string' || new TextEncoder().encode(text).length > IMPORT_BYTES) throw new Error('文件太大，请使用 2 MB 以内的对话文件。');
+  if (typeof text !== 'string' || new TextEncoder().encode(text).length > IMPORT_BYTES) throw new Error('Tệp quá lớn, vui lòng dùng tệp trò chuyện dưới 2 MB.');
   const source = text.replace(/^\uFEFF/,'').trim();
-  if (!source) throw new Error('这个文件没有对话内容。');
+  if (!source) throw new Error('Tệp này không có nội dung trò chuyện.');
   let data;
   try { data = JSON.parse(source); }
   catch {
     try { data = source.split(/\r?\n/).filter(line=>line.trim()).map(line=>JSON.parse(line)); }
     catch { return parseTextImport(source, character); }
   }
-  let items, title = '导入的对话';
+  let items, title = 'Đoạn trò chuyện đã nhập';
   if (data?.format === 'erii-pet-chat') {
-    if (data.version !== 1 || !Array.isArray(data.messages)) throw new Error('暂不支持这个版本的对话文件。');
-    if (data.character?.id && data.character.id !== character.id) throw new Error(`这是${String(data.character.name || data.character.id).slice(0,40)}的记录，请切换到对应角色再导入。`);
+    if (data.version !== 1 || !Array.isArray(data.messages)) throw new Error('Hiện chưa hỗ trợ phiên bản tệp trò chuyện này.');
+    if (data.character?.id && data.character.id !== character.id) throw new Error(`Đây là bản ghi của ${String(data.character.name || data.character.id).slice(0,40)}, vui lòng chuyển sang nhân vật tương ứng rồi nhập lại.`);
     items = data.messages; title = String(data.title || title).slice(0,40);
   } else if (Array.isArray(data)) {
     items = data.filter(item=>!(item && !('mes' in item) && !('content' in item) && ('user_name' in item || 'chat_metadata' in item || 'character_name' in item)));
@@ -57,38 +57,41 @@ export function parseChatImport(text, character) {
       ? {role:item.is_user ? 'user' : 'assistant',content:item.mes,at:validDate(item.send_date),reasoning:item.extra?.reasoning}
       : item);
   } else if (Array.isArray(data?.messages)) items = data.messages;
-  else throw new Error('没有找到消息列表。支持本插件 JSON、酒馆 JSONL 和旧版导出 TXT。');
+  else throw new Error('Không tìm thấy danh sách tin nhắn. Hỗ trợ JSON của plugin, JSONL của Tavern và TXT bản cũ.');
   return checkedImport(items,title);
 }
 function validDate(value) { if(!['string','number'].includes(typeof value) || value === '')return undefined; const date = new Date(value); return Number.isFinite(date.getTime()) ? date.toISOString() : undefined; }
 function checkedImport(items,title) {
-  if (!items.length) throw new Error('这个文件没有可导入的消息。');
-  if (items.length > HISTORY_LIMIT) throw new Error(`一次最多导入 ${HISTORY_LIMIT} 条消息，请先拆分文件。`);
+  if (!items.length) throw new Error('Tệp này không có tin nhắn nào để nhập.');
+  if (items.length > HISTORY_LIMIT) throw new Error(`Mỗi lần chỉ được nhập tối đa ${HISTORY_LIMIT} tin nhắn, vui lòng chia nhỏ tệp trước.`);
   const messages = items.map(item=> {
-    if (!item || !['user','assistant'].includes(item.role) || typeof item.content !== 'string') throw new Error('消息格式不对：只接收 user / assistant 的文字消息。');
-    if (item.content.length > 16000 || (typeof item.reasoning === 'string' && item.reasoning.length > 32000)) throw new Error('有一条消息超过长度限制，请先拆分。');
+    if (!item || !['user','assistant'].includes(item.role) || typeof item.content !== 'string') throw new Error('Định dạng tin nhắn không hợp lệ: chỉ nhận tin nhắn văn bản của user / assistant.');
+    if (item.content.length > 16000 || (typeof item.reasoning === 'string' && item.reasoning.length > 32000)) throw new Error('Có một tin nhắn vượt quá giới hạn độ dài, vui lòng chia nhỏ trước.');
     const result=normalizeMessage(item);
-    if (!result.content && !result.reasoning) throw new Error('文件中含有空消息，请检查后再导入。');
+    if (!result.content && !result.reasoning) throw new Error('Tệp có chứa tin nhắn trống, vui lòng kiểm tra lại trước khi nhập.');
     return result;
   });
-  if (messages.reduce((sum,item)=>sum+item.content.length+(item.reasoning?.length || 0),0) > HISTORY_BUDGET) throw new Error('对话文字超过 128000 字符，请先拆分文件。');
+  if (messages.reduce((sum,item)=>sum+item.content.length+(item.reasoning?.length || 0),0) > HISTORY_BUDGET) throw new Error('Văn bản trò chuyện vượt quá 128.000 ký tự, vui lòng chia nhỏ tệp trước.');
   return {title,messages};
 }
 function parseTextImport(source,character) {
   const lines=source.split(/\r?\n/), heading=lines.shift();
-  if (heading !== `${character.fullName}的聊天记录`) throw new Error('无法识别这个文件。请导入本插件 JSON、酒馆 JSONL 或当前角色的旧版聊天 TXT。');
+  if (heading !== `Lịch sử trò chuyện của ${character.fullName}` && heading !== `${character.fullName}的聊天记录`) {
+    throw new Error('Không thể nhận diện tệp này. Vui lòng nhập JSON của plugin, JSONL của Tavern hoặc TXT bản cũ của nhân vật hiện tại.');
+  }
   const messages=[]; let current=null;
-  // 旧 TXT 无结构标记，按原导出的人名·时间行识别消息；新备份推荐 JSON。
+  // TXT cũ không có đánh dấu cấu trúc, nhận diện tin nhắn theo dòng "Tên người · Thời gian" xuất ban đầu; sao lưu mới khuyến nghị dùng JSON.
   for (const line of lines) {
     const match=/^(.+?) · (\d{4}\/\d{1,2}\/\d{1,2} \d{1,2}:\d{2}(?::\d{2})?)$/.exec(line);
-    const bare=[character.fullName,`${character.fullName}（旁观）`,'你'].includes(line);
+    const bare=[character.fullName,`${character.fullName}（旁观）`,`${character.fullName} (Quan sát)`,'你','Bạn'].includes(line);
     if (match || bare) {
       if (current) {current.content=current.content.trim();messages.push(current);}
-      const name=match ? match[1] : line, assistant=name===character.fullName || name===`${character.fullName}（旁观）`;
-      current={role:assistant?'assistant':'user',content:'',...(match?{at:validDate(match[2])}:{}),...(name.endsWith('（旁观）')?{kind:'watch'}:{})};
+      const name=match ? match[1] : line, assistant=name.startsWith(character.fullName);
+      const isWatch = name.endsWith('（旁观）') || name.endsWith('(Quan sát)') || name.endsWith('（Quan sát）');
+      current={role:assistant?'assistant':'user',content:'',...(match?{at:validDate(match[2])}:{}),...(isWatch?{kind:'watch'}:{})};
     } else if (current) current.content+=line+'\n';
-    else if (line.trim()) throw new Error('旧 TXT 的人名或时间行无法识别，请使用原始导出文件。');
+    else if (line.trim()) throw new Error('Không thể nhận diện dòng tên người hoặc thời gian của TXT cũ, vui lòng sử dụng tệp xuất gốc.');
   }
   if (current) {current.content=current.content.trim();messages.push(current);}
-  return checkedImport(messages,'导入的旧对话');
+  return checkedImport(messages,'Đoạn trò chuyện cũ đã nhập');
 }

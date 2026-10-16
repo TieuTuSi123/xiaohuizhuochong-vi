@@ -1,7 +1,7 @@
 import {splitReasoning} from './chat-history.js';
-// Version authority: official 1.14.0–1.19.0 openai.js and the installed 1.17.0 source.
-// Each request owns its AbortSignal. No global generation/stop events or setting edits.
-export const CHAT_DEFAULTS = { mode: 'current', url: '', model: '', nickname: '', relationship: '恋人', maxTokens: 768, rememberKey: false, replyStyle: 'natural', memory: '' };
+// Căn cứ phiên bản: openai.js chính thức 1.14.0–1.19.0 và mã nguồn 1.17.0 đã cài đặt.
+// Mỗi yêu cầu sở hữu AbortSignal riêng. Không dùng sự kiện tạo/dừng toàn cục hay sửa đổi cài đặt.
+export const CHAT_DEFAULTS = { mode: 'current', url: '', model: '', nickname: '', relationship: 'Người yêu', maxTokens: 768, rememberKey: false, replyStyle: 'natural', memory: '' };
 
 export function normalizeChatConfig(value = {}, defaults = {}) {
   const relationship = defaults.relationship || CHAT_DEFAULTS.relationship;
@@ -15,9 +15,9 @@ export function normalizeChatConfig(value = {}, defaults = {}) {
 
 export function apiBase(value) {
   let url;
-  try { url = new URL(value); } catch { throw new Error('请填写完整的 API 地址，例如 https://你的接口/v1'); }
+  try { url = new URL(value); } catch { throw new Error('Vui lòng điền đầy đủ địa chỉ API, ví dụ https://api-cua-ban/v1'); }
   if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.search || url.hash)
-    throw new Error('API 地址需使用 http 或 https，密钥请填写在单独的密钥框里。');
+    throw new Error('Địa chỉ API phải dùng giao thức http hoặc https, khóa bí mật (API key) vui lòng điền vào ô khóa riêng.');
   url.pathname = url.pathname.replace(/\/chat\/completions\/?$/, '').replace(/\/+$/, '');
   return url.href.replace(/\/$/, '');
 }
@@ -46,20 +46,20 @@ export function responseMessage(data) {
 export const responseText = data => responseMessage(data).content;
 
 export function safeChatError(error, key = '') {
-  let text = typeof error === 'string' ? error : error?.message || '连接没有成功，请检查 API 设置后重试。';
-  if (key) text = text.split(key).join('［密钥已隐藏］');
+  let text = typeof error === 'string' ? error : error?.message || 'Kết nối không thành công, vui lòng kiểm tra cài đặt API rồi thử lại.';
+  if (key) text = text.split(key).join('[Khóa bí mật đã ẩn]');
   return String(text).slice(0, 350);
 }
 
 async function fetchHostJSON(host, context, url, body, signal) {
   signal?.throwIfAborted();
-  if (typeof context.getRequestHeaders !== 'function') throw new Error('酒馆连接接口尚未就绪，请刷新后再试。');
+  if (typeof context.getRequestHeaders !== 'function') throw new Error('Giao diện kết nối SillyTavern chưa sẵn sàng, vui lòng tải lại trang rồi thử lại.');
   const response = await host.fetch(url, { method: 'POST', headers: context.getRequestHeaders(), body: JSON.stringify(body), signal, cache: 'no-store' });
   let data;
-  try { data = await response.json(); } catch { throw new Error(`接口没有返回有效数据（${response.status}），请检查地址是否正确。`); }
+  try { data = await response.json(); } catch { throw new Error(`API không trả về dữ liệu hợp lệ (${response.status}), vui lòng kiểm tra xem địa chỉ có chính xác không.`); }
   if (!response.ok || data?.error) {
     const detail = typeof data?.error === 'string' ? data.error : data?.error?.message;
-    throw new Error(detail || `连接失败（${response.status}），请检查地址、模型、密钥或额度。`);
+    throw new Error(detail || `Kết nối thất bại (${response.status}), vui lòng kiểm tra địa chỉ, mô hình, API key hoặc hạn mức.`);
   }
   signal?.throwIfAborted();
   return data;
@@ -73,37 +73,37 @@ export function normalizeModelList(data) {
     .sort((a, b) => a.localeCompare(b));
 }
 
-// Native status route verified in 1.14.0–1.19.0; this only reads model metadata.
+// Định tuyến status gốc được kiểm chứng từ 1.14.0–1.19.0; phần này chỉ đọc metadata của mô hình.
 export async function requestModelList(host, context, config, { signal, apiKey = '' } = {}) {
-  if (config.mode !== 'custom') throw new Error('当前连接跟随酒馆的模型；如需单独选模型，请切换到“单独配置 API”。');
+  if (config.mode !== 'custom') throw new Error('Kết nối hiện tại theo mô hình của SillyTavern; nếu muốn chọn mô hình riêng, vui lòng chuyển sang "Tự cấu hình API".');
   const data = await fetchHostJSON(host, context, '/api/backends/chat-completions/status', {
     chat_completion_source: 'custom', custom_url: apiBase(config.url),
     custom_include_headers: JSON.stringify({ Authorization: apiKey ? `Bearer ${apiKey}` : '' }),
   }, signal);
   const models = normalizeModelList(data);
-  if (!models.length) throw new Error('接口没有返回可选模型。它可能不提供模型列表，仍可手动填写模型名称。');
+  if (!models.length) throw new Error('API không trả về mô hình khả dụng nào. Có thể API không hỗ trợ liệt kê danh sách, bạn vẫn có thể tự nhập tên mô hình.');
   return models;
 }
 
 export async function requestChat(host, context, config, messages, { signal, apiKey = '', loadModule, includeReasoning = false } = {}) {
   signal?.throwIfAborted();
   if (context.eriiPreviewMode === 'live' && config.mode !== 'custom')
-    throw new Error('独立预览页无法读取酒馆当前 API，请在连接设置中选择“单独配置 API”。安装到酒馆后可使用当前连接。');
+    throw new Error('Trang xem trước độc lập không thể đọc API hiện tại của SillyTavern, vui lòng chọn "Tự cấu hình API" trong cài đặt kết nối. Sau khi cài vào SillyTavern có thể dùng kết nối hiện tại.');
   const load = loadModule || (path => import(new URL(path, host.document.baseURI).href));
   const fetchJSON = (url, body) => fetchHostJSON(host, context, url, body, signal);
   let data;
   if (config.mode === 'custom') {
-    if (!config.model) throw new Error('请先在连接设置里填写模型名称。');
+    if (!config.model) throw new Error('Vui lòng điền tên mô hình trong phần cài đặt kết nối trước.');
     data = await fetchJSON('/api/backends/chat-completions/generate', {
       chat_completion_source: 'custom', custom_url: apiBase(config.url), model: config.model,
-      // Always override the host's CUSTOM secret, including keyless local endpoints.
+      // Luôn ghi đè khóa bí mật CUSTOM của host, bao gồm cả các endpoint cục bộ không cần khóa.
       custom_include_headers: JSON.stringify({ Authorization: apiKey ? `Bearer ${apiKey}` : '' }),
       messages, max_tokens: config.maxTokens, temperature: 0.8, top_p: 1, stream: false,
     });
   } else if (!context.mainApi || context.mainApi === 'openai') {
     const native = await load('scripts/openai.js');
     const settings = context.chatCompletionSettings || native.oai_settings;
-    if (!settings) throw new Error('请先在酒馆中配置一个聊天补全连接。');
+    if (!settings) throw new Error('Vui lòng cấu hình kết nối Chat Completion trong SillyTavern trước.');
     if (typeof native.createGenerationParameters === 'function') {
       const own = { ...settings, openai_max_tokens: config.maxTokens, stream_openai: false, n: 1,
         function_calling: false, enable_web_search: false, request_images: false };
@@ -112,19 +112,19 @@ export async function requestChat(host, context, config, messages, { signal, api
       signal?.throwIfAborted();
       data = await fetchJSON('/api/backends/chat-completions/generate', generate_data);
     } else if (typeof native.sendOpenAIRequest === 'function') {
-      // 1.14 predates the exported parameter builder; native quiet request has its own signal.
+      // Bản 1.14 ra trước bộ tạo tham số export; yêu cầu quiet gốc sở hữu signal riêng.
       data = await native.sendOpenAIRequest('quiet', messages, signal);
-    } else throw new Error('当前酒馆缺少聊天接口，可以使用单独配置 API。');
+    } else throw new Error('SillyTavern hiện tại thiếu API trò chuyện, có thể dùng "Tự cấu hình API".');
   } else if (context.mainApi === 'textgenerationwebui') {
     const [core, native] = await Promise.all([load('script.js'), load('scripts/textgen-settings.js')]);
     const prompt = core.createRawPrompt(messages, context.mainApi, false, false, '', '');
     const body = await native.getTextGenGenerationData(prompt, config.maxTokens, false, false, null, 'quiet');
     body.stream = false;
     data = await fetchJSON(core.getGenerateUrl(context.mainApi), body);
-  } else throw new Error(`当前连接类型 ${context.mainApi} 暂不支持独立聊天，请使用聊天补全、文本补全或单独配置 API。`);
+  } else throw new Error(`Loại kết nối hiện tại (${context.mainApi}) chưa hỗ trợ trò chuyện độc lập, vui lòng sử dụng Chat Completion, Text Completion hoặc Tự cấu hình API.`);
   signal?.throwIfAborted();
   const result = responseMessage(data);
-  if (!result.content && !(includeReasoning && result.reasoning)) throw new Error('接口没有返回正文，请提高回复长度后重试。');
+  if (!result.content && !(includeReasoning && result.reasoning)) throw new Error('API không trả về nội dung chính, vui lòng tăng độ dài phản hồi (max tokens) rồi thử lại.');
   result.content=result.content.slice(0,16000);
   return includeReasoning ? result : result.content;
 }
