@@ -3,8 +3,9 @@
 import erii from './characters/erii.js';
 import zero from './characters/zero.js';
 import naidan from './characters/naidan.js';
+import claude from './characters/claude.js';
 
-export const CHARACTERS = Object.freeze({ erii, zero, naidan });
+export const CHARACTERS = Object.freeze({ erii, zero, naidan, claude });
 export const CHARACTER_IDS = Object.freeze(Object.keys(CHARACTERS));
 export const DEFAULT_CHARACTER = 'erii';
 export const POSES = Object.freeze(['idle', 'received', 'writing', 'complete', 'error', 'tea', 'reading', 'origami', 'duck',

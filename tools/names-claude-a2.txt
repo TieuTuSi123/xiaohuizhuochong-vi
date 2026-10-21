@@ -1,0 +1,13 @@
+# 小克 A2 表：5 列 × 2 行，从左到右、从上到下（核心第 11–20 格）
+# 第 10 格设定图只用来量统一缩放比例（配合 --ref reference），名字前的 ~ 表示不导出
+# B 表与零共用 names-b.txt（第 8 格下午茶备用图跳过）
+rest
+gift
+lifted
+land
+wave
+peek
+edge-left
+edge-right
+edge-bottom
+~reference

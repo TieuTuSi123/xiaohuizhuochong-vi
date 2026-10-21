@@ -1,6 +1,6 @@
 /* =========================================================================
    数据库桌宠 · 精装手帐
-   纸张、烫金线、纸胶带、印章；三个角色各一套色。所有样式都挂在本扩展的
+   纸张、烫金线、纸胶带、印章；每个角色各一套色。所有样式都挂在本扩展的
    命名空间下，按钮和输入框显式写颜色，避免被酒馆主题改掉。
    ========================================================================= */
 
@@ -36,6 +36,15 @@
   --pet-gold: #d29a2a; --pet-gold-hi: #ffe28a; --pet-gold-lo: #a06f12;
   --pet-tape: rgba(255, 186, 52, .62); --pet-tape-dot: rgba(255, 120, 40, .45);
   --pet-shadow: rgba(120, 80, 10, .22);
+}
+[data-character="claude"] {
+  --pet-accent: #c15f3c; --pet-accent-2: #d97757; --pet-accent-ink: #7a3519;
+  --pet-ink: #3b2a22; --pet-muted: #8c7262; --pet-faint: #c4ab9a;
+  --pet-paper: #fbf6ef; --pet-paper-2: #f4e9dc; --pet-card: #fffdf9;
+  --pet-line: #e8d6c4; --pet-soft: #f8e6d8; --pet-cover: #3b2a22; --pet-cover-2: #57402f;
+  --pet-gold: #c39a4a; --pet-gold-hi: #f1dca6; --pet-gold-lo: #94702c;
+  --pet-tape: rgba(217, 119, 87, .5); --pet-tape-dot: rgba(255, 255, 255, .75);
+  --pet-shadow: rgba(90, 50, 25, .2);
 }
 /* 紫夜礼裙的手帐与桌宠气泡；换回默认后恢复角色原来的配色。 */
 .erii-companion[data-character="erii"][data-skin="erii-purple-night"],
@@ -620,6 +629,7 @@
 .erii-life__who[data-character="erii"] { background: #c4434e; }
 .erii-life__who[data-character="zero"] { background: #4c7cb3; }
 .erii-life__who[data-character="naidan"] { background: #e0901f; }
+.erii-life__who[data-character="claude"] { background: #c96442; }
 .erii-life__records [data-kind="earned"] span { color: var(--pet-good); }
 .erii-life__records [data-kind="spent"] span { color: var(--pet-gold-lo); }
 .erii-life__task { flex: 0 0 auto; display: flex; align-items: flex-start; gap: 8px; margin: 8px 18px 0; padding: 8px 12px; border-radius: 12px; background: var(--pet-soft); font-size: 11px; }
@@ -901,6 +911,7 @@
 .erii-companion-settings .pet-settings__pick::before { content: ""; position: absolute; left: 9px; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: #c4434e; box-shadow: 0 0 0 2px rgba(255,255,255,.35); }
 .erii-companion-settings .pet-settings__pick[data-character="zero"]::before { background: #6b97c9; }
 .erii-companion-settings .pet-settings__pick[data-character="naidan"]::before { background: #f6a93b; }
+.erii-companion-settings .pet-settings__pick[data-character="claude"]::before { background: #d97757; }
 .erii-companion-settings .pet-settings__pick[aria-pressed="true"] { background: rgba(140, 52, 66, .95) !important; outline: 2px solid rgba(255, 220, 160, .7); }
 .erii-companion-settings .pet-settings__house { background: rgba(160, 120, 40, .9) !important; }
 .erii-companion-settings .pet-settings__mall { flex: 1 1 100%; min-height: 40px; background: #71468b !important; }

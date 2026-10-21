@@ -30,3 +30,8 @@ v0.9.3 新增月读命·紫夜礼裙，27 张透明动作/生活图在 `assets/s
 ## v1.0.0 零的皇女皮肤
 
 新增 `skins/zero-ice-rose/` 27 张960×960透明WebP和媒体清单。沿用用户确认母图的同人造型，原图和提示词在维护素材目录留存；获取方式为用户指定密语解锁，非购买。详情见该目录NOTICE.md。
+
+
+## v1.0.2 小克
+
+新增的小克动作图在 `assets/claude/`（核心 16 张、探头 3 张）和 `assets/claude/life/`（生活 7 张），造型参考、生成方式与许可见 [assets/claude/NOTICE.md](claude/NOTICE.md)。原有素材字节未变。
