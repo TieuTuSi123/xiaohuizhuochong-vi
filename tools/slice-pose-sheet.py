@@ -7,6 +7,9 @@
     python tools/slice-pose-sheet.py sheet-a.png --grid 4x5 --names tools/names-a.txt --out assets/zero
     # 生活插图（B 表 4×2，768 画布、质量 90 的有损 WebP）
     python tools/slice-pose-sheet.py sheet-b.png --grid 4x2 --names tools/names-b.txt --out assets/zero/life --fit scene --size 768 --lossy 90
+    # 名字前加 ~ 的格子只用来量缩放比例、不导出；例如表里没有待机格时用设定图对齐。
+    # 正常头身的角色加 --edge-max，探头图最多放大到参照比例的 1.25 倍
+    python tools/slice-pose-sheet.py sheet-a2.png --grid 5x2 --names tools/names-claude-a2.txt --out assets/claude --ref reference --edge-max 1.25
 
 规则从仓库现有绘梨衣素材量出：
 - 普通姿势：384 画布，水平居中，脚底/坐姿底边在 95.8%。整张表用同一个缩放比例（以 --ref 指定的
@@ -45,6 +48,7 @@ def parse_args(argv):
     parser.add_argument('--edge-size', type=int, default=512, help='edge-* 探头图的画布边长')
     parser.add_argument('--ref', default='idle', help='统一缩放比例参照的格子名')
     parser.add_argument('--ref-height', type=float, default=REF_HEIGHT, help='参照格的高度占画布的比例（默认对齐绘梨衣待机图 0.885）')
+    parser.add_argument('--edge-max', type=float, help='探头图最多放大到参照比例的几倍；正常头身的角色用，免得探头时脸比平时大好几倍')
     parser.add_argument('--lossy', type=int, help='改存有损 WebP 的质量（默认无损）')
     parser.add_argument('--png', action='store_true', help='同时存一份 PNG 方便检查')
     parser.add_argument('--alpha-floor', type=int, default=16)
@@ -180,13 +184,14 @@ def normalize(name, piece, args, reference_scale):
     rule = EDGE_RULES.get(name)
     if rule:
         canvas = args.edge_size
+        cap = args.edge_max * reference_scale * canvas / args.size if args.edge_max and reference_scale else float('inf')
         if rule['side'] == 'bottom':
-            scale = min(rule['width'] * canvas / piece.width, (rule['line'] - rule['top']) * canvas / piece.height)
+            scale = min(rule['width'] * canvas / piece.width, (rule['line'] - rule['top']) * canvas / piece.height, cap)
             left = (canvas - piece.width * scale) / 2
             top = rule['line'] * canvas - piece.height * scale
         else:
             room = (1 - rule['line']) if rule['side'] == 'left' else rule['line']
-            scale = min((rule['bottom'] - rule['top']) * canvas / piece.height, (room - 0.01) * canvas / piece.width)
+            scale = min((rule['bottom'] - rule['top']) * canvas / piece.height, (room - 0.01) * canvas / piece.width, cap)
             width = piece.width * scale
             left = rule['line'] * canvas if rule['side'] == 'left' else rule['line'] * canvas - width
             top = rule['bottom'] * canvas - piece.height * scale
@@ -224,10 +229,13 @@ def main(argv=None):
         sys.exit(f'名字列表有 {len(names)} 项，但网格是 {columns * rows} 格。')
     rgba = load_sheet(args.sheet, args)
     masks = cell_masks(rgba, columns, rows)
-    pieces = {}
+    pieces, measure_only = {}, set()
     for index, name in enumerate(names):
         if name == '-':
             continue
+        if name.startswith('~'):
+            name = name[1:]
+            measure_only.add(name)
         if index not in masks:
             sys.exit(f'第 {index + 1} 格（{name}）是空的。')
         pieces[name] = crop(rgba, masks[index])
@@ -235,6 +243,8 @@ def main(argv=None):
     if args.fit == 'pose' and args.ref in pieces:
         reference_scale = args.ref_height * args.size / pieces[args.ref].height
     for name, piece in pieces.items():
+        if name in measure_only:
+            continue
         board = normalize(name, piece, args, reference_scale)
         path = os.path.join(args.out, f'{name}.webp')
         save(board, path, args)

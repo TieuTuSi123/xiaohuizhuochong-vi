@@ -1,0 +1,11 @@
+# 小克 A1 表：5 列 × 2 行，从左到右、从上到下（正常头身，核心第 1–10 格）
+idle
+received
+writing
+complete
+error
+black-tea
+reading
+paper-flower
+starlet
+stretch
