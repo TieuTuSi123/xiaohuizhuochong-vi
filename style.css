@@ -1,8 +1,7 @@
 /* =========================================================================
-   Pet Màn Hình CSDL · Sổ Tay Bìa Cứng
-   Vân giấy, đường kẻ mạ vàng, băng dính washi, con dấu; 3 nhân vật có 3 bộ màu riêng.
-   Tất cả các style đều nằm trong namespace của tiện ích này, nút bấm và khung nhập liệu
-   ghi màu rõ ràng nhằm tránh bị theme của SillyTavern ghi đè.
+   数据库桌宠 · 精装手帐
+   纸张、烫金线、纸胶带、印章；每个角色各一套色。所有样式都挂在本扩展的
+   命名空间下，按钮和输入框显式写颜色，避免被酒馆主题改掉。
    ========================================================================= */
 
 .erii-companion, .erii-chat, .erii-life, .erii-house, .erii-mall {
@@ -38,7 +37,16 @@
   --pet-tape: rgba(255, 186, 52, .62); --pet-tape-dot: rgba(255, 120, 40, .45);
   --pet-shadow: rgba(120, 80, 10, .22);
 }
-/* Sổ tay và bong bóng của pet khi mặc Dạ Lễ Nguyệt Độc; đổi về mặc định sẽ khôi phục màu gốc của nhân vật. */
+[data-character="claude"] {
+  --pet-accent: #c15f3c; --pet-accent-2: #d97757; --pet-accent-ink: #7a3519;
+  --pet-ink: #3b2a22; --pet-muted: #8c7262; --pet-faint: #c4ab9a;
+  --pet-paper: #fbf6ef; --pet-paper-2: #f4e9dc; --pet-card: #fffdf9;
+  --pet-line: #e8d6c4; --pet-soft: #f8e6d8; --pet-cover: #3b2a22; --pet-cover-2: #57402f;
+  --pet-gold: #c39a4a; --pet-gold-hi: #f1dca6; --pet-gold-lo: #94702c;
+  --pet-tape: rgba(217, 119, 87, .5); --pet-tape-dot: rgba(255, 255, 255, .75);
+  --pet-shadow: rgba(90, 50, 25, .2);
+}
+/* 紫夜礼裙的手帐与桌宠气泡；换回默认后恢复角色原来的配色。 */
 .erii-companion[data-character="erii"][data-skin="erii-purple-night"],
 .erii-life[data-character="erii"][data-skin="erii-purple-night"] {
   --pet-accent: #805399; --pet-accent-2: #a177b7; --pet-accent-ink: #523362;
@@ -48,7 +56,7 @@
   --pet-tape: rgba(157, 111, 183, .46); --pet-shadow: rgba(70, 40, 90, .18);
 }
 
-/* ---------- Bản thể Pet màn hình ---------- */
+/* ---------- 桌宠本体 ---------- */
 .erii-companion {
   --erii-size: 88px;
   position: fixed; top: 0; left: 0; z-index: 9420;
@@ -94,14 +102,14 @@
   opacity: 0; transition: opacity .05s ease-out;
 }
 .erii-companion__sprite[data-visible="true"] { opacity: 1; }
-/* Ảnh của Nãi Đản lấy từ CSDL, gần như chiếm trọn khung tranh: Thu nhỏ một chút để chân thẳng hàng với 2 cô gái; ảnh nhòm ngó xoay theo cạnh tương ứng. */
+/* 奶蛋的图来自数据库，几乎撑满画框：缩一点，让脚底和两位女孩对齐；探头图旋转到对应边。 */
 .erii-companion[data-character="naidan"] .erii-companion__sprite { transform: translateY(-2%) scale(.9); transform-origin: 50% 100%; }
 .erii-companion[data-character="naidan"][data-edge="bottom"] .erii-companion__sprite,
 .erii-companion[data-character="naidan"][data-edge="top"] .erii-companion__sprite { transform: translateY(4%) scale(1.04); }
 .erii-companion[data-character="naidan"][data-edge="left"] .erii-companion__sprite { transform: translateX(12%) rotate(90deg) scale(1.04); transform-origin: 50% 50%; }
 .erii-companion[data-character="naidan"][data-edge="right"] .erii-companion__sprite { transform: translateX(-12%) rotate(-90deg) scale(1.04); transform-origin: 50% 50%; }
 
-/* ---------- Dùng chung: Vân giấy, Icon, Nút bấm, Thước đo ---------- */
+/* ---------- 通用：纸张、图标、按钮、量表 ---------- */
 .pet-icon { display: inline-grid; place-items: center; width: 1.15em; height: 1.15em; flex: 0 0 auto; line-height: 0; }
 .pet-icon svg { width: 100%; height: 100%; }
 .pet-grip { display: none; }
@@ -115,7 +123,7 @@
 .pet-meter__value { font: italic 600 11px/1 var(--pet-serif); color: var(--pet-ink); text-align: right; font-variant-numeric: tabular-nums; }
 @keyframes pet-nudge { 0%, 86%, 100% { transform: none; } 90% { transform: rotate(-12deg); } 95% { transform: rotate(10deg); } }
 
-/* ---------- Sổ tay nhỏ ---------- */
+/* ---------- 小本子 ---------- */
 .erii-companion__notebook {
   position: fixed; width: var(--erii-page-width, 330px); max-height: var(--erii-page-height, 460px);
   overflow: auto; overscroll-behavior: contain; pointer-events: auto; scrollbar-width: thin;
@@ -225,7 +233,7 @@
 .erii-companion .erii-nb__room .pet-icon { width: 19px; height: 19px; color: var(--pet-accent); }
 .erii-companion .erii-nb__room:hover { background: var(--pet-soft) !important; }
 
-/* ---------- Bong bóng (Lời thoại, Nhiệm vụ, Đời sống, Câu chuyện) ---------- */
+/* ---------- 气泡（台词、任务、生活、故事） ---------- */
 .erii-companion__message, .erii-companion__life-bubble {
   position: fixed; width: max-content; max-width: min(300px, var(--erii-page-width, 300px)); max-height: 150px;
   overflow: auto; padding: 8px 12px 9px; border: 1px solid var(--pet-line); border-radius: 14px;
@@ -287,7 +295,7 @@
 @keyframes pet-sheet-in { from { transform: translateY(100%); } to { transform: none; } }
 @keyframes pet-sheet-out { to { transform: translateY(100%); } }
 
-/* ---------- Cửa sổ nổi và Ngăn kéo đáy ---------- */
+/* ---------- 浮窗与底部抽屉 ---------- */
 .erii-chat, .erii-life, .erii-house { animation: pet-window-in .26s var(--pet-ease); }
 .erii-chat.is-leaving, .erii-life.is-leaving, .erii-house.is-leaving { animation: pet-window-out .18s ease-in forwards; pointer-events: none; }
 .pet-sheet { border-radius: 20px 20px 0 0 !important; animation: pet-sheet-in .32s var(--pet-ease) !important; box-shadow: 0 -16px 40px -18px rgba(0, 0, 0, .45) !important; }
@@ -300,7 +308,7 @@
 .erii-companion__notebook.pet-sheet::after { right: 22px; top: -6px; }
 .erii-companion__notebook.pet-sheet .erii-nb__head { touch-action: none; }
 
-/* ---------- Cửa sổ trò chuyện ---------- */
+/* ---------- 聊天窗 ---------- */
 .erii-chat {
   position: fixed; z-index: 9460; display: flex; flex-direction: column;
   width: 440px; height: 660px; overflow: hidden; pointer-events: auto;
@@ -470,7 +478,7 @@
   .erii-chat .erii-chat__message-tools button { min-height: 30px; padding: 4px 1px; }
 }
 
-/* ---------- Chế độ bảo trì & Quan sát đồng hành ---------- */
+/* ---------- 检修模式与旁观陪聊 ---------- */
 .erii-chat__mode { display: flex; flex: 0 0 auto; margin: 8px 12px 0; padding: 3px; border-radius: 99px; background: var(--pet-paper-2); border: 1px solid var(--pet-line); }
 .erii-chat .erii-chat__mode button { flex: 1 1 0; min-height: 30px; padding: 3px 8px; border: 0 !important; border-radius: 99px; background: transparent !important; color: var(--pet-muted) !important; font-size: 12px; transition: background .2s, color .2s; }
 .erii-chat .erii-chat__mode button[aria-pressed="true"] { background: linear-gradient(180deg, var(--pet-accent-2), var(--pet-accent)) !important; color: #fffaf6 !important; font-weight: 700; box-shadow: 0 4px 10px -6px var(--pet-shadow) !important; }
@@ -527,7 +535,7 @@
   .erii-chat .erii-repair__receipt button, .erii-chat .erii-repair__confirm button { min-height: 32px; }
 }
 
-/* ---------- Sổ tay đời sống ---------- */
+/* ---------- 生活手帐 ---------- */
 .erii-life { position: fixed; z-index: 9440; display: flex; flex-direction: column; background: var(--pet-grain), var(--pet-paper); border: 1px solid var(--pet-line); border-radius: 18px; color: var(--pet-ink); font: 13px/1.65 var(--pet-body); text-shadow: none; overflow: hidden;
   box-shadow: 0 30px 60px -30px var(--pet-shadow), 0 8px 20px -10px var(--pet-shadow); }
 .erii-life, .erii-life *, .erii-life *::before, .erii-life *::after { box-sizing: border-box; }
@@ -597,7 +605,7 @@
 .erii-life__food-image { display: block; width: 104px; height: 96px; object-fit: contain; margin: 0 auto 6px; }
 .erii-life__food p { color: var(--pet-gold-lo); font-size: 11.5px; }
 .erii-life__food button { margin-top: 7px; width: 100%; font-size: 12px; }
-/* Trang thay đồ: Cùng bố cục với thẻ gọi món; mẩu giấy nhỏ góc trên bên trái ghi giá / đã sở hữu / đang dùng. Màu giao diện của skin được viết riêng bằng [data-skin="id skin"]. */
+/* 换装页：和点餐卡片同一套版式；左上角的小纸签写价格 / 已拥有 / 使用中。皮肤的界面配色用 [data-skin="皮肤 id"] 另写。 */
 .erii-life__closet { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .erii-life .erii-life__skin-shortage { min-height: 0; color: var(--pet-gold-lo); font-size: 11px; }
 .erii-life__skin { position: relative; min-width: 0; padding: 14px 10px 12px; text-align: center; border: 1px solid var(--pet-line); border-radius: 16px; background: var(--pet-card); transition: transform .18s var(--pet-ease), box-shadow .18s; }
@@ -621,6 +629,7 @@
 .erii-life__who[data-character="erii"] { background: #c4434e; }
 .erii-life__who[data-character="zero"] { background: #4c7cb3; }
 .erii-life__who[data-character="naidan"] { background: #e0901f; }
+.erii-life__who[data-character="claude"] { background: #c96442; }
 .erii-life__records [data-kind="earned"] span { color: var(--pet-good); }
 .erii-life__records [data-kind="spent"] span { color: var(--pet-gold-lo); }
 .erii-life__task { flex: 0 0 auto; display: flex; align-items: flex-start; gap: 8px; margin: 8px 18px 0; padding: 8px 12px; border-radius: 12px; background: var(--pet-soft); font-size: 11px; }
@@ -644,7 +653,7 @@
   .erii-life__job > button { font-size: 11px; padding: 7px 9px; }
 }
 
-/* ---------- Ngôi nhà Pet: Cuốn bách khoa mở rộng ---------- */
+/* ---------- 桌宠小屋：翻开的图鉴 ---------- */
 .erii-house {
   position: fixed; z-index: 9445; display: flex; flex-direction: column; overflow: hidden; pointer-events: auto;
   width: 780px; height: 600px; padding: 0 18px 16px; border-radius: 20px; color: var(--pet-ink); font: 13px/1.6 var(--pet-body); text-align: left; text-shadow: none !important;
@@ -872,10 +881,10 @@
 .erii-mall[data-compact="true"] .erii-mall__footer { padding-block: 5px; }
 .erii-mall[data-compact="true"] .erii-mall__status:empty { display: none; }
 
-/* ---------- Canvas hiệu ứng đặc biệt ---------- */
+/* ---------- 特效画布 ---------- */
 .erii-fx { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 9470; pointer-events: none; }
 
-/* ---------- Cài đặt tiện ích mở rộng ---------- */
+/* ---------- 扩展设置 ---------- */
 .erii-companion-settings { padding: 8px 0; color: inherit; }
 .erii-companion-settings summary { cursor: pointer; padding: 6px 0; font-weight: 700; }
 .erii-companion-settings label { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
@@ -902,6 +911,7 @@
 .erii-companion-settings .pet-settings__pick::before { content: ""; position: absolute; left: 9px; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: #c4434e; box-shadow: 0 0 0 2px rgba(255,255,255,.35); }
 .erii-companion-settings .pet-settings__pick[data-character="zero"]::before { background: #6b97c9; }
 .erii-companion-settings .pet-settings__pick[data-character="naidan"]::before { background: #f6a93b; }
+.erii-companion-settings .pet-settings__pick[data-character="claude"]::before { background: #d97757; }
 .erii-companion-settings .pet-settings__pick[aria-pressed="true"] { background: rgba(140, 52, 66, .95) !important; outline: 2px solid rgba(255, 220, 160, .7); }
 .erii-companion-settings .pet-settings__house { background: rgba(160, 120, 40, .9) !important; }
 .erii-companion-settings .pet-settings__mall { flex: 1 1 100%; min-height: 40px; background: #71468b !important; }
@@ -911,7 +921,7 @@
 body[data-erii-replace-database-pet] .acu-desk-pet,
 body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !important; pointer-events: none !important; }
 
-/* ---------- Giảm hiệu ứng động / Tắt hiệu ứng đặc biệt ---------- */
+/* ---------- 减少动态效果 / 特效关闭 ---------- */
 .erii-companion[data-fx="off"] .erii-companion__message, .erii-companion[data-fx="off"] .erii-companion__life-bubble,
 .erii-companion[data-fx="off"] .erii-companion__story, .erii-companion[data-fx="off"] .erii-companion__notebook,
 .erii-house[data-fx="off"], .erii-house[data-fx="off"] h2, .erii-house[data-fx="off"] .erii-house__stamp { animation: none !important; }
@@ -919,99 +929,4 @@ body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !im
   .erii-companion, .erii-companion__sprite, .erii-companion__sway, .erii-companion__edge-frame { transition: none !important; }
   .erii-companion__breath { animation: none !important; }
   .erii-companion *, .erii-chat, .erii-chat *, .erii-life, .erii-life *, .erii-house, .erii-house *, .erii-mall, .erii-mall *, .pet-sheet { animation: none !important; transition: none !important; }
-}
-/* =========================================================================
-   GÓI TỐI ƯU TOÀN DIỆN (SỬA THANH KÉO + TĂNG TỐC CHO CẢ LAPTOP & ĐIỆN THOẠI)
-   ========================================================================= */
-
-/* --- 1. SỬA LỖI THANH KÉO: Nhỏ gọn (6px), bo tròn, bỏ nút mũi tên xám thô --- */
-.erii-companion, .erii-companion *,
-.erii-chat, .erii-chat *,
-.erii-life, .erii-life *,
-.erii-house, .erii-house *,
-.erii-mall, .erii-mall * {
-  scrollbar-width: thin !important;
-  scrollbar-color: color-mix(in srgb, var(--pet-muted) 35%, transparent) transparent !important;
-}
-
-.erii-companion::-webkit-scrollbar, .erii-companion *::-webkit-scrollbar,
-.erii-chat::-webkit-scrollbar, .erii-chat *::-webkit-scrollbar,
-.erii-life::-webkit-scrollbar, .erii-life *::-webkit-scrollbar,
-.erii-house::-webkit-scrollbar, .erii-house *::-webkit-scrollbar,
-.erii-mall::-webkit-scrollbar, .erii-mall *::-webkit-scrollbar {
-  width: 6px !important;
-  height: 6px !important;
-}
-
-.erii-companion::-webkit-scrollbar-button, .erii-companion *::-webkit-scrollbar-button,
-.erii-chat::-webkit-scrollbar-button, .erii-chat *::-webkit-scrollbar-button,
-.erii-life::-webkit-scrollbar-button, .erii-life *::-webkit-scrollbar-button,
-.erii-house::-webkit-scrollbar-button, .erii-house *::-webkit-scrollbar-button,
-.erii-mall::-webkit-scrollbar-button, .erii-mall *::-webkit-scrollbar-button {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-.erii-companion::-webkit-scrollbar-track, .erii-companion *::-webkit-scrollbar-track,
-.erii-chat::-webkit-scrollbar-track, .erii-chat *::-webkit-scrollbar-track,
-.erii-life::-webkit-scrollbar-track, .erii-life *::-webkit-scrollbar-track,
-.erii-house::-webkit-scrollbar-track, .erii-house *::-webkit-scrollbar-track,
-.erii-mall::-webkit-scrollbar-track, .erii-mall *::-webkit-scrollbar-track {
-  background: transparent !important;
-}
-
-.erii-companion::-webkit-scrollbar-thumb, .erii-companion *::-webkit-scrollbar-thumb,
-.erii-chat::-webkit-scrollbar-thumb, .erii-chat *::-webkit-scrollbar-thumb,
-.erii-life::-webkit-scrollbar-thumb, .erii-life *::-webkit-scrollbar-thumb,
-.erii-house::-webkit-scrollbar-thumb, .erii-house *::-webkit-scrollbar-thumb,
-.erii-mall::-webkit-scrollbar-thumb, .erii-mall *::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--pet-muted) 35%, transparent) !important;
-  border-radius: 99px !important;
-}
-
-.erii-companion::-webkit-scrollbar-thumb:hover, .erii-companion *::-webkit-scrollbar-thumb:hover,
-.erii-chat::-webkit-scrollbar-thumb:hover, .erii-chat *::-webkit-scrollbar-thumb:hover,
-.erii-life::-webkit-scrollbar-thumb:hover, .erii-life *::-webkit-scrollbar-thumb:hover,
-.erii-house::-webkit-scrollbar-thumb:hover, .erii-house *::-webkit-scrollbar-thumb:hover,
-.erii-mall::-webkit-scrollbar-thumb:hover, .erii-mall *::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--pet-accent) 60%, transparent) !important;
-}
-
-/* Sửa lỗi tự bung thanh cuộn ở màn hình chào mừng cửa sổ chat */
-.erii-chat__welcome { padding: 16px 6px 10px !important; }
-.erii-chat__welcome img { width: 90px !important; height: 90px !important; margin: 0 auto 8px !important; }
-.erii-chat__starters { margin-top: 12px !important; }
-
-
-/* --- 2. TĂNG TỐC ĐỒ HỌA: Tắt bộ lọc SVG nặng, nhẹ máy cả trên Laptop lẫn Mobile --- */
-.erii-companion__notebook,
-.erii-chat,
-.erii-life,
-.erii-house,
-.erii-mall,
-.erii-repair__ticket,
-.erii-chat__log,
-.erii-companion__story {
-  background-image: none !important;
-}
-
-/* Đơn giản hóa đổ bóng phức tạp: Giúp kéo thả cửa sổ & pet không bị khựng */
-.erii-companion__notebook,
-.erii-chat,
-.erii-life,
-.erii-house,
-.erii-mall {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.22) !important;
-}
-
-/* Tăng tốc phần cứng GPU cho thao tác di chuyển chuột và trượt ngăn kéo */
-.erii-companion,
-.erii-chat,
-.erii-life,
-.erii-house,
-.erii-mall,
-.pet-sheet {
-  will-change: transform;
-  transform: translateZ(0);
 }
