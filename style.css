@@ -1,8 +1,7 @@
 /* =========================================================================
-   Desktop Pet Cơ Sở Dữ Liệu · Sổ Tay Bìa Cứng (Bản Đầy Đủ Đã Tối Ưu Hiệu Năng)
-   - Giữ nguyên 100% tất cả các class, bố cục, nút bấm và chi tiết giao diện.
-   - Triệt tiêu hoàn toàn bộ lọc hạt SVG feTurbulence (nguyên nhân gây quá nhiệt).
-   - Tối ưu chu kỳ animation để giảm tải cho chip i5-5200U và màn hình 120Hz.
+   数据库桌宠 · 精装手帐 (Bản Khôi Phục Đầy Đủ + Tối Ưu An Toàn)
+   Đã gỡ bỏ lỗi contain, hiển thị đầy đủ 100% Sổ tay, Khung chat và Cửa hàng.
+   Tắt SVG feTurbulence để chống nóng máy và tụt FPS.
    ========================================================================= */
 
 .erii-companion, .erii-chat, .erii-life, .erii-house, .erii-mall {
@@ -12,11 +11,11 @@
   --pet-line: #e9d3c6; --pet-soft: #f9e4dc; --pet-cover: #4b1d22; --pet-cover-2: #6b2a30;
   --pet-gold: #c79a3e; --pet-gold-hi: #f3dc9a; --pet-gold-lo: #9c7426;
   --pet-tape: rgba(214, 72, 86, .52); --pet-tape-dot: rgba(255, 255, 255, .7);
-  --pet-shadow: rgba(110, 40, 30, .16); --pet-good: #4f7a52; --pet-warn: #b0662a; --pet-bad: #b23a33;
+  --pet-shadow: rgba(110, 40, 30, .2); --pet-good: #4f7a52; --pet-warn: #b0662a; --pet-bad: #b23a33;
   --pet-hand: "LXGW WenKai", "LXGW WenKai Screen", "霞鹜文楷", "KaiTi", "STKaiti", "Kaiti SC", "楷体", serif;
   --pet-body: "HarmonyOS Sans SC", "MiSans", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", sans-serif;
   --pet-serif: "Palatino Linotype", "Book Antiqua", Palatino, "Iowan Old Style", Georgia, serif;
-  /* TỐI ƯU CỰC MẠNH: Tắt SVG feTurbulence. Việc này giảm ngay 60-70% tải CPU/GPU trên laptop và điện thoại */
+  /* Tối ưu quan trọng: Bỏ SVG feTurbulence để chống nóng máy và tiết kiệm pin */
   --pet-grain: none;
   --pet-ease: cubic-bezier(.2, .8, .2, 1);
   --pet-spring: cubic-bezier(.34, 1.56, .64, 1);
@@ -28,7 +27,7 @@
   --pet-line: #d2deec; --pet-soft: #e3edf8; --pet-cover: #1b2c45; --pet-cover-2: #2b4467;
   --pet-gold: #c3a45a; --pet-gold-hi: #f1e3b0; --pet-gold-lo: #957b39;
   --pet-tape: rgba(120, 165, 215, .5); --pet-tape-dot: rgba(255, 255, 255, .8);
-  --pet-shadow: rgba(30, 50, 90, .16);
+  --pet-shadow: rgba(30, 50, 90, .2);
 }
 [data-character="naidan"] {
   --pet-accent: #e0801a; --pet-accent-2: #f6a93b; --pet-accent-ink: #94500b;
@@ -37,7 +36,7 @@
   --pet-line: #f0dca8; --pet-soft: #fff0c4; --pet-cover: #6e430d; --pet-cover-2: #8f5a14;
   --pet-gold: #d29a2a; --pet-gold-hi: #ffe28a; --pet-gold-lo: #a06f12;
   --pet-tape: rgba(255, 186, 52, .62); --pet-tape-dot: rgba(255, 120, 40, .45);
-  --pet-shadow: rgba(120, 80, 10, .18);
+  --pet-shadow: rgba(120, 80, 10, .22);
 }
 [data-character="claude"] {
   --pet-accent: #c15f3c; --pet-accent-2: #d97757; --pet-accent-ink: #7a3519;
@@ -46,26 +45,25 @@
   --pet-line: #e8d6c4; --pet-soft: #f8e6d8; --pet-cover: #3b2a22; --pet-cover-2: #57402f;
   --pet-gold: #c39a4a; --pet-gold-hi: #f1dca6; --pet-gold-lo: #94702c;
   --pet-tape: rgba(217, 119, 87, .5); --pet-tape-dot: rgba(255, 255, 255, .75);
-  --pet-shadow: rgba(90, 50, 25, .16);
+  --pet-shadow: rgba(90, 50, 25, .2);
 }
-/* Sổ tay và bong bóng của Desktop Pet khi mặc Dạ Lễ Phục Tím; đổi lại mặc định sẽ khôi phục bảng màu gốc của nhân vật. */
+/* Sổ tay và bong bóng của Desktop Pet khi mặc Dạ Lễ Phục Tím */
 .erii-companion[data-character="erii"][data-skin="erii-purple-night"],
 .erii-life[data-character="erii"][data-skin="erii-purple-night"] {
   --pet-accent: #805399; --pet-accent-2: #a177b7; --pet-accent-ink: #523362;
   --pet-ink: #403146; --pet-muted: #806d89; --pet-faint: #96839d;
   --pet-paper: #fbf7fd; --pet-paper-2: #f1e8f5; --pet-card: #fffdfd;
   --pet-line: #dfcee8; --pet-soft: #eee2f5; --pet-cover: #302139; --pet-cover-2: #4a305c;
-  --pet-tape: rgba(157, 111, 183, .46); --pet-shadow: rgba(70, 40, 90, .15);
+  --pet-tape: rgba(157, 111, 183, .46); --pet-shadow: rgba(70, 40, 90, .18);
 }
 
-/* ---------- Phần thân Desktop Pet ---------- */
+/* ---------- Phần thân Desktop Pet (ĐÃ GỠ BỎ HOÀN TOÀN contain) ---------- */
 .erii-companion {
   --erii-size: 88px;
   position: fixed; top: 0; left: 0; z-index: 9420;
   width: var(--erii-size); height: var(--erii-size);
   color: var(--pet-ink); font: 13px/1.6 var(--pet-body);
   pointer-events: none; text-shadow: none;
-  contain: layout style paint;
   will-change: transform;
   transition: transform .26s cubic-bezier(.2,.8,.2,1);
 }
@@ -92,8 +90,8 @@
 .erii-companion[data-dragging="true"] .erii-companion__edge-frame { transition: none; }
 .erii-companion__sway { transform: rotate(var(--erii-tilt, 0deg)); transform-origin: 50% 25%; transition: transform .08s ease-out; }
 
-/* Tối ưu nhịp thở: Kéo dài chu kỳ lên 4.6s và bỏ phép tính scale phức tạp, giảm tải render liên tục */
-.erii-companion__breath { transform-origin: 50% 88%; animation: erii-breath 4.6s ease-in-out infinite; }
+/* Tối ưu nhịp thở: Chu kỳ 4.2s mượt mà, không giật lag */
+.erii-companion__breath { transform-origin: 50% 88%; animation: erii-breath 4.2s cubic-bezier(.37,0,.63,1) infinite; }
 .erii-companion[data-dragging="true"] .erii-companion__breath { animation-play-state: paused; }
 @keyframes erii-breath {
   0%, 100% { transform: translateY(0); }
@@ -106,7 +104,6 @@
   opacity: 0; transition: opacity .05s ease-out;
 }
 .erii-companion__sprite[data-visible="true"] { opacity: 1; }
-/* Ảnh của Naidan lấy từ cơ sở dữ liệu, gần như tràn toàn bộ khung hình: thu nhỏ một chút để chân đế thẳng hàng với hai thiếu nữ; ảnh ló đầu xoay theo mép tương ứng. */
 .erii-companion[data-character="naidan"] .erii-companion__sprite { transform: translateY(-2%) scale(.9); transform-origin: 50% 100%; }
 .erii-companion[data-character="naidan"][data-edge="bottom"] .erii-companion__sprite,
 .erii-companion[data-character="naidan"][data-edge="top"] .erii-companion__sprite { transform: translateY(4%) scale(1.04); }
@@ -136,8 +133,8 @@
     repeating-linear-gradient(180deg, transparent 0 25px, color-mix(in srgb, var(--pet-accent) 6%, transparent) 25px 26px),
     var(--pet-paper);
   border: 1px solid var(--pet-line); border-radius: 6px 16px 16px 6px;
-  box-shadow: 0 14px 30px -14px var(--pet-shadow), 0 3px 8px -4px var(--pet-shadow);
-  animation: pet-pop .22s var(--pet-ease);
+  box-shadow: 0 18px 40px -18px var(--pet-shadow), 0 3px 10px -4px var(--pet-shadow);
+  animation: pet-pop .26s var(--pet-ease);
 }
 .erii-companion__notebook::before {
   content: ""; position: absolute; left: 13px; top: 10px; bottom: 10px; width: 0;
@@ -241,8 +238,8 @@
   position: fixed; width: max-content; max-width: min(300px, var(--erii-page-width, 300px)); max-height: 150px;
   overflow: auto; padding: 8px 12px 9px; border: 1px solid var(--pet-line); border-radius: 14px;
   background: var(--pet-card); color: var(--pet-ink);
-  pointer-events: auto; box-shadow: 0 10px 20px -12px var(--pet-shadow), 0 2px 6px -3px var(--pet-shadow);
-  animation: pet-bubble .26s var(--pet-spring);
+  pointer-events: auto; box-shadow: 0 10px 24px -14px var(--pet-shadow), 0 2px 6px -3px var(--pet-shadow);
+  animation: pet-bubble .34s var(--pet-spring);
 }
 .erii-companion__message { display: grid; gap: 2px; padding-top: 12px; overflow: visible; max-height: none; }
 .erii-companion__message::after, .erii-companion__life-bubble::after, .erii-companion__story::after {
@@ -279,8 +276,8 @@
   overflow: auto; overscroll-behavior: contain; pointer-events: auto;
   padding: 12px 16px; border: 1px solid var(--pet-line); border-radius: 16px 16px 6px 16px;
   background: repeating-linear-gradient(180deg, transparent 0 27px, color-mix(in srgb, var(--pet-accent) 7%, transparent) 27px 28px), var(--pet-card);
-  color: var(--pet-ink); text-align: left; box-shadow: 0 12px 24px -14px var(--pet-shadow);
-  animation: pet-bubble .26s var(--pet-spring);
+  color: var(--pet-ink); text-align: left; box-shadow: 0 14px 30px -16px var(--pet-shadow);
+  animation: pet-bubble .34s var(--pet-spring);
 }
 .erii-companion__story::after { display: none; }
 .erii-companion__story-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -291,18 +288,18 @@
 .erii-companion__story-next { border: 1px solid var(--pet-line) !important; border-radius: 99px; background: var(--pet-card) !important; color: var(--pet-accent-ink) !important; padding: 4px 12px; }
 .erii-companion__story-next:hover { background: var(--pet-soft) !important; }
 
-@keyframes pet-pop { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-@keyframes pet-bubble { from { opacity: 0; transform: translateY(4px) scale(.95); } to { opacity: 1; transform: none; } }
-@keyframes pet-window-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@keyframes pet-window-out { to { opacity: 0; transform: translateY(6px); } }
+@keyframes pet-pop { from { opacity: 0; transform: translateY(6px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes pet-bubble { from { opacity: 0; transform: translateY(6px) scale(.9); } to { opacity: 1; transform: none; } }
+@keyframes pet-window-in { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes pet-window-out { to { opacity: 0; transform: translateY(8px) scale(.97); } }
 @keyframes pet-sheet-in { from { transform: translateY(100%); } to { transform: none; } }
 @keyframes pet-sheet-out { to { transform: translateY(100%); } }
 
 /* ---------- Cửa sổ nổi và Ngăn kéo đáy ---------- */
-.erii-chat, .erii-life, .erii-house { animation: pet-window-in .22s var(--pet-ease); contain: layout style; }
-.erii-chat.is-leaving, .erii-life.is-leaving, .erii-house.is-leaving { animation: pet-window-out .16s ease-in forwards; pointer-events: none; }
-.pet-sheet { border-radius: 20px 20px 0 0 !important; animation: pet-sheet-in .26s var(--pet-ease) !important; box-shadow: 0 -12px 30px -15px rgba(0, 0, 0, .35) !important; }
-.pet-sheet.is-leaving { animation: pet-sheet-out .18s ease-in forwards !important; }
+.erii-chat, .erii-life, .erii-house { animation: pet-window-in .26s var(--pet-ease); }
+.erii-chat.is-leaving, .erii-life.is-leaving, .erii-house.is-leaving { animation: pet-window-out .18s ease-in forwards; pointer-events: none; }
+.pet-sheet { border-radius: 20px 20px 0 0 !important; animation: pet-sheet-in .32s var(--pet-ease) !important; box-shadow: 0 -16px 40px -18px rgba(0, 0, 0, .45) !important; }
+.pet-sheet.is-leaving { animation: pet-sheet-out .22s ease-in forwards !important; }
 .pet-sheet > .pet-grip { display: block; flex: 0 0 auto; position: relative; height: 18px; margin: 0 0 -4px; cursor: grab; touch-action: none; }
 .pet-sheet > .pet-grip::before { content: ""; position: absolute; left: 50%; top: 7px; width: 42px; height: 5px; margin-left: -21px; border-radius: 99px; background: color-mix(in srgb, var(--pet-muted) 55%, transparent); }
 .erii-companion__notebook.pet-sheet { position: fixed; padding: 6px 16px 18px; max-height: none; border-left: 1px solid var(--pet-line);
@@ -318,7 +315,7 @@
   border: 1px solid var(--pet-line); border-radius: 18px; background: var(--pet-paper); color: var(--pet-ink);
   font: 13px/1.6 var(--pet-body);
   text-align: left; text-shadow: none !important; backdrop-filter: none;
-  box-shadow: 0 20px 45px -20px var(--pet-shadow), 0 6px 15px -8px var(--pet-shadow);
+  box-shadow: 0 30px 60px -30px var(--pet-shadow), 0 8px 20px -10px var(--pet-shadow);
 }
 .erii-chat, .erii-chat *, .erii-chat *::before, .erii-chat *::after { box-sizing: border-box; }
 .erii-chat[hidden], .erii-chat [hidden] { display: none !important; }
@@ -385,19 +382,19 @@
 .erii-chat__log { flex: 1 1 auto; min-height: 0; overflow: auto; overflow-anchor: none; overscroll-behavior: contain; padding: 14px 16px;
   background: repeating-linear-gradient(180deg, transparent 0 31px, color-mix(in srgb, var(--pet-accent) 4%, transparent) 31px 32px); }
 .erii-chat__welcome { padding: 24px 6px; text-align: center; color: var(--pet-muted); }
-.erii-chat__welcome img { display: block; width: 104px; height: 104px; object-fit: contain; margin: 0 auto 12px; filter: drop-shadow(0 6px 8px var(--pet-shadow)); }
+.erii-chat__welcome img { display: block; width: 104px; height: 104px; object-fit: contain; margin: 0 auto 12px; filter: drop-shadow(0 8px 10px var(--pet-shadow)); }
 .erii-chat__welcome span { display: block; color: var(--pet-accent-ink); font: 600 19px/1.5 var(--pet-hand); letter-spacing: 2px; }
 .erii-chat__welcome p { margin: 8px 0; font-size: 12px; }
 .erii-chat__starters { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-top: 18px; }
 .erii-chat__starters button { font-size: 12px; }
 .erii-chat__day { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 5px 0 18px; font: italic 11px/1 var(--pet-serif); color: var(--pet-muted); }
 .erii-chat__day::before, .erii-chat__day::after { content: ""; width: 36px; height: 3px; border-block: 1px solid var(--pet-gold); opacity: .5; }
-.erii-chat__row { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 16px; animation: pet-pop .25s var(--pet-ease); }
+.erii-chat__row { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 16px; animation: pet-pop .3s var(--pet-ease); }
 .erii-chat__row--user { flex-direction: row-reverse; }
 .erii-chat__avatar { width: 32px; height: 32px; object-fit: cover; object-position: 50% 12%; flex: 0 0 auto; margin-top: 4px; border-radius: 50%; border: 1px solid var(--pet-gold); background: var(--pet-card); }
 .erii-chat[data-character="naidan"] .erii-chat__avatar { object-fit: contain; }
 .erii-chat__avatar--user { display: grid; place-items: center; height: 32px; color: #fffaf4; background: linear-gradient(180deg, var(--pet-accent-2), var(--pet-accent)); font-size: 12px; border: 0; }
-.erii-chat__bubble { max-width: 91%; width: fit-content; margin: 0 0 14px; padding: 9px 13px; border: 1px solid var(--pet-line); border-radius: 14px 14px 14px 4px; background: var(--pet-card); box-shadow: 0 4px 10px -8px var(--pet-shadow); }
+.erii-chat__bubble { max-width: 91%; width: fit-content; margin: 0 0 14px; padding: 9px 13px; border: 1px solid var(--pet-line); border-radius: 14px 14px 14px 4px; background: var(--pet-card); box-shadow: 0 6px 14px -12px var(--pet-shadow); }
 .erii-chat__row .erii-chat__bubble { max-width: calc(100% - 40px); margin: 0; min-width: 78px; }
 .erii-chat__bubble--user { margin-left: auto; border-color: color-mix(in srgb, var(--pet-accent) 25%, var(--pet-line)); border-radius: 14px 14px 4px 14px; background: color-mix(in srgb, var(--pet-soft) 85%, var(--pet-card)); }
 .erii-chat__bubble small { display: block; font-size: 10px; color: var(--pet-muted); margin-bottom: 3px; }
@@ -490,12 +487,12 @@
   background: color-mix(in srgb, var(--pet-soft) 70%, transparent); border: 1px dashed color-mix(in srgb, var(--pet-accent) 35%, var(--pet-line)); }
 .erii-chat .erii-repair__scope select { display: inline-block; width: auto; min-height: 26px; padding: 1px 6px; border-radius: 8px; font-size: 11px; }
 .erii-repair__ticket { position: relative; margin: 10px 0 4px; padding: 12px 12px 10px; border-radius: 12px; background: var(--pet-paper); border: 1px solid var(--pet-line);
-  box-shadow: 0 8px 18px -12px var(--pet-shadow); white-space: normal; }
+  box-shadow: 0 10px 22px -16px var(--pet-shadow); white-space: normal; }
 .erii-repair__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 8px; margin: 0 0 6px; padding: 0 64px 8px 0; border-bottom: 1.5px dashed var(--pet-line); }
 .erii-repair__head strong { font: 700 15px/1.3 var(--pet-hand); color: var(--pet-accent-ink); letter-spacing: 1px; white-space: nowrap; }
 .erii-chat__bubble .erii-repair__head small { display: inline; margin: 0; font-size: 10.5px; color: var(--pet-muted); }
 .erii-repair__stamp { position: absolute; right: 12px; top: -11px; padding: 1px 10px; border-radius: 99px; border: 1.5px solid var(--pet-warn); color: var(--pet-warn); background: var(--pet-paper);
-  font: 600 11px/1.5 var(--pet-hand); transform: rotate(6deg); animation: pet-stamp .35s var(--pet-ease) both; }
+  font: 600 11px/1.5 var(--pet-hand); transform: rotate(6deg); animation: pet-stamp .45s var(--pet-ease) both; }
 .erii-repair__ticket[data-state="applied"] .erii-repair__stamp { border-color: var(--pet-good); color: var(--pet-good); }
 .erii-repair__ticket[data-state="dismissed"] .erii-repair__stamp, .erii-repair__ticket[data-state="undone"] .erii-repair__stamp { border-color: var(--pet-faint); color: var(--pet-muted); }
 .erii-repair__ticket[data-state="interrupted"] .erii-repair__stamp { border-color: var(--pet-bad); color: var(--pet-bad); }
@@ -540,7 +537,7 @@
 
 /* ---------- Sổ tay sinh hoạt ---------- */
 .erii-life { position: fixed; z-index: 9440; display: flex; flex-direction: column; background: var(--pet-paper); border: 1px solid var(--pet-line); border-radius: 18px; color: var(--pet-ink); font: 13px/1.65 var(--pet-body); text-shadow: none; overflow: hidden;
-  box-shadow: 0 20px 45px -20px var(--pet-shadow), 0 6px 15px -8px var(--pet-shadow); }
+  box-shadow: 0 30px 60px -30px var(--pet-shadow), 0 8px 20px -10px var(--pet-shadow); }
 .erii-life, .erii-life *, .erii-life *::before, .erii-life *::after { box-sizing: border-box; }
 .erii-life[hidden], .erii-life [hidden] { display: none !important; }
 .erii-life button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; font: inherit; color: var(--pet-accent-ink) !important; background: var(--pet-card) !important; border: 1px solid var(--pet-line) !important; border-radius: 99px; padding: 7px 13px; min-height: 36px; cursor: pointer; text-shadow: none !important; box-shadow: none; line-height: 1.4; margin: 0; transition: background .15s, transform .15s var(--pet-ease); }
@@ -608,7 +605,6 @@
 .erii-life__food-image { display: block; width: 104px; height: 96px; object-fit: contain; margin: 0 auto 6px; }
 .erii-life__food p { color: var(--pet-gold-lo); font-size: 11.5px; }
 .erii-life__food button { margin-top: 7px; width: 100%; font-size: 12px; }
-/* Trang thay đồ: Cùng bố cục với thẻ gọi món; nhãn giấy nhỏ ở góc trên bên trái ghi giá / Đã sở hữu / Đang sử dụng. Bảng màu giao diện của trang phục được viết riêng bằng [data-skin="id skin"]. */
 .erii-life__closet { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .erii-life .erii-life__skin-shortage { min-height: 0; color: var(--pet-gold-lo); font-size: 11px; }
 .erii-life__skin { position: relative; min-width: 0; padding: 14px 10px 12px; text-align: center; border: 1px solid var(--pet-line); border-radius: 16px; background: var(--pet-card); transition: transform .18s var(--pet-ease), box-shadow .18s; }
@@ -664,7 +660,7 @@
     radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--pet-cover-2) 90%, white 10%), transparent 70%),
     repeating-linear-gradient(45deg, rgba(255,255,255,.035) 0 2px, transparent 2px 5px),
     var(--pet-cover);
-  box-shadow: 0 30px 60px -30px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.08), inset 0 0 0 6px var(--pet-cover), inset 0 0 0 7px color-mix(in srgb, var(--pet-gold) 55%, transparent);
+  box-shadow: 0 40px 80px -36px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.08), inset 0 0 0 6px var(--pet-cover), inset 0 0 0 7px color-mix(in srgb, var(--pet-gold) 55%, transparent);
 }
 .erii-house, .erii-house *, .erii-house *::before, .erii-house *::after { box-sizing: border-box; }
 .erii-house[hidden], .erii-house [hidden] { display: none !important; }
@@ -674,10 +670,8 @@
 .erii-house__eyebrow { display: block; font: italic 11px/1.4 var(--pet-serif); letter-spacing: 4px; color: color-mix(in srgb, var(--pet-gold-hi) 70%, transparent); }
 .erii-house h2 { margin: 0; font: 700 26px/1.25 var(--pet-hand); letter-spacing: 4px;
   background: linear-gradient(100deg, var(--pet-gold-lo), var(--pet-gold-hi) 35%, var(--pet-gold) 55%, var(--pet-gold-hi) 75%, var(--pet-gold-lo));
-  background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
-  /* Tắt animation lấp lánh chạy vô hạn để GPU được nghỉ ngơi */
-  animation: none;
-}
+  background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: pet-foil 7s linear infinite; }
+@keyframes pet-foil { to { background-position: -220% 0; } }
 .erii-house .erii-house__close { width: 40px; height: 40px; border: 0 !important; border-radius: 10px; background: transparent !important; color: var(--pet-gold-hi) !important; font-size: 26px; line-height: 1; padding: 0; }
 .erii-house .erii-house__close:hover { background: rgba(255,255,255,.08) !important; }
 .erii-house__ribbons { flex: 0 0 auto; position: relative; z-index: 2; display: flex; gap: 8px; padding: 0 22px; margin-bottom: -10px; }
@@ -699,7 +693,7 @@
 .erii-house__book {
   position: relative; flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; border-radius: 6px;
   background: var(--pet-paper); perspective: 1600px;
-  box-shadow: 0 2px 0 #fff8 inset, 0 14px 24px -14px rgba(0,0,0,.5), 0 0 0 1px rgba(0,0,0,.12);
+  box-shadow: 0 2px 0 #fff8 inset, 0 18px 30px -18px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.12);
 }
 .erii-house__book::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 46px; margin-left: -23px; pointer-events: none;
   background: linear-gradient(90deg, transparent, rgba(0,0,0,.09) 42%, rgba(0,0,0,.16) 50%, rgba(0,0,0,.09) 58%, transparent); }
@@ -709,9 +703,9 @@
 .erii-house__plate::before { left: 8px; top: 8px; border-right: 0; border-bottom: 0; }
 .erii-house__plate::after { right: 8px; bottom: 8px; border-left: 0; border-top: 0; }
 .erii-house__aurora { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity .6s; }
-.erii-house[data-fx="fancy"] .erii-house__aurora { opacity: .7; }
+.erii-house[data-fx="fancy"] .erii-house__aurora { opacity: .9; }
 .erii-house__frame { position: relative; z-index: 1; display: grid; place-items: center; width: 100%; height: 100%; padding: 26px 30px 44px; }
-.erii-house__portrait { width: 100%; height: 100%; max-height: 330px; object-fit: contain; filter: drop-shadow(0 10px 10px var(--pet-shadow)); transition: transform .3s var(--pet-spring); }
+.erii-house__portrait { width: 100%; height: 100%; max-height: 330px; object-fit: contain; filter: drop-shadow(0 16px 14px var(--pet-shadow)); transition: transform .3s var(--pet-spring); }
 .erii-house__portrait:hover { transform: translateY(-4px) scale(1.02); }
 .erii-house__plate[data-character="naidan"] .erii-house__portrait { max-height: 230px; }
 .erii-house__missing { margin: 0; padding: 18px; text-align: center; color: var(--pet-muted); font: 14px/1.8 var(--pet-hand); }
@@ -719,14 +713,14 @@
 .erii-house__latin { position: absolute; z-index: 2; right: 14px; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; font: 600 12px/1 var(--pet-serif); letter-spacing: 8px; color: color-mix(in srgb, var(--pet-accent-ink) 55%, transparent); }
 .erii-house__stamp { position: absolute; z-index: 2; right: 18px; bottom: 14px; max-width: 70%; padding: 4px 12px; border-radius: 99px; transform: rotate(-6deg);
   font: 600 12px/1.4 var(--pet-hand); color: var(--pet-accent); border: 1.5px solid currentColor; background: color-mix(in srgb, var(--pet-paper) 80%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.erii-house__stamp[data-current="true"] { color: var(--pet-good); animation: pet-stamp .4s var(--pet-spring); }
-@keyframes pet-stamp { from { opacity: 0; transform: rotate(-6deg) scale(1.6); } 60% { opacity: 1; transform: rotate(-6deg) scale(.94); } to { transform: rotate(-6deg) scale(1); } }
+.erii-house__stamp[data-current="true"] { color: var(--pet-good); animation: pet-stamp .5s var(--pet-spring); }
+@keyframes pet-stamp { from { opacity: 0; transform: rotate(-6deg) scale(1.8); } 60% { opacity: 1; transform: rotate(-6deg) scale(.94); } to { transform: rotate(-6deg) scale(1); } }
 .erii-house__page { position: relative; min-height: 0; overflow: auto; padding: 22px 26px 18px 30px; scrollbar-width: thin; transform-origin: 0 50%; backface-visibility: hidden; }
-.erii-house__page.is-turning { animation: pet-turn .45s var(--pet-ease); }
-.erii-house__plate.is-turning .erii-house__frame { animation: pet-fade .35s var(--pet-ease); }
+.erii-house__page.is-turning { animation: pet-turn .55s var(--pet-ease); }
+.erii-house__plate.is-turning .erii-house__frame { animation: pet-fade .45s var(--pet-ease); }
 @keyframes pet-turn { from { transform: rotateY(-92deg); opacity: .2; } 60% { opacity: 1; } to { transform: none; } }
 @keyframes pet-fade { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
-.erii-house[data-fx="simple"] .erii-house__page.is-turning { animation: pet-fade .25s ease; }
+.erii-house[data-fx="simple"] .erii-house__page.is-turning { animation: pet-fade .3s ease; }
 .erii-house__name-row { display: flex; align-items: center; gap: 8px; min-height: 40px; }
 .erii-house__name { margin: 0; font: 700 28px/1.2 var(--pet-hand); color: var(--pet-accent-ink); letter-spacing: 3px; }
 .erii-house .erii-house__rename { width: 30px; height: 30px; border-radius: 50%; border: 1px dashed var(--pet-line) !important; background: transparent !important; color: var(--pet-muted) !important; padding: 0; display: grid; place-items: center; }
@@ -736,7 +730,7 @@
 .erii-house__affection { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; margin-bottom: 10px; }
 .erii-house__hearts .pet-icon { width: 17px; height: 17px; }
 .erii-house__bar { position: relative; height: 8px; border-radius: 99px; background: var(--pet-line); overflow: hidden; }
-.erii-house__bar i { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: linear-gradient(90deg, var(--pet-gold), var(--pet-accent-2), var(--pet-accent)); transition: width .6s var(--pet-ease); }
+.erii-house__bar i { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: linear-gradient(90deg, var(--pet-gold), var(--pet-accent-2), var(--pet-accent)); transition: width .7s var(--pet-ease); }
 .erii-house__points { font: italic 600 12px/1 var(--pet-serif); color: var(--pet-accent-ink); font-variant-numeric: tabular-nums; }
 .erii-house__mood { display: flex; align-items: center; gap: 12px; margin: 4px 0 10px; }
 .erii-house__key { font-size: 11px; color: var(--pet-muted); letter-spacing: 2px; }
@@ -773,7 +767,7 @@
 .erii-house__story[data-locked="true"] { background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--pet-line) 50%, transparent) 6px 7px), var(--pet-paper); }
 .erii-house .erii-house__story-title { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 12px; border: 0 !important; background: transparent !important; color: var(--pet-accent-ink) !important; font: 600 14px/1.3 var(--pet-hand); text-align: left; }
 .erii-house__story-title small { font: 11px/1 var(--pet-body); color: var(--pet-muted); }
-.erii-house__story p { margin: 0; padding: 0 14px 12px; font: 14px/1.9 var(--pet-hand); color: var(--pet-ink); animation: pet-pop .25s var(--pet-ease); }
+.erii-house__story p { margin: 0; padding: 0 14px 12px; font: 14px/1.9 var(--pet-hand); color: var(--pet-ink); animation: pet-pop .3s var(--pet-ease); }
 .erii-house__empty { color: var(--pet-muted); }
 .erii-house__status { flex: 0 0 auto; margin: 8px 6px 0; min-height: 1.4em; color: var(--pet-gold-hi); font: 13px/1.4 var(--pet-hand); }
 .erii-house.pet-sheet { padding: 0 10px calc(10px + env(safe-area-inset-bottom, 0px)); overflow: auto; }
@@ -799,9 +793,9 @@
 .erii-life__wardrobe-head p { color: var(--pet-muted); font-size: 11px; }
 .erii-life .erii-life__wardrobe-head button { min-height: 40px; font-size: 12px; padding: 8px 12px; }
 .erii-mall { --pet-accent: #805399; --pet-accent-2: #a177b7; --pet-accent-ink: #523362; --pet-ink: #403146; --pet-muted: #806d89; --pet-faint: #96839d;
-  --pet-paper: #fbf7fd; --pet-paper-2: #f1e8f5; --pet-card: #fffdfd; --pet-line: #dfcee8; --pet-soft: #eee2f5; --pet-shadow: rgba(70,40,90,.15);
+  --pet-paper: #fbf7fd; --pet-paper-2: #f1e8f5; --pet-card: #fffdfd; --pet-line: #dfcee8; --pet-soft: #eee2f5; --pet-shadow: rgba(70,40,90,.18);
   position: fixed; z-index: 9440; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--pet-line); border-radius: 20px;
-  background: var(--pet-paper); color: var(--pet-ink); font: 13px/1.6 var(--pet-body); text-shadow: none; box-shadow: 0 16px 45px -20px var(--pet-shadow); }
+  background: var(--pet-paper); color: var(--pet-ink); font: 13px/1.6 var(--pet-body); text-shadow: none; box-shadow: 0 20px 60px -25px var(--pet-shadow); }
 .erii-mall *, .erii-mall *::before, .erii-mall *::after { box-sizing: border-box; }
 .erii-mall[hidden], .erii-mall [hidden] { display: none !important; }
 .erii-mall p, .erii-mall h2, .erii-mall h3 { margin: 0; overflow-wrap: anywhere; }
@@ -832,7 +826,7 @@
 .erii-mall__unlock textarea { width: 100%; min-height: 90px; resize: vertical; padding: 9px; border: 1px solid var(--pet-line) !important; border-radius: 8px; font: inherit; color: var(--pet-ink) !important; background: var(--pet-paper) !important; text-shadow: none !important; }
 .erii-mall__unlock p { margin-block: 8px; }
 .erii-mall__unlock button { min-height: 42px; }
-.erii-mall[data-character="zero"] { --pet-accent:#3f6fa6; --pet-accent-2:#6b97c9; --pet-accent-ink:#1f3d63; --pet-ink:#223047; --pet-muted:#6c7f97; --pet-paper:#f7fafd; --pet-paper-2:#e9f0f8; --pet-card:#fff; --pet-line:#d2deec; --pet-soft:#e3edf8; --pet-shadow:rgba(30,50,90,.16); }
+.erii-mall[data-character="zero"] { --pet-accent:#3f6fa6; --pet-accent-2:#6b97c9; --pet-accent-ink:#1f3d63; --pet-ink:#223047; --pet-muted:#6c7f97; --pet-paper:#f7fafd; --pet-paper-2:#e9f0f8; --pet-card:#fff; --pet-line:#d2deec; --pet-soft:#e3edf8; --pet-shadow:rgba(30,50,90,.2); }
 .erii-mall__product { display: grid; grid-template-columns: 1fr 1.1fr; gap: 18px; margin-bottom: 16px; align-items: center; }
 .erii-mall__plate { position: relative; display: grid; place-items: center; min-width: 0; padding: 25px 10px 10px; border: 1px solid var(--pet-line); border-radius: 90px 90px 12px 12px;
   background: radial-gradient(ellipse at 50% 40%, #eee0f5 0, #fdfaff 72%); }
