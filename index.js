@@ -1237,7 +1237,7 @@ export function createCompanion(host, context) {
   house = createPetHouse(host, {
     characters: CHARACTER_IDS.map(id => CHARACTERS[id]), currentId: () => character.id, care,
     portraits: item => { const art = artFor(item); return art.idle ? { idle: art.idle, wave: art.wave || art.idle } : null; },
-    available: item => usesDatabaseArt(item) && !readArt() ? { ok: false, reason: 'Ảnh của Nono lấy từ CSDL đang chạy. Vui lòng bật Long Huyết Huyền Hoàng · CSDL và mở pet đi kèm của nó.' } : { ok: true },
+    available: item => usesDatabaseArt(item) && !readArt() ? { ok: false, reason: 'Ảnh của Naidan lấy từ CSDL đang chạy. Vui lòng bật Long Huyết Huyền Hoàng · CSDL và mở pet đi kèm của nó.' } : { ok: true },
     moodExtra, nameOf, statusOf, fxTier, themeOf: item => themeOf(item, skinOf(item.id)),
     actions: {
       switchTo: id => switchCharacter(id),
