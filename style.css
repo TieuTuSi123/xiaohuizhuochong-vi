@@ -1001,3 +1001,31 @@ body[data-erii-replace-database-pet] .acu-notice-bubble { visibility: hidden !im
   .erii-companion__breath { animation: none !important; }
   .erii-companion *, .erii-chat, .erii-chat *, .erii-life, .erii-life *, .erii-house, .erii-house *, .erii-mall, .erii-mall *, .pet-sheet { animation: none !important; transition: none !important; }
 }
+/* ---------- THANH TRƯỢT MINI ĐỂ DÙNG CHUỘT KÉO QUA LẠI ---------- */
+.erii-life__people {
+  overflow-x: auto !important;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-width: thin !important;
+  padding-bottom: 6px !important;
+}
+
+.erii-life__people::-webkit-scrollbar {
+  display: block !important;
+  height: 4px !important;
+}
+
+.erii-life__people::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.erii-life__people::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--pet-muted) 45%, transparent) !important;
+  border-radius: 99px !important;
+}
+
+.erii-life__people::-webkit-scrollbar-thumb:hover {
+  background: var(--pet-accent) !important;
+}
