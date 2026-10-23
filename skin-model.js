@@ -1,28 +1,28 @@
-// Thay đổi trang phục (Skin): Mua bằng xu vàng hoặc vé hoa trong ví tiền gia đình, sở hữu và mặc riêng theo từng nhân vật. Logic thuần túy, việc lưu trữ giao cho bên gọi.
-// Quy ước: Mỗi nhân vật có sẵn một bộ "Trang phục mặc định", miễn phí, vĩnh viễn sở hữu, không thể bán; trang phục đã mua sẽ không biến mất, có thể đổi về mặc định bất cứ lúc nào.
-// Thêm trang phục sau này: Thêm một mục vào CATALOG bên dưới, không ghi currency thì mặc định dùng xu vàng, ghi tickets thì dùng vé hoa.
-// Đặt hình ảnh vào assets/skins/<id trang phục>/, không cần sửa đổi mã nguồn khác.
+// Thay đổi trang phục (Skin): Mua bằng tiền vàng hoặc phiếu hoa trong ví tiền gia đình, sở hữu và mặc riêng theo từng nhân vật. Logic thuần túy, việc lưu trữ do bên gọi phụ trách.
+// Quy ước: Mỗi nhân vật luôn có sẵn một bộ "Trang phục mặc định", miễn phí, sở hữu vĩnh viễn, không thể bán; trang phục đã mua sẽ không mất đi, có thể đổi về mặc định bất cứ lúc nào.
+// Thêm trang phục sau này: Chỉ cần thêm một mục vào CATALOG bên dưới, không khai báo currency thì mặc định dùng tiền vàng (coins), khai báo tickets thì dùng phiếu hoa.
+// Đặt hình ảnh vào assets/skins/<id trang phục>/, không cần chỉnh sửa mã nguồn khác.
 export const DEFAULT_SKIN = 'default';
 export const SKIN_ID = /^[a-z][a-z0-9-]{0,39}$/;
 export const ZERO_SECRET = '这一路上我们不会彼此抛弃，不彼此出卖，直到死亡的尽头';
 const MAX_OWNED = 200;
 
-// Cách viết một mục trang phục (ví dụ, chưa thực sự mở bán):
+// Cách khai báo một mục trang phục (ví dụ tham khảo, chưa mở bán chính thức):
 // {
-//   id: 'erii-yukata',                        // id duy nhất: bắt đầu bằng chữ cái thường, chỉ dùng chữ thường, số, dấu gạch nối
+//   id: 'erii-yukata',                        // ID duy nhất: bắt đầu bằng chữ cái thường, chỉ gồm chữ thường, số, dấu gạch nối
 //   name: 'Yukata Mùa Hè',                    // Tên hiển thị trên giao diện
 //   description: 'Bộ yukata mặc đi lễ hội đêm hè, trên tay cầm thêm một chiếc quạt tròn.',
-//   price: 120,                               // Xu vàng; 0 nghĩa là miễn phí (vẫn phải "mua" một lần mới tính là sở hữu)
-//   characters: ['erii'],                     // Nhân vật nào có thể mặc; ghi '*' là áp dụng cho mọi nhân vật
-//   assets: {                                 // Chỉ ghi các tư thế có ảnh, tư thế không ghi sẽ dùng lại ảnh gốc của nhân vật
-//     base: 'assets/skins/erii-yukata/',      // Đường dẫn tương đối so với thư mục gốc của tiện ích
+//   price: 120,                               // Tiền vàng; 0 nghĩa là miễn phí (vẫn cần "mua" một lần để tính là đã sở hữu)
+//   characters: ['erii'],                     // Nhân vật có thể mặc; điền '*' nếu áp dụng cho tất cả nhân vật
+//   assets: {                                 // Chỉ khai báo các tư thế có ảnh, tư thế không khai báo sẽ kế thừa ảnh gốc của nhân vật
+//     base: 'assets/skins/erii-yukata/',      // Đường dẫn tương đối so với thư mục gốc của tiện ích mở rộng
 //     poses: { idle: 'idle.webp', wave: 'wave.webp', 'edge-left': 'edge-left.webp', 'eat-pudding': 'eat-pudding.webp' },
 //   },
 //   theme: { colors: ['#6fb1d8', '#dff1fb', '#ffffff'] },   // Tùy chọn: Ghi đè màu hạt hiệu ứng; màu giao diện dùng [data-skin="erii-yukata"] để viết CSS
 // }
 const CATALOG = [{
-  id: 'erii-purple-night', name: 'Tsukuyomi · Dạ Lễ Nguyệt Độc',
-  description: 'Mái tóc đỏ cùng lễ phục đen tím, găng tay lụa, ngọc trai và hoa cài. Làm việc tích lũy xu vàng, đổi lấy vé hoa rồi mua.',
+  id: 'erii-purple-night', name: 'Tsukuyomi · Dạ Lễ Phục Tím',
+  description: 'Mái tóc đỏ cùng lễ phục dạ hội đen tím, găng tay ren mỏng, ngọc trai và hoa cài. Đi làm tích lũy tiền vàng, đổi lấy phiếu hoa để mua.',
   price: 10320, currency: 'tickets', characters: ['erii'],
   assets: { base: 'assets/skins/erii-purple-night/', poses: Object.fromEntries([
     'idle', 'received', 'writing', 'complete', 'error', 'tea', 'reading', 'origami', 'duck',
@@ -32,8 +32,8 @@ const CATALOG = [{
   ].map(pose => [pose, `${pose}.webp`])) },
   theme: { colors: ['#b892e5', '#eadcfa', '#ceaeed'] },
 }, {
-  id: 'zero-ice-rose', name: 'Hoàng Nữ Zero · Lam Băng Tường Vi',
-  description: 'Mái tóc dài vàng nhạt, hoa tường vi lam băng cùng lễ phục đen trắng. Dùng mật ngữ hai người đã ước định để mở khóa bộ trang phục này.',
+  id: 'zero-ice-rose', name: 'Hoàng Nữ Zero · Băng Lam Tường Vi',
+  description: 'Mái tóc dài vàng nhạt, hoa tường vi xanh băng cùng lễ phục đen trắng. Dùng mật ngữ hai người đã ước định để mở khóa bộ trang phục này.',
   unlock: { type: 'phrase', phrase: ZERO_SECRET }, price: null, currency: null, characters: ['zero'],
   assets: { base: 'assets/skins/zero-ice-rose/', poses: Object.fromEntries([
     'idle', 'received', 'writing', 'complete', 'error', 'tea', 'reading', 'origami', 'duck', 'stretch', 'rest', 'gift', 'lifted', 'land', 'wave', 'peek',
@@ -45,7 +45,7 @@ const integer = value => Math.min(1000000000, Math.max(0, Math.floor(Number(valu
 const validWho = who => typeof who === 'string' && /^[a-z][a-z0-9-]{0,19}$/.test(who);
 const validId = id => typeof id === 'string' && SKIN_ID.test(id) && id !== DEFAULT_SKIN;
 
-// Bỏ qua và cảnh báo khi mục trong danh mục không hợp lệ, không để một trang phục viết sai làm sập toàn bộ tiện ích.
+// Bỏ qua và đưa ra cảnh báo khi mục trong danh mục không hợp lệ, tránh để một trang phục viết sai làm sập toàn bộ tiện ích.
 export function validSkin(skin) {
   if (!skin || typeof skin !== 'object' || !validId(skin.id)) return false;
   if (typeof skin.name !== 'string' || !skin.name.trim()) return false;
@@ -76,7 +76,7 @@ export function normalizeCatalog(list, warn = () => {}) {
   return Object.freeze(result);
 }
 
-export const SKINS = normalizeCatalog(CATALOG, skin => console.warn('[Pet CSDL] Danh mục trang phục có một mục viết không đúng định dạng, đã bỏ qua:', skin));
+export const SKINS = normalizeCatalog(CATALOG, skin => console.warn('[Pet CSDL] Danh mục trang phục có một mục không đúng định dạng, đã bỏ qua:', skin));
 
 export const fits = (skin, who) => Boolean(skin) && (skin.characters === '*' || skin.characters.includes(who));
 export const defaultEntry = () => ({ id: DEFAULT_SKIN, name: 'Trang phục mặc định', description: 'Dáng vẻ ngày thường. Miễn phí, có thể đổi lại bất cứ lúc nào.', price: 0, currency: 'coins', characters: '*', assets: null, theme: null });
@@ -93,7 +93,7 @@ export function normalizeSkins(saved = {}) {
   return { schema: 2, owned, equipped, bought: integer(saved?.bought), spent: integer(saved?.spent), spentTickets: integer(saved?.spentTickets) };
 }
 
-// Trang phục đã mua dù tạm thời không có trong danh mục (ví dụ hạ cấp về bản cũ hoặc người bảo trì tạm gỡ xuống) vẫn được lưu trong hồ sơ, khi mở bán lại sẽ tiếp tục mặc được.
+// Trang phục đã mua dù tạm thời không có trong danh mục (ví dụ khi hạ cấp về bản cũ hoặc tạm thời gỡ xuống) vẫn được lưu trong hồ sơ, khi có lại sẽ tiếp tục mặc được bình thường.
 export class SkinModel {
   constructor(saved, { persist = () => {}, catalog = SKINS } = {}) {
     this.state = normalizeSkins(saved); this.persist = persist; this.catalog = catalog;
@@ -111,7 +111,7 @@ export class SkinModel {
     return skin && fits(skin, who) ? skin : null;
   }
   equippedId(who) { return this.equipped(who)?.id || DEFAULT_SKIN; }
-  // Danh mục dùng cho giao diện: Trang phục mặc định luôn xếp đầu tiên; affordable biểu thị đủ khả năng mua (đã sở hữu cũng tính là true).
+  // Danh mục dùng cho giao diện: Trang phục mặc định luôn xếp đầu tiên; affordable biểu thị có đủ khả năng mua (đã sở hữu cũng tính là true).
   list(who, { coins = 0, tickets = 0 } = {}) {
     const current = this.equippedId(who);
     return [defaultEntry(), ...this.available(who)].map(skin => {
@@ -120,7 +120,7 @@ export class SkinModel {
       return { id: skin.id, skin, price: skin.price, currency, balance, owned, equipped: skin.id === current, affordable: owned || (!skin.unlock && balance >= skin.price) };
     });
   }
-  // pay(price, skin) phụ trách trừ tiền thực tế và trả về có thành công hay không (ví dụ LifeModel.spend); ở đây chỉ quản lý "có thể mua hay không" và ghi sổ.
+  // pay(price, skin) phụ trách trừ tiền thực tế và trả về kết quả thành công hay không (ví dụ LifeModel.spend); ở đây chỉ quản lý "có thể mua hay không" và ghi sổ.
   buy(who, id, pay) {
     if (!validWho(who)) return { ok: false, reason: 'who' };
     const skin = this.find(id);
@@ -144,7 +144,7 @@ export class SkinModel {
     if (typeof phrase !== 'string' || phrase.trim().normalize('NFC') !== skin.unlock.phrase) return { ok: false, reason: 'phrase' };
     (this.state.owned[who] ||= []).push(id); this.save(); return { ok: true, skin };
   }
-  // Mặc trang phục đã sở hữu; truyền DEFAULT_SKIN để đổi về mặc định. Trả về false khi không có thay đổi.
+  // Mặc trang phục đã sở hữu; truyền DEFAULT_SKIN để đổi về trang phục mặc định. Trả về false khi không có thay đổi.
   equip(who, id) {
     if (!validWho(who)) return false;
     if (id === DEFAULT_SKIN) {

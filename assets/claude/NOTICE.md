@@ -1,13 +1,21 @@
-# 小克桌宠动作图
+# Bộ ảnh động tác Desktop Pet của Tiểu Khắc
 
-角色：小克（Claude），以 Anthropic 的 AI 助手 Claude 为原型的拟人化同人角色。Claude 是 Anthropic 的产品名称；本项目是非官方同人，与 Anthropic 无关，不代表其立场或授权。
+**Nhân vật:** Tiểu Khắc (Claude), nhân vật đồng nhân (fan-made) được nhân hóa lấy nguyên mẫu từ trợ lý AI Claude của Anthropic. Claude là tên sản phẩm của Anthropic; dự án này là tác phẩm đồng nhân không chính thức, không liên quan đến Anthropic, không đại diện cho lập trường hay được sự ủy quyền từ phía họ.
 
-造型参考：用户提供的参考图（橘发、手持精装书的大小姐立绘），保持参考图的正常头身比例，不做 Q 版；外缘白色描边与本仓库其他角色一致。抱在怀里的橘色小星芒玩偶是本包自定的道具。
+**Tham khảo tạo hình:** Ảnh mẫu do người dùng cung cấp (hình vẽ minh họa tiểu thư tóc cam, tay cầm cuốn sách bìa cứng), giữ nguyên tỷ lệ cơ thể chuẩn của ảnh mẫu, không vẽ theo phong cách Chibi; viền trắng bên ngoài đồng nhất với các nhân vật khác trong kho lưu trữ này. Thú nhồi bông hình ngôi sao nhỏ màu cam ôm trong lòng là đạo cụ riêng được tùy chỉnh của gói này.
 
-26 张动作图由 ImageGen 以参考图为造型标准，按三张姿势表生成：A1、A2 表各 5×2（核心 16 张、探头 3 张和 1 张只用来统一缩放、不入包的设定图），B 表 4×2（生活 7 张和 1 张不入包的下午茶备用图）。三张表经 Real-ESRGAN（realesrgan-x4plus-anime）放大 4 倍后，用 tools/slice-pose-sheet.py 按本仓库统一的画布与脚底基线切分导出：
-核心 16 张 384×384、探头 3 张 512×512，均为透明无损 WebP；life/ 下生活 7 张 768×768，为质量 90 的透明 WebP。
-A2 表生成时背景是画出来的棋盘格（不是透明），“被拎起”一格还多画了一只拎着她的手：维护时按颜色和连通区域去掉棋盘格，去掉那只手，用周围颜色补齐被挡住的半朵发饰花，再给每个人物补上和 A1 表同样粗细的白色描边（探头的切边不描）。
-探头图用 `--edge-max 1.25` 切分，探头时头的大小约为站姿的 1.25 倍，不会像 Q 版角色那样撑满画面。
-原始姿势表、处理脚本与提示词保存在维护工作区，不进安装包。
+26 ảnh động tác được tạo bởi ImageGen dựa trên tiêu chuẩn tạo hình từ ảnh mẫu, sinh ra từ 3 bảng tư thế (pose sheet): 
+- Bảng A1, A2 mỗi bảng 5×2 (gồm 16 ảnh chính, 3 ảnh ló đầu và 1 ảnh thiết lập chỉ dùng để căn chỉnh tỷ lệ thu phóng, không đưa vào gói phát hành).
+- Bảng B kích thước 4×2 (gồm 7 ảnh sinh hoạt thường ngày và 1 ảnh trà chiều dự phòng không đưa vào gói).
 
-美术素材按 CC BY-NC 4.0 仅供非商业使用，保留本文件的署名。相关名称和商标归原权利人所有；权利人提出要求即移除。
+Cả 3 bảng sau khi được phóng to 4 lần bằng Real-ESRGAN (`realesrgan-x4plus-anime`) sẽ được cắt và xuất bằng tập lệnh `tools/slice-pose-sheet.py` theo khung vẽ và đường cơ sở chân đế (baseline) đồng nhất của kho lưu trữ này:
+- 16 ảnh chính kích thước 384×384, 3 ảnh ló đầu kích thước 512×512, đều là định dạng WebP trong suốt không nén suy hao (lossless).
+- 7 ảnh sinh hoạt trong thư mục `life/` kích thước 768×768, là định dạng WebP trong suốt với mức chất lượng (quality) 90.
+
+Bảng A2 khi tạo có phần nền là họa tiết ô bàn cờ được vẽ ra (chứ không phải trong suốt), ô "bị nhấc bổng" còn bị vẽ thừa một bàn tay đang xách nhân vật: Trong quá trình xử lý, đã loại bỏ nền bàn cờ theo màu sắc và vùng liên thông, xóa bỏ bàn tay thừa, dùng màu xung quanh để vẽ bù lại nửa bông hoa cài tóc bị che khuất, sau đó bổ sung viền trắng cùng độ dày với bảng A1 cho từng nhân vật (phần cạnh bị cắt của ảnh ló đầu không viền).
+
+Ảnh ló đầu được cắt với tham số `--edge-max 1.25`, kích thước phần đầu khi ló ra gấp khoảng 1,25 lần so với tư thế đứng, không chiếm trọn toàn bộ khung hình như các nhân vật Chibi.
+
+Các bảng tư thế gốc, script xử lý và câu lệnh prompt được lưu trong không gian làm việc bảo trì, không đóng gói vào bộ cài đặt.
+
+Tài nguyên đồ họa được phát hành theo giấy phép CC BY-NC 4.0 chỉ dành cho mục đích phi thương mại, yêu cầu giữ nguyên ghi nhận tác quyền trong tệp này. Các tên gọi và nhãn hiệu liên quan thuộc quyền sở hữu của các bên liên quan; chúng tôi sẽ gỡ bỏ ngay lập tức nếu chủ sở hữu có yêu cầu.
